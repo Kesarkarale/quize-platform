@@ -66,14 +66,43 @@ export default function LoginPage() {
 
 
 
-      const {error}=await supabase.auth.signInWithPassword({
+     const response = await fetch("/api/auth/login",{
 
-        email:formData.email,
+  method:"POST",
 
-        password:formData.password
+  headers:{
+    "Content-Type":"application/json"
+  },
 
-      });
+  body:JSON.stringify({
 
+    email:formData.email,
+
+    password:formData.password
+
+  })
+
+});
+
+
+const result = await response.json();
+
+
+
+if(!response.ok){
+
+  toast.error(result.message);
+
+  return;
+
+}
+
+
+
+toast.success("Login Successful");
+
+
+router.push("/student/dashboard");
 
 
       if(error){
