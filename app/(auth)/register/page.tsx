@@ -13,6 +13,8 @@ import {
   EyeOff,
   Loader2,
   ArrowRight,
+  GraduationCap,
+  CheckCircle,
 } from "lucide-react";
 
 import { toast } from "sonner";
@@ -27,6 +29,8 @@ export default function RegisterPage() {
   const [loading,setLoading] = useState(false);
 
   const [showPassword,setShowPassword] = useState(false);
+
+  const [showConfirmPassword,setShowConfirmPassword] = useState(false);
 
 
 
@@ -44,6 +48,7 @@ export default function RegisterPage() {
 
 
   async function handleRegister(e:FormEvent){
+
 
     e.preventDefault();
 
@@ -67,7 +72,9 @@ export default function RegisterPage() {
 
     if(formData.password.length < 8){
 
-      toast.error("Password must be at least 8 characters");
+      toast.error(
+        "Password must be minimum 8 characters"
+      );
 
       return;
 
@@ -79,12 +86,13 @@ export default function RegisterPage() {
 
     if(formData.password !== formData.confirmPassword){
 
-      toast.error("Passwords do not match");
+      toast.error(
+        "Passwords do not match"
+      );
 
       return;
 
     }
-
 
 
 
@@ -102,9 +110,7 @@ export default function RegisterPage() {
           method:"POST",
 
           headers:{
-
             "Content-Type":"application/json"
-
           },
 
 
@@ -119,9 +125,7 @@ export default function RegisterPage() {
           })
 
         }
-
       );
-
 
 
 
@@ -144,7 +148,7 @@ export default function RegisterPage() {
 
 
       toast.success(
-        "Registration successful. Check your email."
+        "Account created successfully"
       );
 
 
@@ -153,11 +157,14 @@ export default function RegisterPage() {
 
 
 
+
     }
     catch{
 
 
-      toast.error("Something went wrong");
+      toast.error(
+        "Something went wrong"
+      );
 
 
     }
@@ -176,35 +183,51 @@ export default function RegisterPage() {
 
 
 
-
-
 return (
 
-<main className="min-h-screen flex items-center justify-center bg-gradient-to-br from-indigo-100 via-white to-purple-100 px-4">
+<main className="min-h-screen flex items-center justify-center bg-gradient-to-br from-indigo-100 via-white to-purple-100 px-4 py-10">
+
 
 
 <div className="w-full max-w-md bg-white rounded-3xl shadow-2xl p-8">
 
 
 
+
+
+{/* Header */}
+
+
 <div className="text-center mb-8">
 
 
-<h1 className="text-4xl font-bold text-gray-900">
+<div className="mx-auto w-16 h-16 rounded-2xl bg-indigo-600 flex items-center justify-center text-white">
+
+
+<GraduationCap size={35}/>
+
+
+</div>
+
+
+
+<h1 className="text-4xl font-bold text-gray-900 mt-5">
 
 Create Account
 
 </h1>
 
 
+
 <p className="text-gray-500 mt-2">
 
-Join Quiz Platform
+Join Quiz Platform today
 
 </p>
 
 
 </div>
+
 
 
 
@@ -217,31 +240,41 @@ className="space-y-5"
 
 
 
-{/* Name */}
+{/* Full Name */}
+
 
 <div>
 
-<label className="font-medium">
+
+<label className="font-medium text-gray-700">
 
 Full Name
 
 </label>
 
 
-<div className="flex items-center border rounded-xl px-4 mt-2">
+
+<div className="flex items-center border rounded-xl px-4 mt-2 focus-within:ring-2 focus-within:ring-indigo-500">
 
 
-<User size={18}/>
+<User
+size={18}
+className="text-gray-400"
+/>
+
 
 
 <input
 
-className="w-full p-3 outline-none"
+type="text"
 
-placeholder="John Doe"
+placeholder="Enter your name"
+
+className="w-full p-3 outline-none"
 
 
 value={formData.fullName}
+
 
 
 onChange={(e)=>
@@ -256,13 +289,16 @@ fullName:e.target.value
 
 }
 
+
 />
 
 
 </div>
 
 
+
 </div>
+
 
 
 
@@ -271,31 +307,41 @@ fullName:e.target.value
 
 {/* Email */}
 
+
+
 <div>
 
-<label className="font-medium">
 
-Email
+<label className="font-medium text-gray-700">
+
+Email Address
 
 </label>
 
 
-<div className="flex items-center border rounded-xl px-4 mt-2">
+
+<div className="flex items-center border rounded-xl px-4 mt-2 focus-within:ring-2 focus-within:ring-indigo-500">
 
 
-<Mail size={18}/>
+<Mail
+size={18}
+className="text-gray-400"
+/>
+
 
 
 <input
 
 type="email"
 
+placeholder="example@gmail.com"
+
 className="w-full p-3 outline-none"
 
-placeholder="john@gmail.com"
 
 
 value={formData.email}
+
 
 
 onChange={(e)=>
@@ -310,13 +356,18 @@ email:e.target.value
 
 }
 
+
 />
 
 
 </div>
 
 
+
 </div>
+
+
+
 
 
 
@@ -326,19 +377,26 @@ email:e.target.value
 {/* Password */}
 
 
+
 <div>
 
-<label className="font-medium">
+
+<label className="font-medium text-gray-700">
 
 Password
 
 </label>
 
 
-<div className="flex items-center border rounded-xl px-4 mt-2">
 
 
-<Lock size={18}/>
+<div className="flex items-center border rounded-xl px-4 mt-2 focus-within:ring-2 focus-within:ring-indigo-500">
+
+
+<Lock
+size={18}
+className="text-gray-400"
+/>
 
 
 
@@ -346,12 +404,13 @@ Password
 
 type={showPassword ? "text":"password"}
 
-className="w-full p-3 outline-none"
+placeholder="Minimum 8 characters"
 
-placeholder="********"
+className="w-full p-3 outline-none"
 
 
 value={formData.password}
+
 
 
 onChange={(e)=>
@@ -366,7 +425,9 @@ password:e.target.value
 
 }
 
+
 />
+
 
 
 <button
@@ -404,34 +465,52 @@ showPassword ?
 
 
 
+
+
 {/* Confirm Password */}
+
 
 
 <div>
 
-<label className="font-medium">
+
+<label className="font-medium text-gray-700">
 
 Confirm Password
 
 </label>
 
 
-<div className="flex items-center border rounded-xl px-4 mt-2">
 
 
-<Lock size={18}/>
+<div className="flex items-center border rounded-xl px-4 mt-2 focus-within:ring-2 focus-within:ring-indigo-500">
+
+
+<Lock
+size={18}
+className="text-gray-400"
+/>
+
 
 
 <input
 
-type={showPassword ? "text":"password"}
+type={
+showConfirmPassword
+?
+"text"
+:
+"password"
+}
+
+placeholder="Confirm password"
 
 className="w-full p-3 outline-none"
 
-placeholder="********"
 
 
 value={formData.confirmPassword}
+
 
 
 onChange={(e)=>
@@ -446,9 +525,42 @@ confirmPassword:e.target.value
 
 }
 
+
 />
 
 
+
+
+<button
+
+type="button"
+
+onClick={()=>
+
+setShowConfirmPassword(
+!showConfirmPassword
+)
+
+}
+
+>
+
+
+{
+
+showConfirmPassword ?
+
+<EyeOff size={18}/> :
+
+<Eye size={18}/>
+
+}
+
+
+</button>
+
+
+
 </div>
 
 
@@ -457,6 +569,11 @@ confirmPassword:e.target.value
 
 
 
+
+
+
+
+{/* Button */}
 
 
 
@@ -464,7 +581,7 @@ confirmPassword:e.target.value
 
 disabled={loading}
 
-className="w-full bg-indigo-600 hover:bg-indigo-700 disabled:opacity-50 text-white rounded-xl py-3 flex justify-center items-center gap-2"
+className="w-full bg-indigo-600 hover:bg-indigo-700 disabled:opacity-50 text-white rounded-xl py-3 flex items-center justify-center gap-2 transition"
 
 >
 
@@ -486,7 +603,9 @@ Create Account
 }
 
 
+
 </button>
+
 
 
 
@@ -498,8 +617,46 @@ Create Account
 
 
 
+{/* Benefits */}
 
-<div className="text-center mt-6 text-gray-600">
+
+<div className="mt-6 space-y-2">
+
+
+<p className="flex items-center gap-2 text-sm text-gray-600">
+
+<CheckCircle
+size={16}
+className="text-green-500"
+/>
+
+Secure account
+
+</p>
+
+
+<p className="flex items-center gap-2 text-sm text-gray-600">
+
+<CheckCircle
+size={16}
+className="text-green-500"
+/>
+
+Access online quizzes
+
+</p>
+
+
+</div>
+
+
+
+
+
+
+
+
+<div className="text-center mt-7 text-gray-600">
 
 
 Already have an account?
@@ -509,7 +666,7 @@ Already have an account?
 
 href="/login"
 
-className="text-indigo-600 ml-2 font-semibold"
+className="text-indigo-600 font-semibold ml-2"
 
 >
 
@@ -530,6 +687,5 @@ Login
 
 
 );
-
 
 }
