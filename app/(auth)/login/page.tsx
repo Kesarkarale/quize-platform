@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
+import type { FormEvent } from "react";
 
 import { createClient } from "@/lib/supabase/client";
 
@@ -17,191 +18,373 @@ import {
 
 import { toast } from "sonner";
 
+
 export default function LoginPage() {
+
   const router = useRouter();
 
   const supabase = createClient();
 
+
   const [loading, setLoading] = useState(false);
 
   const [showPassword, setShowPassword] = useState(false);
+
 
   const [formData, setFormData] = useState({
     email: "",
     password: "",
   });
 
-  async function handleLogin(e: React.FormEvent) {
+
+
+  async function handleLogin(e: FormEvent) {
+
     e.preventDefault();
 
+
     if (!formData.email || !formData.password) {
+
       toast.error("Please fill all fields");
+
       return;
     }
 
+
+
     try {
+
       setLoading(true);
 
-      const { error } = await supabase.auth.signInWithPassword({
-        email: formData.email,
-        password: formData.password,
-      });
+
+      const { error } =
+        await supabase.auth.signInWithPassword({
+
+          email: formData.email,
+
+          password: formData.password,
+
+        });
+
+
 
       if (error) {
+
         toast.error(error.message);
+
         return;
+
       }
+
+
 
       toast.success("Login Successful");
 
+
       router.push("/student/dashboard");
-    } catch {
+
+
+    } catch (error) {
+
       toast.error("Something went wrong");
+
     } finally {
+
       setLoading(false);
+
     }
+
   }
 
+
+
   return (
-    <main className="min-h-screen bg-slate-100 flex items-center justify-center px-5">
+
+    <main className="min-h-screen flex items-center justify-center bg-gradient-to-br from-indigo-100 via-white to-purple-100 px-4">
+
 
       <div className="w-full max-w-md bg-white rounded-3xl shadow-2xl p-8">
 
+
         <div className="text-center mb-8">
 
-          <h1 className="text-4xl font-bold">
+
+          <h1 className="text-4xl font-bold text-gray-900">
+
             Quiz Platform
+
           </h1>
 
+
           <p className="text-gray-500 mt-2">
+
             Login to continue
+
           </p>
 
+
         </div>
+
+
 
         <form
           onSubmit={handleLogin}
           className="space-y-5"
         >
 
+
+
+          {/* Email */}
+
           <div>
 
-            <label className="font-medium">
+
+            <label className="font-medium text-gray-700">
+
               Email
+
             </label>
 
-            <div className="mt-2 flex items-center border rounded-xl px-4">
 
-              <Mail size={18} />
+
+            <div className="mt-2 flex items-center border rounded-xl px-4 focus-within:ring-2 focus-within:ring-indigo-500">
+
+
+              <Mail size={18} className="text-gray-500"/>
+
 
               <input
+
                 type="email"
+
                 placeholder="Enter email"
+
                 className="w-full p-3 outline-none"
 
                 value={formData.email}
 
-                onChange={(e) =>
+
+                onChange={(e)=>
+
                   setFormData({
+
                     ...formData,
-                    email: e.target.value,
+
+                    email:e.target.value
+
                   })
+
                 }
+
               />
+
 
             </div>
 
+
           </div>
+
+
+
+
+
+          {/* Password */}
+
 
           <div>
 
-            <label className="font-medium">
+
+            <label className="font-medium text-gray-700">
+
               Password
+
             </label>
 
-            <div className="mt-2 flex items-center border rounded-xl px-4">
 
-              <Lock size={18} />
+
+            <div className="mt-2 flex items-center border rounded-xl px-4 focus-within:ring-2 focus-within:ring-indigo-500">
+
+
+
+              <Lock size={18} className="text-gray-500"/>
+
+
 
               <input
+
                 type={showPassword ? "text" : "password"}
+
                 placeholder="Enter password"
+
                 className="w-full p-3 outline-none"
+
 
                 value={formData.password}
 
-                onChange={(e) =>
+
+
+                onChange={(e)=>
+
                   setFormData({
+
                     ...formData,
-                    password: e.target.value,
+
+                    password:e.target.value
+
                   })
+
                 }
+
               />
 
+
+
+
               <button
+
                 type="button"
-                onClick={() =>
+
+                onClick={()=>
+
                   setShowPassword(!showPassword)
+
                 }
+
               >
-                {showPassword ? (
-                  <EyeOff size={18} />
-                ) : (
-                  <Eye size={18} />
-                )}
+
+
+                {
+
+                showPassword ?
+
+                <EyeOff size={18}/> :
+
+                <Eye size={18}/>
+
+                }
+
+
               </button>
+
+
 
             </div>
 
+
           </div>
 
+
+
+
+
+          {/* Login Button */}
+
+
+
           <button
+
             disabled={loading}
-            className="w-full bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl py-3 flex justify-center items-center gap-2 transition"
+
+            className="w-full bg-indigo-600 hover:bg-indigo-700 disabled:opacity-50 text-white rounded-xl py-3 flex justify-center items-center gap-2 transition"
+
+
           >
 
-            {loading ? (
-              <Loader2 className="animate-spin" />
-            ) : (
+
+            {
+
+            loading ?
+
+            (
+
+              <Loader2 className="animate-spin"/>
+
+            )
+
+            :
+
+            (
+
               <>
-                Login
-                <ArrowRight size={18} />
+
+              Login
+
+              <ArrowRight size={18}/>
+
               </>
-            )}
+
+            )
+
+            }
+
 
           </button>
 
+
+
         </form>
+
+
+
+
 
         <div className="mt-6 text-center">
 
+
           <Link
+
             href="/forgot-password"
+
             className="text-indigo-600 hover:underline"
+
           >
+
             Forgot Password?
+
           </Link>
 
+
         </div>
+
+
+
 
         <div className="text-center mt-5">
 
+
           <p className="text-gray-600">
+
+
             Don't have an account?
 
+
             <Link
+
               href="/register"
+
               className="text-indigo-600 ml-2 font-semibold"
+
             >
+
               Register
+
             </Link>
+
+
 
           </p>
 
+
         </div>
+
+
+
 
       </div>
 
+
     </main>
+
   );
+
 }
