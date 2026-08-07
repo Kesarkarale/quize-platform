@@ -1,381 +1,871 @@
 "use client";
 
 import Link from "next/link";
+import { motion } from "framer-motion";
 
 import {
-  BookOpen,
-  Brain,
-  Clock,
-  BarChart3,
-  ShieldCheck,
-  Users,
   ArrowRight,
-  CheckCircle,
+  Sparkles,
+  Trophy,
+  Brain,
+  Users,
+  ShieldCheck,
+  Clock,
+  Target,
+  Zap,
+  CheckCircle
 } from "lucide-react";
 
 
-export default function HomePage() {
+export default function Home(){
 
-  const features = [
-    {
-      icon: Brain,
-      title: "Smart Quiz System",
-      desc: "Create and attempt quizzes with an intelligent assessment platform."
-    },
-    {
-      icon: Clock,
-      title: "Real Time Exams",
-      desc: "Take online exams with timer and instant submission."
-    },
-    {
-      icon: BarChart3,
-      title: "Detailed Analytics",
-      desc: "Track performance, scores and improvement reports."
-    },
-    {
-      icon: ShieldCheck,
-      title: "Secure Platform",
-      desc: "Safe authentication and protected student data."
-    },
-    {
-      icon: Users,
-      title: "Student Management",
-      desc: "Manage students, exams and results easily."
-    },
-    {
-      icon: BookOpen,
-      title: "Learning Hub",
-      desc: "Practice quizzes and improve your knowledge."
-    }
-  ];
 
+return (
 
-  return (
+<main className="
+min-h-screen
+bg-[#050816]
+text-white
+overflow-hidden
+relative
+">
 
-    <main className="min-h-screen bg-gradient-to-br from-indigo-50 via-white to-purple-100">
 
 
-      {/* Navbar */}
 
-      <nav className="flex items-center justify-between px-8 py-5 max-w-7xl mx-auto">
 
+{/* Background Glow */}
 
-        <h1 className="text-2xl font-bold text-indigo-600">
-          QuizPro
-        </h1>
 
+<div className="
+absolute
+w-[600px]
+h-[600px]
+bg-indigo-600
+rounded-full
+blur-[180px]
+opacity-30
+top-[-200px]
+left-[-200px]
+"/>
 
 
-        <div className="flex items-center gap-5">
 
+<div className="
+absolute
+w-[500px]
+h-[500px]
+bg-purple-600
+rounded-full
+blur-[180px]
+opacity-30
+bottom-[-200px]
+right-[-150px]
+"/>
 
-          <Link
-            href="/login"
-            className="text-gray-700 hover:text-indigo-600"
-          >
-            Login
-          </Link>
 
 
-          <Link
-            href="/register"
-            className="bg-indigo-600 text-white px-5 py-2 rounded-xl hover:bg-indigo-700"
-          >
-            Register
-          </Link>
 
 
-        </div>
 
 
-      </nav>
 
+{/* Navbar */}
 
 
 
+<nav className="
+relative
+z-10
+max-w-7xl
+mx-auto
+px-6
+py-6
+flex
+justify-between
+items-center
+">
 
-      {/* Hero Section */}
 
+<div className="
+flex
+items-center
+gap-3
+">
 
-      <section className="max-w-7xl mx-auto px-8 py-20 grid md:grid-cols-2 gap-12 items-center">
 
+<div className="
+w-11
+h-11
+rounded-xl
+bg-gradient-to-r
+from-indigo-600
+to-purple-600
+flex
+items-center
+justify-center
+">
 
-        <div>
 
+<Brain size={25}/>
 
-          <span className="bg-indigo-100 text-indigo-600 px-4 py-2 rounded-full text-sm font-semibold">
-            Online Assessment Platform
-          </span>
 
+</div>
 
 
-          <h1 className="text-5xl font-bold text-gray-900 mt-6 leading-tight">
 
-            Test Your Knowledge.
-            <br />
+<h1 className="
+text-2xl
+font-bold
+">
 
-            Improve Your Skills.
+QuizPro
 
-          </h1>
+</h1>
 
 
+</div>
 
-          <p className="text-gray-600 mt-6 text-lg">
 
-            A powerful quiz management platform for students,
-            teachers and organizations to conduct online exams easily.
 
-          </p>
 
 
+<div className="
+flex
+gap-4
+">
 
-          <div className="flex gap-4 mt-8">
 
+<Link
 
-            <Link
-              href="/register"
-              className="flex items-center gap-2 bg-indigo-600 text-white px-6 py-3 rounded-xl hover:bg-indigo-700"
-            >
+href="/login"
 
-              Get Started
+className="
+px-5
+py-2
+rounded-xl
+text-gray-300
+hover:text-white
+"
 
-              <ArrowRight size={18}/>
+>
 
-            </Link>
+Login
 
+</Link>
 
 
-            <Link
-              href="/login"
-              className="px-6 py-3 rounded-xl border border-gray-300 hover:bg-white"
-            >
-              Login
-            </Link>
 
 
-          </div>
+<Link
 
+href="/register"
 
+className="
+px-5
+py-2
+rounded-xl
+bg-white
+text-black
+font-semibold
+"
 
-          <div className="mt-8 space-y-3">
+>
 
+Get Started
 
-            <p className="flex items-center gap-2 text-gray-700">
+</Link>
 
-              <CheckCircle className="text-green-500" size={20}/>
 
-              Instant Results
+</div>
 
-            </p>
 
 
-            <p className="flex items-center gap-2 text-gray-700">
+</nav>
 
-              <CheckCircle className="text-green-500" size={20}/>
 
-              Secure Online Exams
 
-            </p>
 
 
-            <p className="flex items-center gap-2 text-gray-700">
 
-              <CheckCircle className="text-green-500" size={20}/>
 
-              Performance Tracking
 
-            </p>
 
+{/* Hero */}
 
-          </div>
 
 
+<section className="
+relative
+z-10
+max-w-7xl
+mx-auto
+px-6
+pt-20
+grid
+lg:grid-cols-2
+gap-16
+items-center
+">
 
-        </div>
 
 
 
 
+<motion.div
 
+initial={{opacity:0,x:-40}}
 
-        {/* Right Card */}
+animate={{opacity:1,x:0}}
 
+transition={{duration:.7}}
 
-        <div className="bg-white rounded-3xl shadow-2xl p-8">
+>
 
 
-          <div className="bg-indigo-600 rounded-2xl p-8 text-white">
 
+<div className="
+inline-flex
+items-center
+gap-2
+bg-white/10
+border
+border-white/20
+px-4
+py-2
+rounded-full
+backdrop-blur
+">
 
-            <h2 className="text-3xl font-bold">
-              Start Your Quiz Journey
-            </h2>
 
+<Sparkles size={18}/>
 
-            <p className="mt-4 text-indigo-100">
 
-              Join thousands of students and test your skills.
+AI Powered Quiz Platform
 
-            </p>
 
+</div>
 
-            <div className="mt-8 grid grid-cols-2 gap-4">
 
 
-              <div className="bg-white/20 rounded-xl p-4">
 
-                <h3 className="text-2xl font-bold">
-                  1000+
-                </h3>
 
-                <p>
-                  Questions
-                </p>
 
-              </div>
 
 
-              <div className="bg-white/20 rounded-xl p-4">
+<h1 className="
+text-5xl
+lg:text-7xl
+font-bold
+leading-tight
+mt-8
+">
 
-                <h3 className="text-2xl font-bold">
-                  500+
-                </h3>
 
-                <p>
-                  Students
-                </p>
+Test Knowledge.
 
-              </div>
+<br/>
 
+<span className="
+bg-gradient-to-r
+from-indigo-400
+to-purple-400
+bg-clip-text
+text-transparent
+">
 
-            </div>
+Win Challenges.
 
+</span>
 
-          </div>
 
+</h1>
 
-        </div>
 
 
-      </section>
 
 
 
 
+<p className="
+text-gray-400
+text-xl
+mt-6
+max-w-xl
+">
 
 
-      {/* Features */}
+A next generation online assessment platform
+where students learn, compete and improve
+their skills through interactive quizzes.
 
 
-      <section className="max-w-7xl mx-auto px-8 py-16">
+</p>
 
 
-        <div className="text-center mb-12">
 
 
-          <h2 className="text-4xl font-bold">
 
-            Powerful Features
 
-          </h2>
 
+<div className="
+flex
+gap-5
+mt-10
+">
 
-          <p className="text-gray-600 mt-3">
 
-            Everything you need for online examinations
+<Link
 
-          </p>
+href="/register"
 
+className="
+bg-gradient-to-r
+from-indigo-600
+to-purple-600
+px-7
+py-4
+rounded-2xl
+font-semibold
+flex
+items-center
+gap-2
+hover:scale-105
+transition
+"
 
-        </div>
+>
 
 
+Start Learning
 
+<ArrowRight size={20}/>
 
-        <div className="grid md:grid-cols-3 gap-6">
 
+</Link>
 
-          {
-            features.map((item,index)=>{
 
-              const Icon=item.icon;
 
 
-              return (
 
-                <div
-                  key={index}
-                  className="bg-white rounded-2xl shadow-lg p-6 hover:-translate-y-1 transition"
-                >
+<Link
 
-                  <Icon
-                    size={35}
-                    className="text-indigo-600"
-                  />
+href="/login"
 
+className="
+border
+border-white/20
+px-7
+py-4
+rounded-2xl
+font-semibold
+hover:bg-white/10
+"
 
-                  <h3 className="text-xl font-bold mt-4">
+>
 
-                    {item.title}
+Login
 
-                  </h3>
+</Link>
 
 
-                  <p className="text-gray-600 mt-2">
+</div>
 
-                    {item.desc}
 
-                  </p>
 
 
-                </div>
 
-              )
 
-            })
-          }
 
+{/* Stats */}
 
-        </div>
 
 
-      </section>
+<div className="
+grid
+grid-cols-3
+gap-5
+mt-12
+">
 
 
+<div>
 
+<h2 className="
+text-3xl
+font-bold
+">
 
+50K+
 
-      {/* Footer CTA */}
+</h2>
 
+<p className="text-gray-400">
 
-      <section className="text-center py-16">
+Students
 
+</p>
 
-        <h2 className="text-4xl font-bold">
 
-          Ready to Start Your Assessment?
+</div>
 
-        </h2>
 
 
-        <Link
-          href="/register"
-          className="inline-flex items-center gap-2 mt-6 bg-indigo-600 text-white px-8 py-3 rounded-xl"
-        >
+<div>
 
-          Create Account
+<h2 className="
+text-3xl
+font-bold
+">
 
-          <ArrowRight size={18}/>
+2M+
 
-        </Link>
+</h2>
 
+<p className="text-gray-400">
 
-      </section>
+Questions
 
+</p>
 
 
-    </main>
+</div>
 
-  );
+
+
+<div>
+
+<h2 className="
+text-3xl
+font-bold
+">
+
+98%
+
+</h2>
+
+<p className="text-gray-400">
+
+Success
+
+</p>
+
+
+</div>
+
+
+
+</div>
+
+
+
+
+
+</motion.div>
+
+
+
+
+
+
+
+
+
+{/* Quiz Card Preview */}
+
+
+
+
+<motion.div
+
+initial={{opacity:0,y:50}}
+
+animate={{opacity:1,y:0}}
+
+transition={{duration:.7}}
+
+className="
+relative
+"
+
+
+>
+
+
+<div className="
+bg-white/10
+border
+border-white/20
+backdrop-blur-xl
+rounded-3xl
+p-8
+shadow-2xl
+">
+
+
+<div className="
+flex
+justify-between
+items-center
+">
+
+
+<h3 className="
+text-xl
+font-bold
+">
+
+Live Quiz
+
+</h3>
+
+
+<div className="
+bg-red-500/20
+text-red-400
+px-3
+py-1
+rounded-full
+text-sm
+">
+
+02:45
+
+</div>
+
+
+</div>
+
+
+
+
+
+<p className="
+mt-8
+text-lg
+font-semibold
+">
+
+Which technology is used for AI?
+
+
+</p>
+
+
+
+
+
+
+<div className="
+space-y-3
+mt-6
+">
+
+
+{
+[
+"React",
+"Artificial Intelligence",
+"HTML",
+"CSS"
+].map((item,index)=>(
+
+
+<div
+
+key={item}
+
+className={`
+p-4
+rounded-xl
+border
+border-white/10
+${index===1
+?
+"bg-indigo-600"
+:
+"bg-white/5"
+}
+`}
+
+>
+
+
+{item}
+
+
+</div>
+
+
+))
+
+}
+
+
+
+</div>
+
+
+
+
+
+<button className="
+w-full
+mt-6
+bg-white
+text-black
+py-3
+rounded-xl
+font-semibold
+">
+
+
+Submit Answer
+
+
+</button>
+
+
+
+
+</div>
+
+
+</motion.div>
+
+
+
+
+
+</section>
+
+
+
+
+
+
+
+
+
+{/* Features */}
+
+
+
+<section className="
+max-w-7xl
+mx-auto
+px-6
+py-24
+">
+
+
+<h2 className="
+text-center
+text-4xl
+font-bold
+">
+
+
+Everything you need to master skills
+
+
+</h2>
+
+
+
+
+
+<div className="
+grid
+md:grid-cols-3
+gap-6
+mt-12
+">
+
+
+{
+
+[
+{
+icon:Brain,
+title:"Smart Quizzes",
+desc:"AI powered questions and assessments"
+},
+{
+icon:Trophy,
+title:"Leaderboard",
+desc:"Compete and rank globally"
+},
+{
+icon:Clock,
+title:"Real Time Tests",
+desc:"Timed exams with analytics"
+}
+
+].map((item)=>{
+
+
+const Icon=item.icon;
+
+
+return (
+
+<div
+
+key={item.title}
+
+className="
+bg-white/10
+border
+border-white/20
+rounded-3xl
+p-7
+hover:scale-105
+transition
+"
+
+
+>
+
+
+<Icon size={35}/>
+
+
+<h3 className="
+text-xl
+font-bold
+mt-5
+">
+
+{item.title}
+
+</h3>
+
+
+<p className="
+text-gray-400
+mt-3
+">
+
+{item.desc}
+
+</p>
+
+
+</div>
+
+)
+
+})
+
+}
+
+
+</div>
+
+
+
+</section>
+
+
+
+
+
+
+
+
+
+{/* CTA */}
+
+
+
+<section className="
+max-w-5xl
+mx-auto
+px-6
+pb-24
+">
+
+
+<div className="
+bg-gradient-to-r
+from-indigo-600
+to-purple-600
+rounded-3xl
+p-10
+text-center
+">
+
+
+<h2 className="
+text-4xl
+font-bold
+">
+
+
+Ready to start your journey?
+
+
+</h2>
+
+
+<p className="
+mt-4
+text-white/80
+">
+
+
+Join thousands of learners today.
+
+
+</p>
+
+
+
+<Link
+
+href="/register"
+
+className="
+inline-flex
+mt-7
+bg-white
+text-black
+px-7
+py-3
+rounded-xl
+font-semibold
+items-center
+gap-2
+"
+
+
+>
+
+
+Create Free Account
+
+<ArrowRight size={18}/>
+
+
+</Link>
+
+
+</div>
+
+
+</section>
+
+
+
+
+
+
+
+
+</main>
+
+
+)
 
 }
