@@ -1,155 +1,134 @@
 "use client";
 
 import { useState } from "react";
-import Link from "next/link";
 import { useRouter } from "next/navigation";
+import Link from "next/link";
 import type { FormEvent } from "react";
+
+import { motion } from "framer-motion";
 
 import {
   Mail,
   Lock,
   Eye,
   EyeOff,
-  Loader2,
   ArrowRight,
-  GraduationCap,
+  Loader2,
+  Sparkles,
+  Trophy,
+  Users,
+  Brain,
   ShieldCheck,
 } from "lucide-react";
 
 import { toast } from "sonner";
 
 
-export default function LoginPage() {
 
+export default function LoginPage(){
 
-  const router = useRouter();
 
+const router = useRouter();
 
-  const [loading,setLoading] = useState(false);
 
-  const [showPassword,setShowPassword] = useState(false);
+const [loading,setLoading]=useState(false);
 
+const [showPassword,setShowPassword]=useState(false);
 
 
-  const [formData,setFormData] = useState({
 
-    email:"",
-    password:"",
+const [formData,setFormData]=useState({
 
-  });
+email:"",
+password:""
 
+});
 
 
 
 
-  async function handleLogin(e:FormEvent){
 
 
-    e.preventDefault();
+async function handleLogin(e:FormEvent){
 
 
+e.preventDefault();
 
-    if(!formData.email || !formData.password){
 
-      toast.error("Please fill all fields");
 
-      return;
+if(!formData.email || !formData.password){
 
-    }
+toast.error("Please enter email and password");
 
+return;
 
+}
 
 
-    try{
 
+try{
 
-      setLoading(true);
 
+setLoading(true);
 
 
-      const response = await fetch(
-        "/api/auth/login",
-        {
 
+const response = await fetch("/api/auth/login",{
 
-          method:"POST",
+method:"POST",
 
+headers:{
 
-          headers:{
+"Content-Type":"application/json"
 
-            "Content-Type":"application/json"
+},
 
-          },
+body:JSON.stringify(formData)
 
+});
 
-          body:JSON.stringify({
 
-            email:formData.email,
 
-            password:formData.password
 
-          })
+const result = await response.json();
 
 
-        }
-      );
 
+if(!response.ok){
 
+toast.error(result.message);
 
+return;
 
+}
 
-      const result = await response.json();
 
 
+toast.success("Welcome back 🎉");
 
 
-      if(!response.ok){
+router.push("/student/dashboard");
 
 
-        toast.error(result.message);
 
-        return;
+}
+catch{
 
 
-      }
+toast.error("Something went wrong");
 
 
+}
+finally{
 
 
+setLoading(false);
 
 
-      toast.success(
-        "Login successful"
-      );
+}
 
 
-
-      router.push("/student/dashboard");
-
-
-
-
-    }
-    catch{
-
-
-      toast.error(
-        "Something went wrong"
-      );
-
-
-    }
-    finally{
-
-
-      setLoading(false);
-
-
-    }
-
-
-  }
-
+}
 
 
 
@@ -158,30 +137,107 @@ export default function LoginPage() {
 
 return (
 
-<main className="min-h-screen flex items-center justify-center bg-gradient-to-br from-indigo-100 via-white to-purple-100 px-4">
+<main className="
+min-h-screen
+relative
+overflow-hidden
+bg-[#050816]
+flex
+items-center
+justify-center
+px-6
+">
 
 
 
 
 
-<div className="w-full max-w-md bg-white rounded-3xl shadow-2xl p-8">
+{/* Background Glow */}
+
+
+<div className="
+absolute
+w-[500px]
+h-[500px]
+bg-indigo-600
+rounded-full
+blur-[150px]
+opacity-30
+top-[-200px]
+left-[-200px]
+"/>
+
+
+<div className="
+absolute
+w-[400px]
+h-[400px]
+bg-purple-600
+rounded-full
+blur-[150px]
+opacity-30
+bottom-[-150px]
+right-[-100px]
+"/>
 
 
 
 
 
 
-{/* Header */}
 
 
-<div className="text-center mb-8">
+<div className="
+relative
+z-10
+max-w-7xl
+w-full
+grid
+lg:grid-cols-2
+gap-16
+items-center
+">
 
 
 
-<div className="mx-auto w-16 h-16 rounded-2xl bg-indigo-600 flex items-center justify-center text-white">
 
 
-<GraduationCap size={35}/>
+
+{/* LEFT SIDE */}
+
+
+
+<motion.div
+
+initial={{opacity:0,x:-50}}
+
+animate={{opacity:1,x:0}}
+
+transition={{duration:.6}}
+
+className="text-white"
+
+>
+
+
+
+<div className="
+inline-flex
+items-center
+gap-2
+bg-white/10
+border
+border-white/20
+px-4
+py-2
+rounded-full
+backdrop-blur
+">
+
+
+<Sparkles size={18}/>
+
+Next Generation Quiz Platform
 
 
 </div>
@@ -189,20 +245,247 @@ return (
 
 
 
-<h1 className="text-4xl font-bold text-gray-900 mt-5">
 
-Welcome Back
+
+
+<h1 className="
+text-5xl
+lg:text-6xl
+font-bold
+mt-8
+leading-tight
+">
+
+
+Master Your Skills.
+
+<br/>
+
+Win Every Challenge.
+
 
 </h1>
 
 
 
-<p className="text-gray-500 mt-2">
 
-Login to Quiz Platform
+
+
+
+<p className="
+text-gray-400
+text-lg
+mt-6
+max-w-xl
+">
+
+
+A powerful online assessment platform
+built for students, teachers and organizations.
+
 
 </p>
 
+
+
+
+
+
+
+
+<div className="
+grid
+grid-cols-3
+gap-4
+mt-10
+">
+
+
+
+<div className="
+bg-white/10
+border
+border-white/10
+rounded-2xl
+p-4
+backdrop-blur
+">
+
+
+<Users/>
+
+<h3 className="text-2xl font-bold mt-3">
+
+50K+
+
+</h3>
+
+<p className="text-gray-400 text-sm">
+
+Students
+
+</p>
+
+
+</div>
+
+
+
+
+
+<div className="
+bg-white/10
+border
+border-white/10
+rounded-2xl
+p-4
+backdrop-blur
+">
+
+
+<Brain/>
+
+<h3 className="text-2xl font-bold mt-3">
+
+2M+
+
+</h3>
+
+<p className="text-gray-400 text-sm">
+
+Questions
+
+</p>
+
+
+</div>
+
+
+
+
+
+
+<div className="
+bg-white/10
+border
+border-white/10
+rounded-2xl
+p-4
+backdrop-blur
+">
+
+
+<Trophy/>
+
+<h3 className="text-2xl font-bold mt-3">
+
+98%
+
+</h3>
+
+<p className="text-gray-400 text-sm">
+
+Success
+
+</p>
+
+
+</div>
+
+
+
+</div>
+
+
+
+
+
+
+</motion.div>
+
+
+
+
+
+
+
+
+
+{/* LOGIN CARD */}
+
+
+
+<motion.div
+
+initial={{opacity:0,y:40}}
+
+animate={{opacity:1,y:0}}
+
+transition={{duration:.6}}
+
+className="
+bg-white/10
+border
+border-white/20
+backdrop-blur-xl
+rounded-3xl
+p-8
+shadow-2xl
+max-w-md
+w-full
+"
+
+
+
+>
+
+
+
+
+<div className="text-white mb-8">
+
+
+<div className="
+w-14
+h-14
+rounded-2xl
+bg-indigo-600
+flex
+items-center
+justify-center
+mb-5
+">
+
+
+<ShieldCheck size={30}/>
+
+
+</div>
+
+
+
+<h2 className="
+text-3xl
+font-bold
+">
+
+
+Welcome Back
+
+
+</h2>
+
+
+<p className="
+text-gray-400
+mt-2
+">
+
+
+Login to continue your journey
+
+
+</p>
 
 
 </div>
@@ -216,43 +499,37 @@ Login to Quiz Platform
 
 
 <form
-
 onSubmit={handleLogin}
-
 className="space-y-5"
-
 >
 
 
 
 
 
-
-
-{/* Email */}
-
-
 <div>
 
 
-<label className="font-medium text-gray-700">
+<label className="text-gray-300">
 
-Email Address
+Email
 
 </label>
 
 
+<div className="
+mt-2
+flex
+items-center
+bg-white/10
+border
+border-white/20
+rounded-xl
+px-4
+">
 
 
-<div className="flex items-center border rounded-xl px-4 mt-2 focus-within:ring-2 focus-within:ring-indigo-500">
-
-
-
-<Mail
-size={18}
-className="text-gray-400"
-/>
-
+<Mail className="text-gray-400" size={18}/>
 
 
 
@@ -260,14 +537,17 @@ className="text-gray-400"
 
 type="email"
 
-placeholder="example@gmail.com"
+placeholder="you@gmail.com"
 
-className="w-full p-3 outline-none"
-
+className="
+bg-transparent
+outline-none
+w-full
+p-3
+text-white
+"
 
 value={formData.email}
-
-
 
 
 onChange={(e)=>
@@ -286,7 +566,6 @@ email:e.target.value
 />
 
 
-
 </div>
 
 
@@ -295,22 +574,13 @@ email:e.target.value
 
 
 
-
-
-
-
-
-{/* Password */}
 
 
 
 <div>
 
 
-<div className="flex justify-between">
-
-
-<label className="font-medium text-gray-700">
+<label className="text-gray-300">
 
 Password
 
@@ -318,28 +588,16 @@ Password
 
 
 
-<Link
-
-href="/forgot-password"
-
-className="text-sm text-indigo-600 hover:underline"
-
->
-
-Forgot password?
-
-</Link>
-
-
-
-</div>
-
-
-
-
-
-<div className="flex items-center border rounded-xl px-4 mt-2 focus-within:ring-2 focus-within:ring-indigo-500">
-
+<div className="
+mt-2
+flex
+items-center
+bg-white/10
+border
+border-white/20
+rounded-xl
+px-4
+">
 
 
 <Lock
@@ -349,30 +607,22 @@ className="text-gray-400"
 
 
 
-
-
 <input
 
-type={
-showPassword
-?
-"text"
-:
-"password"
-}
+type={showPassword?"text":"password"}
 
+placeholder="********"
 
-placeholder="Enter password"
-
-
-className="w-full p-3 outline-none"
-
+className="
+bg-transparent
+outline-none
+w-full
+p-3
+text-white
+"
 
 
 value={formData.password}
-
-
-
 
 
 onChange={(e)=>
@@ -393,43 +643,31 @@ password:e.target.value
 
 
 
-
-
 <button
 
 type="button"
 
-onClick={()=>
+onClick={()=>setShowPassword(!showPassword)}
 
-setShowPassword(
-!showPassword
-)
-
-}
-
+className="text-gray-400"
 
 >
-
 
 
 {
 
 showPassword ?
 
-<EyeOff size={18}/> :
+<EyeOff size={18}/>:
 
 <Eye size={18}/>
 
 }
 
 
-
 </button>
 
 
-
-
-
 </div>
 
 
@@ -444,19 +682,64 @@ showPassword ?
 
 
 
-{/* Login Button */}
+<div className="flex justify-between text-sm">
+
+
+<label className="text-gray-400 flex gap-2">
+
+
+<input type="checkbox"/>
+
+Remember me
+
+
+</label>
+
+
+
+
+<Link
+href="/forgot-password"
+className="text-indigo-400"
+>
+
+Forgot password?
+
+</Link>
+
+
+</div>
+
+
+
+
 
 
 
 <button
 
-
 disabled={loading}
 
+className="
+w-full
+bg-gradient-to-r
+from-indigo-600
+to-purple-600
+text-white
+py-3
+rounded-xl
+font-semibold
+flex
+items-center
+justify-center
+gap-2
+hover:scale-[1.02]
+transition
+"
 
-className="w-full bg-indigo-600 hover:bg-indigo-700 disabled:opacity-50 text-white rounded-xl py-3 flex items-center justify-center gap-2 transition"
 
 >
+
 
 
 {
@@ -476,7 +759,6 @@ Login
 }
 
 
-
 </button>
 
 
@@ -491,57 +773,11 @@ Login
 
 
 
-
-{/* Security */}
-
-
-
-<div className="mt-6 bg-indigo-50 rounded-xl p-4">
-
-
-<div className="flex gap-3">
-
-
-<ShieldCheck
-size={22}
-className="text-indigo-600"
-/>
-
-
-<div>
-
-
-<p className="font-semibold text-gray-800">
-
-Secure Login
-
-</p>
-
-
-<p className="text-sm text-gray-600">
-
-Your account information is protected
-
-</p>
-
-
-</div>
-
-
-</div>
-
-
-</div>
-
-
-
-
-
-
-
-
-
-<div className="text-center mt-7 text-gray-600">
+<div className="
+text-center
+mt-8
+text-gray-400
+">
 
 
 Don't have an account?
@@ -551,7 +787,11 @@ Don't have an account?
 
 href="/register"
 
-className="text-indigo-600 font-semibold ml-2"
+className="
+text-indigo-400
+font-semibold
+ml-2
+"
 
 >
 
@@ -560,14 +800,22 @@ Create Account
 </Link>
 
 
-
 </div>
 
 
 
 
 
+</motion.div>
+
+
+
+
+
+
 </div>
+
+
 
 
 
