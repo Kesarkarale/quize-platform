@@ -5,8 +5,6 @@ import { useRouter } from "next/navigation";
 import Link from "next/link";
 import type { FormEvent } from "react";
 
-import { createClient } from "@/lib/supabase/client";
-
 import {
   Mail,
   Lock,
@@ -25,31 +23,32 @@ export default function LoginPage() {
 
   const router = useRouter();
 
-  const supabase = createClient();
 
+  const [loading, setLoading] = useState(false);
 
-  const [loading,setLoading] = useState(false);
-
-  const [showPassword,setShowPassword] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
 
 
 
-  const [formData,setFormData] = useState({
+  const [formData, setFormData] = useState({
 
-    email:"",
-    password:""
+    email: "",
+
+    password: "",
 
   });
 
 
 
-  async function handleLogin(e:FormEvent){
+
+
+  async function handleLogin(e: FormEvent) {
 
     e.preventDefault();
 
 
 
-    if(!formData.email || !formData.password){
+    if (!formData.email || !formData.password) {
 
       toast.error("Please fill all fields");
 
@@ -59,59 +58,51 @@ export default function LoginPage() {
 
 
 
-    try{
+    try {
 
 
       setLoading(true);
 
 
 
-     const response = await fetch("/api/auth/login",{
+      const response = await fetch("/api/auth/login", {
 
-  method:"POST",
+        method: "POST",
 
-  headers:{
-    "Content-Type":"application/json"
-  },
+        headers: {
 
-  body:JSON.stringify({
+          "Content-Type": "application/json",
 
-    email:formData.email,
+        },
 
-    password:formData.password
+        body: JSON.stringify({
 
-  })
+          email: formData.email,
 
-});
+          password: formData.password,
 
+        }),
 
-const result = await response.json();
-
-
-
-if(!response.ok){
-
-  toast.error(result.message);
-
-  return;
-
-}
+      });
 
 
 
-toast.success("Login Successful");
 
 
-router.push("/student/dashboard");
+      const result = await response.json();
 
 
-      if(error){
 
-        toast.error(error.message);
+
+      if (!response.ok) {
+
+        toast.error(result.message);
 
         return;
 
       }
+
+
 
 
 
@@ -123,20 +114,27 @@ router.push("/student/dashboard");
 
 
 
-    }
-    catch{
+
+    } catch {
+
 
       toast.error("Something went wrong");
 
-    }
-    finally{
+
+    } finally {
+
 
       setLoading(false);
+
 
     }
 
 
   }
+
+
+
+
 
 
 
@@ -151,17 +149,22 @@ router.push("/student/dashboard");
 
 
 
+
+
         {/* Logo */}
 
 
         <div className="text-center mb-8">
 
 
+
           <div className="mx-auto w-16 h-16 rounded-2xl bg-indigo-600 flex items-center justify-center text-white">
 
-            <ShieldCheck size={35}/>
+            <ShieldCheck size={35} />
 
           </div>
+
+
 
 
 
@@ -173,11 +176,13 @@ router.push("/student/dashboard");
 
 
 
+
           <p className="text-gray-500 mt-2">
 
             Login to Quiz Platform
 
           </p>
+
 
 
         </div>
@@ -187,16 +192,23 @@ router.push("/student/dashboard");
 
 
 
+
+
         <form
+
           onSubmit={handleLogin}
+
           className="space-y-5"
+
         >
 
 
 
 
 
+
           {/* Email */}
+
 
 
           <div>
@@ -210,36 +222,51 @@ router.push("/student/dashboard");
 
 
 
+
             <div className="flex items-center border rounded-xl px-4 mt-2 focus-within:ring-2 focus-within:ring-indigo-500">
 
 
+
               <Mail
+
                 size={18}
+
                 className="text-gray-400"
+
               />
+
+
 
 
               <input
 
+
                 type="email"
+
 
                 placeholder="example@gmail.com"
 
+
                 className="w-full p-3 outline-none"
+
+
 
                 value={formData.email}
 
 
 
-                onChange={(e)=>
+
+                onChange={(e) =>
+
 
                   setFormData({
 
                     ...formData,
 
-                    email:e.target.value
+                    email: e.target.value,
 
                   })
+
 
                 }
 
@@ -251,7 +278,10 @@ router.push("/student/dashboard");
             </div>
 
 
+
           </div>
+
+
 
 
 
@@ -262,7 +292,11 @@ router.push("/student/dashboard");
           {/* Password */}
 
 
+
+
+
           <div>
+
 
 
             <div className="flex justify-between">
@@ -275,14 +309,20 @@ router.push("/student/dashboard");
               </label>
 
 
+
+
               <Link
+
                 href="/forgot-password"
+
                 className="text-sm text-indigo-600 hover:underline"
+
               >
 
                 Forgot?
 
               </Link>
+
 
 
             </div>
@@ -291,43 +331,72 @@ router.push("/student/dashboard");
 
 
 
+
+
             <div className="flex items-center border rounded-xl px-4 mt-2 focus-within:ring-2 focus-within:ring-indigo-500">
 
 
+
               <Lock
+
                 size={18}
+
                 className="text-gray-400"
+
               />
+
+
 
 
 
               <input
 
-                type={showPassword ? "text":"password"}
+
+
+                type={showPassword ? "text" : "password"}
+
+
+
 
                 placeholder="********"
 
+
+
+
                 className="w-full p-3 outline-none"
+
+
+
 
 
                 value={formData.password}
 
 
 
-                onChange={(e)=>
+
+
+                onChange={(e) =>
+
 
                   setFormData({
 
+
                     ...formData,
 
-                    password:e.target.value
+
+                    password: e.target.value,
+
 
                   })
+
 
                 }
 
 
+
               />
+
+
 
 
 
@@ -335,21 +404,30 @@ router.push("/student/dashboard");
 
               <button
 
+
                 type="button"
 
-                onClick={()=>setShowPassword(!showPassword)}
+
+                onClick={() => setShowPassword(!showPassword)}
+
 
               >
 
 
+
                 {
+
                   showPassword ?
 
-                  <EyeOff size={18}/> :
 
-                  <Eye size={18}/>
+                    <EyeOff size={18} /> :
+
+
+                    <Eye size={18} />
+
 
                 }
+
 
 
               </button>
@@ -360,6 +438,7 @@ router.push("/student/dashboard");
             </div>
 
 
+
           </div>
 
 
@@ -368,34 +447,59 @@ router.push("/student/dashboard");
 
 
 
-          {/* Button */}
+
+
+          {/* Login Button */}
+
+
 
 
 
           <button
 
+
             disabled={loading}
 
+
+
             className="w-full bg-indigo-600 hover:bg-indigo-700 disabled:opacity-50 text-white py-3 rounded-xl flex justify-center items-center gap-2 transition"
+
+
 
           >
 
 
+
+
             {
+
 
               loading ?
 
-              <Loader2 className="animate-spin"/> :
 
-              <>
 
-              Login
+                <Loader2 className="animate-spin" />
 
-              <ArrowRight size={18}/>
 
-              </>
+                :
+
+
+
+                <>
+
+
+                  Login
+
+
+                  <ArrowRight size={18} />
+
+
+                </>
+
+
 
             }
+
 
 
           </button>
@@ -412,23 +516,36 @@ router.push("/student/dashboard");
 
 
 
+
+
         <div className="text-center mt-7 text-gray-600">
+
 
 
           Don't have an account?
 
 
+
+
           <Link
+
 
             href="/register"
 
+
+
             className="text-indigo-600 font-semibold ml-2"
+
 
           >
 
+
             Create Account
 
+
+
           </Link>
+
 
 
 
@@ -437,7 +554,10 @@ router.push("/student/dashboard");
 
 
 
+
       </div>
+
+
 
 
 
@@ -445,5 +565,6 @@ router.push("/student/dashboard");
 
 
   );
+
 
 }
