@@ -5,8 +5,6 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import type { FormEvent } from "react";
 
-import { createClient } from "@/lib/supabase/client";
-
 import {
   User,
   Mail,
@@ -22,12 +20,11 @@ import { toast } from "sonner";
 
 export default function RegisterPage() {
 
+
   const router = useRouter();
 
-  const supabase = createClient();
 
-
-  const [loading, setLoading] = useState(false);
+  const [loading,setLoading] = useState(false);
 
   const [showPassword,setShowPassword] = useState(false);
 
@@ -44,7 +41,9 @@ export default function RegisterPage() {
 
 
 
-  async function handleRegister(e: FormEvent){
+
+
+  async function handleRegister(e:FormEvent){
 
     e.preventDefault();
 
@@ -65,6 +64,7 @@ export default function RegisterPage() {
 
 
 
+
     if(formData.password.length < 8){
 
       toast.error("Password must be at least 8 characters");
@@ -72,6 +72,8 @@ export default function RegisterPage() {
       return;
 
     }
+
+
 
 
 
@@ -85,6 +87,7 @@ export default function RegisterPage() {
 
 
 
+
     try{
 
 
@@ -92,32 +95,45 @@ export default function RegisterPage() {
 
 
 
-      const {error}=await supabase.auth.signUp({
+      const response = await fetch(
+        "/api/auth/register",
+        {
 
-        email:formData.email,
+          method:"POST",
 
-        password:formData.password,
+          headers:{
+
+            "Content-Type":"application/json"
+
+          },
 
 
-        options:{
+          body:JSON.stringify({
 
-          data:{
+            fullName:formData.fullName,
 
-            full_name:formData.fullName,
+            email:formData.email,
 
-            role:"student"
+            password:formData.password,
 
-          }
+          })
 
         }
 
-      });
+      );
 
 
 
-      if(error){
 
-        toast.error(error.message);
+
+      const result = await response.json();
+
+
+
+
+      if(!response.ok){
+
+        toast.error(result.message);
 
         return;
 
@@ -125,9 +141,12 @@ export default function RegisterPage() {
 
 
 
+
+
       toast.success(
         "Registration successful. Check your email."
       );
+
 
 
       router.push("/login");
@@ -137,17 +156,24 @@ export default function RegisterPage() {
     }
     catch{
 
+
       toast.error("Something went wrong");
+
 
     }
     finally{
 
+
       setLoading(false);
+
 
     }
 
 
   }
+
+
+
 
 
 
@@ -160,17 +186,27 @@ return (
 <div className="w-full max-w-md bg-white rounded-3xl shadow-2xl p-8">
 
 
+
 <div className="text-center mb-8">
 
-<h1 className="text-4xl font-bold">
+
+<h1 className="text-4xl font-bold text-gray-900">
+
 Create Account
+
 </h1>
 
+
 <p className="text-gray-500 mt-2">
+
 Join Quiz Platform
+
 </p>
 
+
 </div>
+
+
 
 
 
@@ -181,10 +217,14 @@ className="space-y-5"
 
 
 
+{/* Name */}
+
 <div>
 
 <label className="font-medium">
+
 Full Name
+
 </label>
 
 
@@ -199,6 +239,7 @@ Full Name
 className="w-full p-3 outline-none"
 
 placeholder="John Doe"
+
 
 value={formData.fullName}
 
@@ -220,16 +261,22 @@ fullName:e.target.value
 
 </div>
 
+
 </div>
 
 
 
 
 
+
+{/* Email */}
+
 <div>
 
 <label className="font-medium">
+
 Email
+
 </label>
 
 
@@ -268,16 +315,23 @@ email:e.target.value
 
 </div>
 
+
 </div>
 
 
 
 
 
+
+{/* Password */}
+
+
 <div>
 
 <label className="font-medium">
+
 Password
+
 </label>
 
 
@@ -315,19 +369,23 @@ password:e.target.value
 />
 
 
-
 <button
+
 type="button"
+
 onClick={()=>setShowPassword(!showPassword)}
+
 >
 
 
 {
+
 showPassword ?
 
 <EyeOff size={18}/> :
 
 <Eye size={18}/>
+
 }
 
 
@@ -344,11 +402,17 @@ showPassword ?
 
 
 
+
+
+{/* Confirm Password */}
+
+
 <div>
 
-
 <label className="font-medium">
+
 Confirm Password
+
 </label>
 
 
@@ -364,12 +428,10 @@ type={showPassword ? "text":"password"}
 
 className="w-full p-3 outline-none"
 
-
 placeholder="********"
 
 
 value={formData.confirmPassword}
-
 
 
 onChange={(e)=>
@@ -384,7 +446,6 @@ confirmPassword:e.target.value
 
 }
 
-
 />
 
 
@@ -392,6 +453,8 @@ confirmPassword:e.target.value
 
 
 </div>
+
+
 
 
 
@@ -433,7 +496,10 @@ Create Account
 
 
 
-<div className="text-center mt-6">
+
+
+
+<div className="text-center mt-6 text-gray-600">
 
 
 Already have an account?
@@ -453,6 +519,7 @@ Login
 
 
 </div>
+
 
 
 
