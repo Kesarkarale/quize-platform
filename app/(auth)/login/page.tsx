@@ -1,8 +1,8 @@
 "use client";
 
 import { useState } from "react";
-import { useRouter } from "next/navigation";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import type { FormEvent } from "react";
 
 import {
@@ -12,6 +12,7 @@ import {
   EyeOff,
   Loader2,
   ArrowRight,
+  GraduationCap,
   ShieldCheck,
 } from "lucide-react";
 
@@ -24,17 +25,16 @@ export default function LoginPage() {
   const router = useRouter();
 
 
-  const [loading, setLoading] = useState(false);
+  const [loading,setLoading] = useState(false);
 
-  const [showPassword, setShowPassword] = useState(false);
+  const [showPassword,setShowPassword] = useState(false);
 
 
 
-  const [formData, setFormData] = useState({
+  const [formData,setFormData] = useState({
 
-    email: "",
-
-    password: "",
+    email:"",
+    password:"",
 
   });
 
@@ -42,13 +42,14 @@ export default function LoginPage() {
 
 
 
-  async function handleLogin(e: FormEvent) {
+  async function handleLogin(e:FormEvent){
+
 
     e.preventDefault();
 
 
 
-    if (!formData.email || !formData.password) {
+    if(!formData.email || !formData.password){
 
       toast.error("Please fill all fields");
 
@@ -58,32 +59,40 @@ export default function LoginPage() {
 
 
 
-    try {
+
+    try{
 
 
       setLoading(true);
 
 
 
-      const response = await fetch("/api/auth/login", {
+      const response = await fetch(
+        "/api/auth/login",
+        {
 
-        method: "POST",
 
-        headers: {
+          method:"POST",
 
-          "Content-Type": "application/json",
 
-        },
+          headers:{
 
-        body: JSON.stringify({
+            "Content-Type":"application/json"
 
-          email: formData.email,
+          },
 
-          password: formData.password,
 
-        }),
+          body:JSON.stringify({
 
-      });
+            email:formData.email,
+
+            password:formData.password
+
+          })
+
+
+        }
+      );
 
 
 
@@ -94,11 +103,13 @@ export default function LoginPage() {
 
 
 
-      if (!response.ok) {
+      if(!response.ok){
+
 
         toast.error(result.message);
 
         return;
+
 
       }
 
@@ -106,7 +117,10 @@ export default function LoginPage() {
 
 
 
-      toast.success("Login Successful");
+
+      toast.success(
+        "Login successful"
+      );
 
 
 
@@ -115,13 +129,17 @@ export default function LoginPage() {
 
 
 
-    } catch {
+    }
+    catch{
 
 
-      toast.error("Something went wrong");
+      toast.error(
+        "Something went wrong"
+      );
 
 
-    } finally {
+    }
+    finally{
 
 
       setLoading(false);
@@ -138,263 +156,285 @@ export default function LoginPage() {
 
 
 
-  return (
+return (
 
+<main className="min-h-screen flex items-center justify-center bg-gradient-to-br from-indigo-100 via-white to-purple-100 px-4">
 
-    <main className="min-h-screen flex items-center justify-center bg-gradient-to-br from-indigo-100 via-white to-purple-100 px-4">
 
 
 
-      <div className="w-full max-w-md bg-white rounded-3xl shadow-2xl p-8">
 
+<div className="w-full max-w-md bg-white rounded-3xl shadow-2xl p-8">
 
 
 
 
-        {/* Logo */}
 
 
-        <div className="text-center mb-8">
+{/* Header */}
 
 
+<div className="text-center mb-8">
 
-          <div className="mx-auto w-16 h-16 rounded-2xl bg-indigo-600 flex items-center justify-center text-white">
 
-            <ShieldCheck size={35} />
 
-          </div>
+<div className="mx-auto w-16 h-16 rounded-2xl bg-indigo-600 flex items-center justify-center text-white">
 
 
+<GraduationCap size={35}/>
 
 
+</div>
 
-          <h1 className="text-4xl font-bold mt-5 text-gray-900">
 
-            Welcome Back
 
-          </h1>
 
+<h1 className="text-4xl font-bold text-gray-900 mt-5">
 
+Welcome Back
 
+</h1>
 
-          <p className="text-gray-500 mt-2">
 
-            Login to Quiz Platform
 
-          </p>
+<p className="text-gray-500 mt-2">
 
+Login to Quiz Platform
 
+</p>
 
-        </div>
 
 
+</div>
 
 
 
 
 
 
-        <form
 
-          onSubmit={handleLogin}
 
-          className="space-y-5"
 
-        >
+<form
 
+onSubmit={handleLogin}
 
+className="space-y-5"
 
+>
 
 
 
-          {/* Email */}
 
 
 
-          <div>
 
+{/* Email */}
 
-            <label className="font-medium text-gray-700">
 
-              Email Address
+<div>
 
-            </label>
 
+<label className="font-medium text-gray-700">
 
+Email Address
 
+</label>
 
-            <div className="flex items-center border rounded-xl px-4 mt-2 focus-within:ring-2 focus-within:ring-indigo-500">
 
 
 
-              <Mail
+<div className="flex items-center border rounded-xl px-4 mt-2 focus-within:ring-2 focus-within:ring-indigo-500">
 
-                size={18}
 
-                className="text-gray-400"
 
-              />
+<Mail
+size={18}
+className="text-gray-400"
+/>
 
 
 
 
-              <input
+<input
 
+type="email"
 
-                type="email"
+placeholder="example@gmail.com"
 
+className="w-full p-3 outline-none"
 
-                placeholder="example@gmail.com"
 
+value={formData.email}
 
-                className="w-full p-3 outline-none"
 
 
 
-                value={formData.email}
+onChange={(e)=>
 
+setFormData({
 
+...formData,
 
+email:e.target.value
 
-                onChange={(e) =>
+})
 
+}
 
-                  setFormData({
 
-                    ...formData,
+/>
 
-                    email: e.target.value,
 
-                  })
 
+</div>
 
-                }
 
+</div>
 
-              />
 
 
 
-            </div>
 
 
 
-          </div>
 
 
+{/* Password */}
 
 
 
+<div>
 
 
+<div className="flex justify-between">
 
 
-          {/* Password */}
+<label className="font-medium text-gray-700">
 
+Password
 
+</label>
 
 
 
-          <div>
+<Link
 
+href="/forgot-password"
 
+className="text-sm text-indigo-600 hover:underline"
 
-            <div className="flex justify-between">
+>
 
+Forgot password?
 
-              <label className="font-medium text-gray-700">
+</Link>
 
-                Password
 
-              </label>
 
+</div>
 
 
 
-              <Link
 
-                href="/forgot-password"
 
-                className="text-sm text-indigo-600 hover:underline"
+<div className="flex items-center border rounded-xl px-4 mt-2 focus-within:ring-2 focus-within:ring-indigo-500">
 
-              >
 
-                Forgot?
 
-              </Link>
+<Lock
+size={18}
+className="text-gray-400"
+/>
 
 
 
-            </div>
 
 
+<input
 
+type={
+showPassword
+?
+"text"
+:
+"password"
+}
 
 
+placeholder="Enter password"
 
 
-            <div className="flex items-center border rounded-xl px-4 mt-2 focus-within:ring-2 focus-within:ring-indigo-500">
+className="w-full p-3 outline-none"
 
 
 
-              <Lock
+value={formData.password}
 
-                size={18}
 
-                className="text-gray-400"
 
-              />
 
 
+onChange={(e)=>
 
+setFormData({
 
+...formData,
 
-              <input
+password:e.target.value
 
+})
 
+}
 
-                type={showPassword ? "text" : "password"}
 
+/>
 
 
 
-                placeholder="********"
 
 
 
+<button
 
-                className="w-full p-3 outline-none"
+type="button"
 
+onClick={()=>
 
+setShowPassword(
+!showPassword
+)
 
+}
 
 
-                value={formData.password}
+>
 
 
 
+{
 
+showPassword ?
 
-                onChange={(e) =>
+<EyeOff size={18}/> :
 
+<Eye size={18}/>
 
-                  setFormData({
+}
 
 
-                    ...formData,
 
+</button>
 
-                    password: e.target.value,
 
 
-                  })
 
 
-                }
+</div>
 
 
 
-              />
+</div>
 
 
 
@@ -402,44 +442,47 @@ export default function LoginPage() {
 
 
 
-              <button
 
 
-                type="button"
+{/* Login Button */}
 
 
-                onClick={() => setShowPassword(!showPassword)}
 
+<button
 
-              >
 
+disabled={loading}
 
 
-                {
+className="w-full bg-indigo-600 hover:bg-indigo-700 disabled:opacity-50 text-white rounded-xl py-3 flex items-center justify-center gap-2 transition"
 
-                  showPassword ?
+>
 
 
-                    <EyeOff size={18} /> :
+{
 
+loading ?
 
-                    <Eye size={18} />
+<Loader2 className="animate-spin"/> :
 
+<>
 
-                }
+Login
 
+<ArrowRight size={18}/>
 
+</>
 
-              </button>
+}
 
 
 
+</button>
 
-            </div>
 
 
 
-          </div>
+</form>
 
 
 
@@ -449,122 +492,90 @@ export default function LoginPage() {
 
 
 
-          {/* Login Button */}
+{/* Security */}
 
 
 
+<div className="mt-6 bg-indigo-50 rounded-xl p-4">
 
 
-          <button
+<div className="flex gap-3">
 
 
-            disabled={loading}
+<ShieldCheck
+size={22}
+className="text-indigo-600"
+/>
 
 
+<div>
 
-            className="w-full bg-indigo-600 hover:bg-indigo-700 disabled:opacity-50 text-white py-3 rounded-xl flex justify-center items-center gap-2 transition"
 
+<p className="font-semibold text-gray-800">
 
+Secure Login
 
-          >
+</p>
 
 
+<p className="text-sm text-gray-600">
 
+Your account information is protected
 
-            {
+</p>
 
 
-              loading ?
+</div>
 
 
+</div>
 
-                <Loader2 className="animate-spin" />
 
+</div>
 
-                :
 
 
 
-                <>
 
 
-                  Login
 
 
-                  <ArrowRight size={18} />
 
+<div className="text-center mt-7 text-gray-600">
 
-                </>
 
+Don't have an account?
 
 
-            }
+<Link
 
+href="/register"
 
+className="text-indigo-600 font-semibold ml-2"
 
-          </button>
+>
 
+Create Account
 
+</Link>
 
 
 
-        </form>
+</div>
 
 
 
 
 
+</div>
 
 
 
 
-        <div className="text-center mt-7 text-gray-600">
+</main>
 
 
-
-          Don't have an account?
-
-
-
-
-          <Link
-
-
-            href="/register"
-
-
-
-            className="text-indigo-600 font-semibold ml-2"
-
-
-          >
-
-
-            Create Account
-
-
-
-          </Link>
-
-
-
-
-        </div>
-
-
-
-
-
-      </div>
-
-
-
-
-
-    </main>
-
-
-  );
+);
 
 
 }
