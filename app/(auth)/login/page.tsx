@@ -14,6 +14,7 @@ import {
   EyeOff,
   Loader2,
   ArrowRight,
+  ShieldCheck,
 } from "lucide-react";
 
 import { toast } from "sonner";
@@ -21,54 +22,61 @@ import { toast } from "sonner";
 
 export default function LoginPage() {
 
+
   const router = useRouter();
 
   const supabase = createClient();
 
 
-  const [loading, setLoading] = useState(false);
+  const [loading,setLoading] = useState(false);
 
-  const [showPassword, setShowPassword] = useState(false);
+  const [showPassword,setShowPassword] = useState(false);
 
 
-  const [formData, setFormData] = useState({
-    email: "",
-    password: "",
+
+  const [formData,setFormData] = useState({
+
+    email:"",
+    password:""
+
   });
 
 
 
-  async function handleLogin(e: FormEvent) {
+  async function handleLogin(e:FormEvent){
 
     e.preventDefault();
 
 
-    if (!formData.email || !formData.password) {
+
+    if(!formData.email || !formData.password){
 
       toast.error("Please fill all fields");
 
       return;
+
     }
 
 
 
-    try {
+    try{
+
 
       setLoading(true);
 
 
-      const { error } =
-        await supabase.auth.signInWithPassword({
 
-          email: formData.email,
+      const {error}=await supabase.auth.signInWithPassword({
 
-          password: formData.password,
+        email:formData.email,
 
-        });
+        password:formData.password
+
+      });
 
 
 
-      if (error) {
+      if(error){
 
         toast.error(error.message);
 
@@ -81,18 +89,23 @@ export default function LoginPage() {
       toast.success("Login Successful");
 
 
+
       router.push("/student/dashboard");
 
 
-    } catch (error) {
+
+    }
+    catch{
 
       toast.error("Something went wrong");
 
-    } finally {
+    }
+    finally{
 
       setLoading(false);
 
     }
+
 
   }
 
@@ -100,30 +113,48 @@ export default function LoginPage() {
 
   return (
 
+
     <main className="min-h-screen flex items-center justify-center bg-gradient-to-br from-indigo-100 via-white to-purple-100 px-4">
+
 
 
       <div className="w-full max-w-md bg-white rounded-3xl shadow-2xl p-8">
 
 
+
+        {/* Logo */}
+
+
         <div className="text-center mb-8">
 
 
-          <h1 className="text-4xl font-bold text-gray-900">
+          <div className="mx-auto w-16 h-16 rounded-2xl bg-indigo-600 flex items-center justify-center text-white">
 
-            Quiz Platform
+            <ShieldCheck size={35}/>
+
+          </div>
+
+
+
+          <h1 className="text-4xl font-bold mt-5 text-gray-900">
+
+            Welcome Back
 
           </h1>
 
 
+
           <p className="text-gray-500 mt-2">
 
-            Login to continue
+            Login to Quiz Platform
 
           </p>
 
 
         </div>
+
+
+
 
 
 
@@ -134,34 +165,41 @@ export default function LoginPage() {
 
 
 
+
+
           {/* Email */}
+
 
           <div>
 
 
             <label className="font-medium text-gray-700">
 
-              Email
+              Email Address
 
             </label>
 
 
 
-            <div className="mt-2 flex items-center border rounded-xl px-4 focus-within:ring-2 focus-within:ring-indigo-500">
+            <div className="flex items-center border rounded-xl px-4 mt-2 focus-within:ring-2 focus-within:ring-indigo-500">
 
 
-              <Mail size={18} className="text-gray-500"/>
+              <Mail
+                size={18}
+                className="text-gray-400"
+              />
 
 
               <input
 
                 type="email"
 
-                placeholder="Enter email"
+                placeholder="example@gmail.com"
 
                 className="w-full p-3 outline-none"
 
                 value={formData.email}
+
 
 
                 onChange={(e)=>
@@ -176,7 +214,9 @@ export default function LoginPage() {
 
                 }
 
+
               />
+
 
 
             </div>
@@ -188,33 +228,55 @@ export default function LoginPage() {
 
 
 
+
+
           {/* Password */}
 
 
           <div>
 
 
-            <label className="font-medium text-gray-700">
-
-              Password
-
-            </label>
+            <div className="flex justify-between">
 
 
+              <label className="font-medium text-gray-700">
 
-            <div className="mt-2 flex items-center border rounded-xl px-4 focus-within:ring-2 focus-within:ring-indigo-500">
+                Password
+
+              </label>
+
+
+              <Link
+                href="/forgot-password"
+                className="text-sm text-indigo-600 hover:underline"
+              >
+
+                Forgot?
+
+              </Link>
+
+
+            </div>
 
 
 
-              <Lock size={18} className="text-gray-500"/>
+
+
+            <div className="flex items-center border rounded-xl px-4 mt-2 focus-within:ring-2 focus-within:ring-indigo-500">
+
+
+              <Lock
+                size={18}
+                className="text-gray-400"
+              />
 
 
 
               <input
 
-                type={showPassword ? "text" : "password"}
+                type={showPassword ? "text":"password"}
 
-                placeholder="Enter password"
+                placeholder="********"
 
                 className="w-full p-3 outline-none"
 
@@ -235,7 +297,9 @@ export default function LoginPage() {
 
                 }
 
+
               />
+
 
 
 
@@ -244,27 +308,23 @@ export default function LoginPage() {
 
                 type="button"
 
-                onClick={()=>
-
-                  setShowPassword(!showPassword)
-
-                }
+                onClick={()=>setShowPassword(!showPassword)}
 
               >
 
 
                 {
+                  showPassword ?
 
-                showPassword ?
+                  <EyeOff size={18}/> :
 
-                <EyeOff size={18}/> :
-
-                <Eye size={18}/>
+                  <Eye size={18}/>
 
                 }
 
 
               </button>
+
 
 
 
@@ -277,7 +337,9 @@ export default function LoginPage() {
 
 
 
-          {/* Login Button */}
+
+
+          {/* Button */}
 
 
 
@@ -285,25 +347,16 @@ export default function LoginPage() {
 
             disabled={loading}
 
-            className="w-full bg-indigo-600 hover:bg-indigo-700 disabled:opacity-50 text-white rounded-xl py-3 flex justify-center items-center gap-2 transition"
-
+            className="w-full bg-indigo-600 hover:bg-indigo-700 disabled:opacity-50 text-white py-3 rounded-xl flex justify-center items-center gap-2 transition"
 
           >
 
 
             {
 
-            loading ?
+              loading ?
 
-            (
-
-              <Loader2 className="animate-spin"/>
-
-            )
-
-            :
-
-            (
+              <Loader2 className="animate-spin"/> :
 
               <>
 
@@ -313,12 +366,12 @@ export default function LoginPage() {
 
               </>
 
-            )
-
             }
 
 
           </button>
+
+
 
 
 
@@ -328,51 +381,26 @@ export default function LoginPage() {
 
 
 
-        <div className="mt-6 text-center">
+
+
+        <div className="text-center mt-7 text-gray-600">
+
+
+          Don't have an account?
 
 
           <Link
 
-            href="/forgot-password"
+            href="/register"
 
-            className="text-indigo-600 hover:underline"
+            className="text-indigo-600 font-semibold ml-2"
 
           >
 
-            Forgot Password?
+            Create Account
 
           </Link>
 
-
-        </div>
-
-
-
-
-        <div className="text-center mt-5">
-
-
-          <p className="text-gray-600">
-
-
-            Don't have an account?
-
-
-            <Link
-
-              href="/register"
-
-              className="text-indigo-600 ml-2 font-semibold"
-
-            >
-
-              Register
-
-            </Link>
-
-
-
-          </p>
 
 
         </div>
@@ -383,7 +411,9 @@ export default function LoginPage() {
       </div>
 
 
+
     </main>
+
 
   );
 
