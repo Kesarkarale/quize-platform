@@ -79,10 +79,8 @@ export default function LoginPage() {
        */
 
       if (result?.user?.role === "ADMIN") {
-        router.replace("/admin/dashboard");
-      } else {
         router.replace("/student/dashboard");
-      }
+      } 
     } catch (error) {
       console.error("Login error:", error);
       toast.error(
