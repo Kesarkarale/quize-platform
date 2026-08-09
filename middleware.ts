@@ -1,7 +1,7 @@
-import { NextResponse } from "next/server";
-import type { NextRequest } from "next/server";
 
 import { createServerClient } from "@supabase/ssr";
+import { NextResponse } from "next/server";
+import type { NextRequest } from "next/server";
 
 export async function middleware(
   request: NextRequest
@@ -17,13 +17,9 @@ export async function middleware(
     process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY ||
     process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY;
 
-  // Prevent middleware from crashing during
-  // build/deployment when env variables are missing.
+  // If Supabase environment variables are not available,
+  // don't crash the application.
   if (!supabaseUrl || !supabaseKey) {
-    console.error(
-      "Supabase environment variables are missing."
-    );
-
     return response;
   }
 
@@ -47,13 +43,19 @@ export async function middleware(
                 name,
                 value
               );
+            }
+          );
 
-              response = NextResponse.next(
-                {
-                  request,
-                }
-              );
+          response = NextResponse.next({
+            request,
+          });
 
+          cookiesToSet.forEach(
+            ({
+              name,
+              value,
+              options,
+            }) => {
               response.cookies.set(
                 name,
                 value,
@@ -74,22 +76,56 @@ export async function middleware(
     request.nextUrl.pathname;
 
   /*
-   * Public routes
+   * Public pages
    */
 
-  const publicRoutes = [
+  const publicPages = [
     "/",
     "/login",
     "/register",
     "/forgot-password",
     "/reset-password",
+    "/quiz",
   ];
 
-  const isPublicRoute =
-    publicRoutes.includes(pathname);
+  const isPublicPage =
+    publicPages.some(
+      (page) =>
+        pathname === page ||
+        pathname.startsWith(
+          `${page}/`
+        )
+    );
 
   /*
-   * Authentication routes
+   * API routes are not handled
+   * by this authentication middleware.
+   */
+
+  if (pathname.startsWith("/api")) {
+    return response;
+  }
+
+  /*
+   * If user is NOT logged in and
+   * tries to access protected page
+   */
+
+  if (!user && !isPublicPage) {
+    return NextResponse.redirect(
+      new URL(
+        "/login",
+        request.url
+      )
+    );
+  }
+
+  /*
+   * If user is already logged in,
+   * don't send them back to login/register.
+   *
+   * We intentionally send them to student
+   * dashboard for now.
    */
 
   if (
@@ -103,90 +139,6 @@ export async function middleware(
         request.url
       )
     );
-  }
-
-  /*
-   * Protected routes
-   */
-
-  const isStudentRoute =
-    pathname.startsWith("/student");
-
-  const isAdminRoute =
-    pathname.startsWith("/admin");
-
-  if (!user && !isPublicRoute) {
-    return NextResponse.redirect(
-      new URL("/login", request.url)
-    );
-  }
-
-  /*
-   * If user is logged in, check profile role
-   */
-
-  if (
-    user &&
-    (isStudentRoute || isAdminRoute)
-  ) {
-    const { data: profile } =
-      await supabase
-        .from("profiles")
-        .select("role,status")
-        .eq("id", user.id)
-        .maybeSingle();
-
-    /*
-     * Profile doesn't exist
-     */
-
-    if (!profile) {
-      return NextResponse.redirect(
-        new URL("/login", request.url)
-      );
-    }
-
-    /*
-     * Inactive account
-     */
-
-    if (profile.status !== "ACTIVE") {
-      return NextResponse.redirect(
-        new URL("/login", request.url)
-      );
-    }
-
-    /*
-     * Student trying to access Admin
-     */
-
-    if (
-      isAdminRoute &&
-      profile.role !== "ADMIN"
-    ) {
-      return NextResponse.redirect(
-        new URL(
-          "/student/dashboard",
-          request.url
-        )
-      );
-    }
-
-    /*
-     * Admin trying to access Student
-     */
-
-    if (
-      isStudentRoute &&
-      profile.role === "ADMIN"
-    ) {
-      return NextResponse.redirect(
-        new URL(
-          "/admin/dashboard",
-          request.url
-        )
-      );
-    }
   }
 
   return response;
