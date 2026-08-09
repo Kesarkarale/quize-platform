@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
+
 import { createServerClient } from "@supabase/ssr";
 
 export async function middleware(
@@ -9,9 +10,26 @@ export async function middleware(
     request,
   });
 
+  const supabaseUrl =
+    process.env.NEXT_PUBLIC_SUPABASE_URL;
+
+  const supabaseKey =
+    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY ||
+    process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY;
+
+  // Prevent middleware from crashing during
+  // build/deployment when env variables are missing.
+  if (!supabaseUrl || !supabaseKey) {
+    console.error(
+      "Supabase environment variables are missing."
+    );
+
+    return response;
+  }
+
   const supabase = createServerClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+    supabaseUrl,
+    supabaseKey,
     {
       cookies: {
         getAll() {
@@ -25,21 +43,22 @@ export async function middleware(
               value,
               options,
             }) => {
-              request.cookies.set({
+              request.cookies.set(
+                name,
+                value
+              );
+
+              response = NextResponse.next(
+                {
+                  request,
+                }
+              );
+
+              response.cookies.set(
                 name,
                 value,
-                ...options,
-              });
-
-              response = NextResponse.next({
-                request,
-              });
-
-              response.cookies.set({
-                name,
-                value,
-                ...options,
-              });
+                options
+              );
             }
           );
         },
@@ -51,37 +70,33 @@ export async function middleware(
     data: { user },
   } = await supabase.auth.getUser();
 
-  const pathname = request.nextUrl.pathname;
-
-  const isStudentRoute =
-    pathname.startsWith("/student");
-
-  const isAdminRoute =
-    pathname.startsWith("/admin");
-
-  const isAuthRoute =
-    pathname === "/login" ||
-    pathname === "/register";
+  const pathname =
+    request.nextUrl.pathname;
 
   /*
-   * Not logged in
+   * Public routes
+   */
+
+  const publicRoutes = [
+    "/",
+    "/login",
+    "/register",
+    "/forgot-password",
+    "/reset-password",
+  ];
+
+  const isPublicRoute =
+    publicRoutes.includes(pathname);
+
+  /*
+   * Authentication routes
    */
 
   if (
-    !user &&
-    (isStudentRoute || isAdminRoute)
+    user &&
+    (pathname === "/login" ||
+      pathname === "/register")
   ) {
-    return NextResponse.redirect(
-      new URL("/login", request.url)
-    );
-  }
-
-  /*
-   * Logged in user trying to access
-   * login/register
-   */
-
-  if (user && isAuthRoute) {
     return NextResponse.redirect(
       new URL(
         "/student/dashboard",
@@ -91,7 +106,23 @@ export async function middleware(
   }
 
   /*
-   * Get profile for role protection
+   * Protected routes
+   */
+
+  const isStudentRoute =
+    pathname.startsWith("/student");
+
+  const isAdminRoute =
+    pathname.startsWith("/admin");
+
+  if (!user && !isPublicRoute) {
+    return NextResponse.redirect(
+      new URL("/login", request.url)
+    );
+  }
+
+  /*
+   * If user is logged in, check profile role
    */
 
   if (
@@ -101,30 +132,37 @@ export async function middleware(
     const { data: profile } =
       await supabase
         .from("profiles")
-        .select("role, status")
+        .select("role,status")
         .eq("id", user.id)
-        .single();
+        .maybeSingle();
 
     /*
-     * Account inactive
+     * Profile doesn't exist
      */
 
-    if (
-      profile?.status &&
-      profile.status !== "ACTIVE"
-    ) {
+    if (!profile) {
       return NextResponse.redirect(
         new URL("/login", request.url)
       );
     }
 
     /*
-     * Student trying admin route
+     * Inactive account
+     */
+
+    if (profile.status !== "ACTIVE") {
+      return NextResponse.redirect(
+        new URL("/login", request.url)
+      );
+    }
+
+    /*
+     * Student trying to access Admin
      */
 
     if (
       isAdminRoute &&
-      profile?.role !== "ADMIN"
+      profile.role !== "ADMIN"
     ) {
       return NextResponse.redirect(
         new URL(
@@ -135,12 +173,12 @@ export async function middleware(
     }
 
     /*
-     * Admin trying student route
+     * Admin trying to access Student
      */
 
     if (
       isStudentRoute &&
-      profile?.role === "ADMIN"
+      profile.role === "ADMIN"
     ) {
       return NextResponse.redirect(
         new URL(
@@ -156,10 +194,6 @@ export async function middleware(
 
 export const config = {
   matcher: [
-    "/student/:path*",
-    "/admin/:path*",
-    "/login",
-    "/register",
+    "/((?!_next/static|_next/image|favicon.ico|.*\\.(?:svg|png|jpg|jpeg|gif|webp)$).*)",
   ],
 };
-
