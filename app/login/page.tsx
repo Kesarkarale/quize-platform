@@ -28,68 +28,114 @@ export default function LoginPage() {
     password: "",
   });
 
-  const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
-    e.preventDefault();
+const handleSubmit = async (
+  e: FormEvent<HTMLFormElement>
+) => {
+  e.preventDefault();
 
-    const email = formData.email.trim();
-    const password = formData.password;
+  const email = formData.email.trim();
+  const password = formData.password;
 
-    if (!email || !password) {
-      toast.error("Please enter email and password.");
-      return;
-    }
+  if (!email || !password) {
+    toast.error(
+      "Please enter email and password."
+    );
+    return;
+  }
 
-    if (!email.includes("@")) {
-      toast.error("Please enter a valid email address.");
-      return;
-    }
+  if (!email.includes("@")) {
+    toast.error(
+      "Please enter a valid email address."
+    );
+    return;
+  }
 
-    try {
-      setLoading(true);
+  try {
+    setLoading(true);
 
-      const response = await fetch("/api/auth/login", {
+    const response = await fetch(
+      "/api/auth/login",
+      {
         method: "POST",
         headers: {
-          "Content-Type": "application/json",
+          "Content-Type":
+            "application/json",
         },
         body: JSON.stringify({
           email,
           password,
         }),
-      });
-
-      const result = await response.json().catch(() => null);
-
-      if (!response.ok) {
-        toast.error(
-          result?.message || "Invalid email or password."
-        );
-        return;
       }
+    );
 
-      toast.success("Login successful!");
-
-      /*
-       * Backend should return:
-       * {
-       *   user: {
-       *     role: "ADMIN" | "STUDENT"
-       *   }
-       * }
-       */
-
-      if (result?.user?.role === "ADMIN") {
-        router.replace("/student/dashboard");
-      } 
-    } catch (error) {
-      console.error("Login error:", error);
-      toast.error(
-        "Unable to connect to the server. Please try again."
+    const result =
+      await response.json().catch(
+        () => null
       );
-    } finally {
-      setLoading(false);
+
+    if (!response.ok) {
+      toast.error(
+        result?.message ||
+          "Invalid email or password."
+      );
+      return;
     }
-  };
+
+    toast.success(
+      "Login successful! 🎉"
+    );
+
+    /*
+     * ADMIN
+     */
+
+    if (
+      result?.user?.role ===
+      "ADMIN"
+    ) {
+      router.replace(
+        "/admin/dashboard"
+      );
+
+      return;
+    }
+
+    /*
+     * STUDENT
+     */
+
+    if (
+      result?.user?.role ===
+      "STUDENT"
+    ) {
+      router.replace(
+        "/student/dashboard"
+      );
+
+      return;
+    }
+
+    /*
+     * If role is missing
+     */
+
+    toast.error(
+      "User role not found."
+    );
+  } catch (error) {
+    console.error(
+      "Login error:",
+      error
+    );
+
+    toast.error(
+      "Unable to connect to the server. Please try again."
+    );
+  } finally {
+    setLoading(false);
+  }
+};
+
 
   return (
     <main className="min-h-screen bg-[#050816] text-white">
