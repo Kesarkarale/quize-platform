@@ -3,11 +3,15 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
-import type { FormEvent, ChangeEvent } from "react";
+import type {
+  FormEvent,
+  ChangeEvent,
+} from "react";
 
 import { motion } from "framer-motion";
 
 import {
+  User,
   Mail,
   Lock,
   Eye,
@@ -19,7 +23,6 @@ import {
   Users,
   Brain,
   ShieldCheck,
-  User,
   CheckCircle2,
 } from "lucide-react";
 
@@ -30,9 +33,13 @@ export default function RegisterPage() {
 
   const [loading, setLoading] = useState(false);
 
-  const [showPassword, setShowPassword] = useState(false);
+  const [showPassword, setShowPassword] =
+    useState(false);
+
   const [showConfirmPassword, setShowConfirmPassword] =
     useState(false);
+
+  const [agree, setAgree] = useState(false);
 
   const [formData, setFormData] = useState({
     name: "",
@@ -41,48 +48,95 @@ export default function RegisterPage() {
     confirmPassword: "",
   });
 
-  const [agree, setAgree] = useState(false);
+  /* ==============================
+     INPUT CHANGE
+  ============================== */
 
-  function handleChange(e: ChangeEvent<HTMLInputElement>) {
+  function handleChange(
+    e: ChangeEvent<HTMLInputElement>
+  ) {
+    const { name, value } = e.target;
+
     setFormData((prev) => ({
       ...prev,
-      [e.target.name]: e.target.value,
+      [name]: value,
     }));
   }
 
-  async function handleRegister(e: FormEvent<HTMLFormElement>) {
+  /* ==============================
+     REGISTER
+  ============================== */
+
+  async function handleRegister(
+    e: FormEvent<HTMLFormElement>
+  ) {
     e.preventDefault();
 
-    const name = formData.name.trim();
-    const email = formData.email.trim();
-    const password = formData.password;
-    const confirmPassword = formData.confirmPassword;
+    if (loading) return;
 
-    if (!name || !email || !password || !confirmPassword) {
-      toast.error("Please fill in all fields");
+    const name = formData.name.trim();
+    const email = formData.email.trim().toLowerCase();
+    const password = formData.password;
+    const confirmPassword =
+      formData.confirmPassword;
+
+    /* ---------- NAME ---------- */
+
+    if (!name) {
+      toast.error("Please enter your full name.");
       return;
     }
 
-    if (!email.includes("@")) {
-      toast.error("Please enter a valid email address");
+    /* ---------- EMAIL ---------- */
+
+    if (!email) {
+      toast.error("Please enter your email address.");
+      return;
+    }
+
+    const emailRegex =
+      /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
+    if (!emailRegex.test(email)) {
+      toast.error(
+        "Please enter a valid email address."
+      );
+      return;
+    }
+
+    /* ---------- PASSWORD ---------- */
+
+    if (!password) {
+      toast.error("Please enter a password.");
       return;
     }
 
     if (password.length < 6) {
       toast.error(
-        "Password must be at least 6 characters"
+        "Password must contain at least 6 characters."
+      );
+      return;
+    }
+
+    /* ---------- CONFIRM PASSWORD ---------- */
+
+    if (!confirmPassword) {
+      toast.error(
+        "Please confirm your password."
       );
       return;
     }
 
     if (password !== confirmPassword) {
-      toast.error("Passwords do not match");
+      toast.error("Passwords do not match.");
       return;
     }
 
+    /* ---------- TERMS ---------- */
+
     if (!agree) {
       toast.error(
-        "Please accept the Terms & Conditions"
+        "Please accept the Terms & Conditions."
       );
       return;
     }
@@ -90,23 +144,27 @@ export default function RegisterPage() {
     try {
       setLoading(true);
 
-      const response = await fetch("/api/auth/register", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          name,
-          email,
-          password,
-        }),
-      });
+      const response = await fetch(
+        "/api/auth/register",
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            name,
+            email,
+            password,
+          }),
+        }
+      );
 
       const result = await response.json();
 
       if (!response.ok) {
         toast.error(
-          result?.message || "Registration failed"
+          result?.message ||
+            "Registration failed. Please try again."
         );
         return;
       }
@@ -115,13 +173,27 @@ export default function RegisterPage() {
         "Account created successfully 🎉"
       );
 
-      router.push("/login");
-      router.refresh();
+      setFormData({
+        name: "",
+        email: "",
+        password: "",
+        confirmPassword: "",
+      });
+
+      setAgree(false);
+
+      setTimeout(() => {
+        router.push("/login");
+        router.refresh();
+      }, 700);
     } catch (error) {
-      console.error("Registration error:", error);
+      console.error(
+        "Registration error:",
+        error
+      );
 
       toast.error(
-        "Unable to create account. Please try again."
+        "Something went wrong. Please try again."
       );
     } finally {
       setLoading(false);
@@ -130,28 +202,39 @@ export default function RegisterPage() {
 
   return (
     <main className="relative min-h-screen overflow-hidden bg-[#050816]">
-      {/* Background Glow */}
+      {/* ==============================
+          BACKGROUND
+      ============================== */}
+
       <div className="pointer-events-none absolute inset-0 overflow-hidden">
         <div className="absolute -left-40 -top-40 h-[500px] w-[500px] rounded-full bg-indigo-600/30 blur-[130px]" />
 
-        <div className="absolute -bottom-40 -right-40 h-[500px] w-[500px] rounded-full bg-purple-600/25 blur-[140px]" />
+        <div className="absolute -bottom-40 -right-40 h-[500px] w-[500px] rounded-full bg-purple-600/30 blur-[140px]" />
 
         <div className="absolute left-1/2 top-1/2 h-[350px] w-[350px] -translate-x-1/2 -translate-y-1/2 rounded-full bg-blue-500/10 blur-[120px]" />
       </div>
 
-      {/* Main */}
       <div className="relative z-10 mx-auto grid min-h-screen max-w-7xl items-center gap-12 px-6 py-10 lg:grid-cols-2 lg:px-10">
-        {/* ================================================= */}
-        {/* LEFT SIDE */}
-        {/* ================================================= */}
+        {/* ==============================
+            LEFT SIDE
+        ============================== */}
 
         <motion.section
-          initial={{ opacity: 0, x: -50 }}
-          animate={{ opacity: 1, x: 0 }}
-          transition={{ duration: 0.6 }}
+          initial={{
+            opacity: 0,
+            x: -50,
+          }}
+          animate={{
+            opacity: 1,
+            x: 0,
+          }}
+          transition={{
+            duration: 0.6,
+          }}
           className="hidden text-white lg:block"
         >
-          {/* Logo */}
+          {/* LOGO */}
+
           <Link
             href="/"
             className="mb-14 inline-flex items-center gap-3"
@@ -161,7 +244,7 @@ export default function RegisterPage() {
             </div>
 
             <div>
-              <h1 className="text-2xl font-black tracking-tight">
+              <h1 className="text-2xl font-black">
                 Quiz
                 <span className="text-indigo-400">
                   Master
@@ -174,13 +257,16 @@ export default function RegisterPage() {
             </div>
           </Link>
 
-          {/* Badge */}
+          {/* BADGE */}
+
           <div className="mb-6 inline-flex items-center gap-2 rounded-full border border-indigo-400/20 bg-indigo-500/10 px-4 py-2 text-sm font-medium text-indigo-300">
             <Sparkles size={16} />
+
             Join the QuizMaster Community
           </div>
 
-          {/* Heading */}
+          {/* HEADING */}
+
           <h2 className="max-w-2xl text-5xl font-black leading-[1.08] tracking-tight xl:text-6xl">
             Start Your
             <span className="block bg-gradient-to-r from-indigo-400 via-purple-400 to-pink-400 bg-clip-text text-transparent">
@@ -188,15 +274,16 @@ export default function RegisterPage() {
             </span>
           </h2>
 
-          {/* Description */}
           <p className="mt-7 max-w-xl text-lg leading-8 text-gray-400">
-            Create your free account and start learning,
-            competing and climbing the leaderboard.
+            Create your free account and start
+            learning, competing and climbing
+            the leaderboard.
           </p>
 
-          {/* Stats */}
+          {/* STATS */}
+
           <div className="mt-10 grid max-w-xl grid-cols-3 gap-4">
-            <div className="rounded-2xl border border-white/10 bg-white/[0.04] p-5 backdrop-blur-sm">
+            <div className="rounded-2xl border border-white/10 bg-white/[0.04] p-5">
               <div className="mb-4 flex h-10 w-10 items-center justify-center rounded-xl bg-indigo-500/10 text-indigo-400">
                 <Users size={20} />
               </div>
@@ -210,7 +297,7 @@ export default function RegisterPage() {
               </p>
             </div>
 
-            <div className="rounded-2xl border border-white/10 bg-white/[0.04] p-5 backdrop-blur-sm">
+            <div className="rounded-2xl border border-white/10 bg-white/[0.04] p-5">
               <div className="mb-4 flex h-10 w-10 items-center justify-center rounded-xl bg-purple-500/10 text-purple-400">
                 <Brain size={20} />
               </div>
@@ -224,7 +311,7 @@ export default function RegisterPage() {
               </p>
             </div>
 
-            <div className="rounded-2xl border border-white/10 bg-white/[0.04] p-5 backdrop-blur-sm">
+            <div className="rounded-2xl border border-white/10 bg-white/[0.04] p-5">
               <div className="mb-4 flex h-10 w-10 items-center justify-center rounded-xl bg-yellow-500/10 text-yellow-400">
                 <Trophy size={20} />
               </div>
@@ -239,7 +326,8 @@ export default function RegisterPage() {
             </div>
           </div>
 
-          {/* Features */}
+          {/* FEATURES */}
+
           <div className="mt-8 space-y-3">
             {[
               "Access hundreds of quizzes",
@@ -261,18 +349,27 @@ export default function RegisterPage() {
           </div>
         </motion.section>
 
-        {/* ================================================= */}
-        {/* REGISTER CARD */}
-        {/* ================================================= */}
+        {/* ==============================
+            RIGHT SIDE
+        ============================== */}
 
         <motion.section
-          initial={{ opacity: 0, y: 40 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.6 }}
+          initial={{
+            opacity: 0,
+            y: 40,
+          }}
+          animate={{
+            opacity: 1,
+            y: 0,
+          }}
+          transition={{
+            duration: 0.6,
+          }}
           className="flex w-full justify-center"
         >
           <div className="w-full max-w-md">
-            {/* Mobile Logo */}
+            {/* MOBILE LOGO */}
+
             <div className="mb-8 flex justify-center lg:hidden">
               <Link
                 href="/"
@@ -297,9 +394,11 @@ export default function RegisterPage() {
               </Link>
             </div>
 
-            {/* Card */}
+            {/* REGISTER CARD */}
+
             <div className="rounded-[30px] border border-white/10 bg-white/[0.08] p-7 shadow-2xl shadow-black/30 backdrop-blur-2xl sm:p-9">
-              {/* Header */}
+              {/* HEADER */}
+
               <div>
                 <div className="mb-5 flex h-12 w-12 items-center justify-center rounded-2xl bg-indigo-500/10 text-indigo-400">
                   <User size={22} />
@@ -310,16 +409,19 @@ export default function RegisterPage() {
                 </h2>
 
                 <p className="mt-2 text-sm leading-6 text-gray-400">
-                  Join QuizMaster and start your journey.
+                  Join QuizMaster and start your
+                  quiz journey.
                 </p>
               </div>
 
-              {/* Form */}
+              {/* FORM */}
+
               <form
                 onSubmit={handleRegister}
                 className="mt-8 space-y-5"
               >
-                {/* Name */}
+                {/* NAME */}
+
                 <div>
                   <label
                     htmlFor="name"
@@ -343,12 +445,13 @@ export default function RegisterPage() {
                       value={formData.name}
                       onChange={handleChange}
                       disabled={loading}
-                      className="w-full rounded-xl border border-white/10 bg-black/20 py-3.5 pl-11 pr-4 text-white placeholder:text-gray-600 outline-none transition focus:border-indigo-500 focus:bg-black/30 focus:ring-4 focus:ring-indigo-500/10 disabled:cursor-not-allowed disabled:opacity-60"
+                      className="w-full rounded-xl border border-white/10 bg-black/20 py-3.5 pl-11 pr-4 text-white placeholder:text-gray-600 outline-none transition focus:border-indigo-500 focus:ring-4 focus:ring-indigo-500/10 disabled:opacity-60"
                     />
                   </div>
                 </div>
 
-                {/* Email */}
+                {/* EMAIL */}
+
                 <div>
                   <label
                     htmlFor="email"
@@ -372,12 +475,13 @@ export default function RegisterPage() {
                       value={formData.email}
                       onChange={handleChange}
                       disabled={loading}
-                      className="w-full rounded-xl border border-white/10 bg-black/20 py-3.5 pl-11 pr-4 text-white placeholder:text-gray-600 outline-none transition focus:border-indigo-500 focus:bg-black/30 focus:ring-4 focus:ring-indigo-500/10 disabled:cursor-not-allowed disabled:opacity-60"
+                      className="w-full rounded-xl border border-white/10 bg-black/20 py-3.5 pl-11 pr-4 text-white placeholder:text-gray-600 outline-none transition focus:border-indigo-500 focus:ring-4 focus:ring-indigo-500/10 disabled:opacity-60"
                     />
                   </div>
                 </div>
 
-                {/* Password */}
+                {/* PASSWORD */}
+
                 <div>
                   <label
                     htmlFor="password"
@@ -405,21 +509,18 @@ export default function RegisterPage() {
                       value={formData.password}
                       onChange={handleChange}
                       disabled={loading}
-                      className="w-full rounded-xl border border-white/10 bg-black/20 py-3.5 pl-11 pr-12 text-white placeholder:text-gray-600 outline-none transition focus:border-indigo-500 focus:bg-black/30 focus:ring-4 focus:ring-indigo-500/10 disabled:cursor-not-allowed disabled:opacity-60"
+                      className="w-full rounded-xl border border-white/10 bg-black/20 py-3.5 pl-11 pr-12 text-white placeholder:text-gray-600 outline-none transition focus:border-indigo-500 focus:ring-4 focus:ring-indigo-500/10 disabled:opacity-60"
                     />
 
                     <button
                       type="button"
                       onClick={() =>
-                        setShowPassword((prev) => !prev)
+                        setShowPassword(
+                          (prev) => !prev
+                        )
                       }
                       disabled={loading}
-                      aria-label={
-                        showPassword
-                          ? "Hide password"
-                          : "Show password"
-                      }
-                      className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-500 transition hover:text-gray-300"
+                      className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-500 hover:text-gray-300"
                     >
                       {showPassword ? (
                         <EyeOff size={19} />
@@ -430,7 +531,8 @@ export default function RegisterPage() {
                   </div>
                 </div>
 
-                {/* Confirm Password */}
+                {/* CONFIRM PASSWORD */}
+
                 <div>
                   <label
                     htmlFor="confirmPassword"
@@ -455,10 +557,12 @@ export default function RegisterPage() {
                       }
                       autoComplete="new-password"
                       placeholder="Re-enter your password"
-                      value={formData.confirmPassword}
+                      value={
+                        formData.confirmPassword
+                      }
                       onChange={handleChange}
                       disabled={loading}
-                      className="w-full rounded-xl border border-white/10 bg-black/20 py-3.5 pl-11 pr-12 text-white placeholder:text-gray-600 outline-none transition focus:border-indigo-500 focus:bg-black/30 focus:ring-4 focus:ring-indigo-500/10 disabled:cursor-not-allowed disabled:opacity-60"
+                      className="w-full rounded-xl border border-white/10 bg-black/20 py-3.5 pl-11 pr-12 text-white placeholder:text-gray-600 outline-none transition focus:border-indigo-500 focus:ring-4 focus:ring-indigo-500/10 disabled:opacity-60"
                     />
 
                     <button
@@ -469,12 +573,7 @@ export default function RegisterPage() {
                         )
                       }
                       disabled={loading}
-                      aria-label={
-                        showConfirmPassword
-                          ? "Hide confirm password"
-                          : "Show confirm password"
-                      }
-                      className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-500 transition hover:text-gray-300"
+                      className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-500 hover:text-gray-300"
                     >
                       {showConfirmPassword ? (
                         <EyeOff size={19} />
@@ -485,7 +584,8 @@ export default function RegisterPage() {
                   </div>
                 </div>
 
-                {/* Terms */}
+                {/* TERMS */}
+
                 <label className="flex cursor-pointer items-start gap-3">
                   <input
                     type="checkbox"
@@ -494,7 +594,7 @@ export default function RegisterPage() {
                       setAgree(e.target.checked)
                     }
                     disabled={loading}
-                    className="mt-1 h-4 w-4 cursor-pointer rounded border-gray-600 bg-transparent accent-indigo-600"
+                    className="mt-1 h-4 w-4 cursor-pointer accent-indigo-600"
                   />
 
                   <span className="text-xs leading-5 text-gray-500">
@@ -516,7 +616,8 @@ export default function RegisterPage() {
                   </span>
                 </label>
 
-                {/* Register Button */}
+                {/* SUBMIT */}
+
                 <button
                   type="submit"
                   disabled={loading}
@@ -528,45 +629,52 @@ export default function RegisterPage() {
                         size={19}
                         className="animate-spin"
                       />
+
                       Creating Account...
                     </>
                   ) : (
                     <>
                       Create Account
+
                       <ArrowRight
                         size={18}
-                        className="transition-transform duration-200 group-hover:translate-x-1"
+                        className="transition-transform group-hover:translate-x-1"
                       />
                     </>
                   )}
                 </button>
               </form>
 
-              {/* Divider */}
+              {/* DIVIDER */}
+
               <div className="my-7 flex items-center gap-4">
                 <div className="h-px flex-1 bg-white/10" />
 
-                <span className="text-xs font-medium text-gray-600">
+                <span className="text-[10px] font-semibold tracking-wider text-gray-600">
                   ALREADY A MEMBER?
                 </span>
 
                 <div className="h-px flex-1 bg-white/10" />
               </div>
 
-              {/* Login */}
+              {/* LOGIN */}
+
               <p className="text-center text-sm text-gray-400">
                 Already have an account?
+
                 <Link
                   href="/login"
-                  className="ml-2 font-bold text-indigo-400 transition hover:text-indigo-300"
+                  className="ml-2 font-bold text-indigo-400 hover:text-indigo-300"
                 >
                   Login
                 </Link>
               </p>
 
-              {/* Security */}
+              {/* SECURITY */}
+
               <div className="mt-6 flex items-center justify-center gap-2 text-xs text-gray-600">
                 <ShieldCheck size={14} />
+
                 Your account information is protected
               </div>
             </div>
