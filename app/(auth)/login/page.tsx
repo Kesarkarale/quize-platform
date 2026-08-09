@@ -28,32 +28,37 @@ export default function LoginPage() {
 
   const [loading, setLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
+  const [rememberMe, setRememberMe] = useState(false);
 
   const [formData, setFormData] = useState({
     email: "",
     password: "",
   });
 
-  function handleChange(e: ChangeEvent<HTMLInputElement>) {
+  function handleChange(
+    e: ChangeEvent<HTMLInputElement>
+  ) {
     setFormData((prev) => ({
       ...prev,
       [e.target.name]: e.target.value,
     }));
   }
 
-  async function handleLogin(e: FormEvent<HTMLFormElement>) {
+  async function handleLogin(
+    e: FormEvent<HTMLFormElement>
+  ) {
     e.preventDefault();
 
     const email = formData.email.trim();
     const password = formData.password;
 
     if (!email || !password) {
-      toast.error("Please enter email and password");
+      toast.error("Please enter email and password.");
       return;
     }
 
     if (!email.includes("@")) {
-      toast.error("Please enter a valid email address");
+      toast.error("Please enter a valid email address.");
       return;
     }
 
@@ -68,6 +73,7 @@ export default function LoginPage() {
         body: JSON.stringify({
           email,
           password,
+          rememberMe,
         }),
       });
 
@@ -75,7 +81,8 @@ export default function LoginPage() {
 
       if (!response.ok) {
         toast.error(
-          result?.message || "Invalid email or password"
+          result?.message ||
+            "Invalid email or password."
         );
         return;
       }
@@ -88,7 +95,7 @@ export default function LoginPage() {
       console.error("Login error:", error);
 
       toast.error(
-        "Unable to login right now. Please try again."
+        "Something went wrong. Please try again."
       );
     } finally {
       setLoading(false);
@@ -97,20 +104,19 @@ export default function LoginPage() {
 
   return (
     <main className="relative min-h-screen overflow-hidden bg-[#050816]">
-      {/* Background Glow */}
+      {/* Background */}
       <div className="pointer-events-none absolute inset-0 overflow-hidden">
-        <div className="absolute -left-32 -top-32 h-[450px] w-[450px] rounded-full bg-indigo-600/30 blur-[120px]" />
+        <div className="absolute -left-40 -top-40 h-[500px] w-[500px] rounded-full bg-indigo-600/30 blur-[130px]" />
 
-        <div className="absolute -bottom-40 -right-40 h-[500px] w-[500px] rounded-full bg-purple-600/25 blur-[140px]" />
+        <div className="absolute -bottom-40 -right-40 h-[500px] w-[500px] rounded-full bg-purple-600/30 blur-[140px]" />
 
-        <div className="absolute left-1/2 top-1/2 h-[300px] w-[300px] -translate-x-1/2 -translate-y-1/2 rounded-full bg-blue-500/10 blur-[100px]" />
+        <div className="absolute left-1/2 top-1/2 h-[300px] w-[300px] -translate-x-1/2 -translate-y-1/2 rounded-full bg-blue-500/10 blur-[120px]" />
       </div>
 
-      {/* Main Container */}
       <div className="relative z-10 mx-auto grid min-h-screen max-w-7xl items-center gap-12 px-6 py-10 lg:grid-cols-2 lg:px-10">
-        {/* ===================================================== */}
+        {/* ================================================= */}
         {/* LEFT SIDE */}
-        {/* ===================================================== */}
+        {/* ================================================= */}
 
         <motion.section
           initial={{ opacity: 0, x: -50 }}
@@ -118,7 +124,7 @@ export default function LoginPage() {
           transition={{ duration: 0.6 }}
           className="hidden text-white lg:block"
         >
-          {/* Brand */}
+          {/* Logo */}
           <Link
             href="/"
             className="mb-14 inline-flex items-center gap-3"
@@ -128,7 +134,7 @@ export default function LoginPage() {
             </div>
 
             <div>
-              <h1 className="text-2xl font-black tracking-tight">
+              <h1 className="text-2xl font-black">
                 Quiz
                 <span className="text-indigo-400">
                   Master
@@ -155,44 +161,49 @@ export default function LoginPage() {
             </span>
           </h2>
 
-          {/* Description */}
           <p className="mt-7 max-w-xl text-lg leading-8 text-gray-400">
-            A powerful online assessment platform built for
-            students, teachers and organizations.
+            A powerful online assessment platform built
+            for students, teachers and organizations.
           </p>
 
-          {/* Features */}
+          {/* Stats */}
           <div className="mt-10 grid max-w-xl grid-cols-3 gap-4">
-            <div className="rounded-2xl border border-white/10 bg-white/[0.04] p-5 backdrop-blur-sm">
+            <div className="rounded-2xl border border-white/10 bg-white/[0.04] p-5">
               <div className="mb-4 flex h-10 w-10 items-center justify-center rounded-xl bg-indigo-500/10 text-indigo-400">
                 <Users size={20} />
               </div>
 
-              <p className="text-2xl font-black">50K+</p>
+              <p className="text-2xl font-black">
+                50K+
+              </p>
 
               <p className="mt-1 text-xs text-gray-500">
                 Students
               </p>
             </div>
 
-            <div className="rounded-2xl border border-white/10 bg-white/[0.04] p-5 backdrop-blur-sm">
+            <div className="rounded-2xl border border-white/10 bg-white/[0.04] p-5">
               <div className="mb-4 flex h-10 w-10 items-center justify-center rounded-xl bg-purple-500/10 text-purple-400">
                 <Brain size={20} />
               </div>
 
-              <p className="text-2xl font-black">2M+</p>
+              <p className="text-2xl font-black">
+                2M+
+              </p>
 
               <p className="mt-1 text-xs text-gray-500">
                 Questions
               </p>
             </div>
 
-            <div className="rounded-2xl border border-white/10 bg-white/[0.04] p-5 backdrop-blur-sm">
-              <div className="mb-4 flex h-10 w-10 items-center justify-center rounded-xl bg-green-500/10 text-green-400">
+            <div className="rounded-2xl border border-white/10 bg-white/[0.04] p-5">
+              <div className="mb-4 flex h-10 w-10 items-center justify-center rounded-xl bg-yellow-500/10 text-yellow-400">
                 <Trophy size={20} />
               </div>
 
-              <p className="text-2xl font-black">98%</p>
+              <p className="text-2xl font-black">
+                98%
+              </p>
 
               <p className="mt-1 text-xs text-gray-500">
                 Success
@@ -200,21 +211,19 @@ export default function LoginPage() {
             </div>
           </div>
 
-          {/* Bottom Feature */}
+          {/* Security */}
           <div className="mt-8 flex items-center gap-3 text-sm text-gray-400">
             <div className="flex h-9 w-9 items-center justify-center rounded-full bg-green-500/10 text-green-400">
               <ShieldCheck size={18} />
             </div>
 
-            <span>
-              Secure & reliable learning experience
-            </span>
+            Secure & reliable learning experience
           </div>
         </motion.section>
 
-        {/* ===================================================== */}
-        {/* RIGHT SIDE - LOGIN CARD */}
-        {/* ===================================================== */}
+        {/* ================================================= */}
+        {/* RIGHT SIDE */}
+        {/* ================================================= */}
 
         <motion.section
           initial={{ opacity: 0, y: 40 }}
@@ -250,7 +259,7 @@ export default function LoginPage() {
 
             {/* Login Card */}
             <div className="rounded-[30px] border border-white/10 bg-white/[0.08] p-7 shadow-2xl shadow-black/30 backdrop-blur-2xl sm:p-9">
-              {/* Card Header */}
+              {/* Header */}
               <div>
                 <div className="mb-5 flex h-12 w-12 items-center justify-center rounded-2xl bg-indigo-500/10 text-indigo-400">
                   <Lock size={22} />
@@ -294,7 +303,7 @@ export default function LoginPage() {
                       value={formData.email}
                       onChange={handleChange}
                       disabled={loading}
-                      className="w-full rounded-xl border border-white/10 bg-black/20 py-3.5 pl-11 pr-4 text-white placeholder:text-gray-600 outline-none transition focus:border-indigo-500 focus:bg-black/30 focus:ring-4 focus:ring-indigo-500/10 disabled:cursor-not-allowed disabled:opacity-60"
+                      className="w-full rounded-xl border border-white/10 bg-black/20 py-3.5 pl-11 pr-4 text-white placeholder:text-gray-600 outline-none transition focus:border-indigo-500 focus:ring-4 focus:ring-indigo-500/10 disabled:opacity-60"
                     />
                   </div>
                 </div>
@@ -311,7 +320,7 @@ export default function LoginPage() {
 
                     <Link
                       href="/forgot-password"
-                      className="text-xs font-semibold text-indigo-400 transition hover:text-indigo-300"
+                      className="text-xs font-semibold text-indigo-400 hover:text-indigo-300"
                     >
                       Forgot password?
                     </Link>
@@ -327,28 +336,27 @@ export default function LoginPage() {
                       id="password"
                       name="password"
                       type={
-                        showPassword ? "text" : "password"
+                        showPassword
+                          ? "text"
+                          : "password"
                       }
                       autoComplete="current-password"
                       placeholder="••••••••"
                       value={formData.password}
                       onChange={handleChange}
                       disabled={loading}
-                      className="w-full rounded-xl border border-white/10 bg-black/20 py-3.5 pl-11 pr-12 text-white placeholder:text-gray-600 outline-none transition focus:border-indigo-500 focus:bg-black/30 focus:ring-4 focus:ring-indigo-500/10 disabled:cursor-not-allowed disabled:opacity-60"
+                      className="w-full rounded-xl border border-white/10 bg-black/20 py-3.5 pl-11 pr-12 text-white placeholder:text-gray-600 outline-none transition focus:border-indigo-500 focus:ring-4 focus:ring-indigo-500/10 disabled:opacity-60"
                     />
 
                     <button
                       type="button"
                       onClick={() =>
-                        setShowPassword((prev) => !prev)
+                        setShowPassword(
+                          (prev) => !prev
+                        )
                       }
                       disabled={loading}
-                      aria-label={
-                        showPassword
-                          ? "Hide password"
-                          : "Show password"
-                      }
-                      className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-500 transition hover:text-gray-300 disabled:opacity-50"
+                      className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-500 hover:text-gray-300"
                     >
                       {showPassword ? (
                         <EyeOff size={19} />
@@ -360,20 +368,25 @@ export default function LoginPage() {
                 </div>
 
                 {/* Remember */}
-                <div className="flex items-center justify-between">
-                  <label className="flex cursor-pointer items-center gap-3">
-                    <input
-                      type="checkbox"
-                      className="h-4 w-4 cursor-pointer rounded border-gray-600 bg-transparent accent-indigo-600"
-                    />
+                <label className="flex cursor-pointer items-center gap-3">
+                  <input
+                    type="checkbox"
+                    checked={rememberMe}
+                    onChange={(e) =>
+                      setRememberMe(
+                        e.target.checked
+                      )
+                    }
+                    disabled={loading}
+                    className="h-4 w-4 cursor-pointer rounded border-gray-600 accent-indigo-600"
+                  />
 
-                    <span className="text-sm text-gray-400">
-                      Remember me
-                    </span>
-                  </label>
-                </div>
+                  <span className="text-sm text-gray-400">
+                    Remember me
+                  </span>
+                </label>
 
-                {/* Login Button */}
+                {/* Submit */}
                 <button
                   type="submit"
                   disabled={loading}
@@ -392,7 +405,7 @@ export default function LoginPage() {
                       Login
                       <ArrowRight
                         size={18}
-                        className="transition-transform duration-200 group-hover:translate-x-1"
+                        className="transition-transform group-hover:translate-x-1"
                       />
                     </>
                   )}
@@ -403,7 +416,7 @@ export default function LoginPage() {
               <div className="my-7 flex items-center gap-4">
                 <div className="h-px flex-1 bg-white/10" />
 
-                <span className="text-xs font-medium text-gray-600">
+                <span className="text-[10px] font-semibold tracking-wider text-gray-600">
                   SECURE LOGIN
                 </span>
 
@@ -415,13 +428,12 @@ export default function LoginPage() {
                 Don't have an account?
                 <Link
                   href="/register"
-                  className="ml-2 font-bold text-indigo-400 transition hover:text-indigo-300"
+                  className="ml-2 font-bold text-indigo-400 hover:text-indigo-300"
                 >
                   Create Account
                 </Link>
               </p>
 
-              {/* Security */}
               <div className="mt-6 flex items-center justify-center gap-2 text-xs text-gray-600">
                 <ShieldCheck size={14} />
                 Your account information is protected
