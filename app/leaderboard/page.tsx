@@ -1,189 +1,956 @@
 "use client";
 
+import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
+
 import {
-  Brain,
-  Trophy,
-  Medal,
-  Crown,
   ArrowLeft,
+  ArrowRight,
+  Award,
+  BarChart3,
+  Brain,
+  ChevronDown,
   Flame,
+  Medal,
+  Search,
+  Trophy,
+  Users,
+  Zap,
 } from "lucide-react";
 
-const players = [
-  { rank: 1, name: "Aarav Sharma", score: 9850, quizzes: 124 },
-  { rank: 2, name: "Priya Patil", score: 9420, quizzes: 118 },
-  { rank: 3, name: "Rahul Deshmukh", score: 9180, quizzes: 109 },
-  { rank: 4, name: "Ananya Kulkarni", score: 8840, quizzes: 101 },
-  { rank: 5, name: "Rohan Joshi", score: 8560, quizzes: 96 },
-  { rank: 6, name: "Sneha More", score: 8210, quizzes: 91 },
-  { rank: 7, name: "Aditya Pawar", score: 7980, quizzes: 87 },
-  { rank: 8, name: "Neha Shinde", score: 7650, quizzes: 83 },
+import { motion } from "framer-motion";
+
+type Player = {
+  rank: number;
+  name: string;
+  points: number;
+  quizzes: number;
+  score: number;
+  streak: number;
+  avatar: string;
+  current?: boolean;
+};
+
+const initialPlayers: Player[] = [
+  {
+    rank: 1,
+    name: "Aarav Sharma",
+    points: 12850,
+    quizzes: 74,
+    score: 96,
+    streak: 18,
+    avatar: "AS",
+  },
+  {
+    rank: 2,
+    name: "Priya Patil",
+    points: 11920,
+    quizzes: 69,
+    score: 94,
+    streak: 14,
+    avatar: "PP",
+  },
+  {
+    rank: 3,
+    name: "Rahul Singh",
+    points: 11450,
+    quizzes: 66,
+    score: 92,
+    streak: 12,
+    avatar: "RS",
+  },
+  {
+    rank: 4,
+    name: "Kesar",
+    points: 10980,
+    quizzes: 48,
+    score: 87,
+    streak: 7,
+    avatar: "K",
+    current: true,
+  },
+  {
+    rank: 5,
+    name: "Sneha Joshi",
+    points: 10340,
+    quizzes: 58,
+    score: 89,
+    streak: 9,
+    avatar: "SJ",
+  },
+  {
+    rank: 6,
+    name: "Aditya Kulkarni",
+    points: 9780,
+    quizzes: 52,
+    score: 86,
+    streak: 6,
+    avatar: "AK",
+  },
+  {
+    rank: 7,
+    name: "Riya Deshmukh",
+    points: 9420,
+    quizzes: 49,
+    score: 85,
+    streak: 5,
+    avatar: "RD",
+  },
+  {
+    rank: 8,
+    name: "Vikram More",
+    points: 9010,
+    quizzes: 46,
+    score: 83,
+    streak: 4,
+    avatar: "VM",
+  },
+  {
+    rank: 9,
+    name: "Neha Shah",
+    points: 8740,
+    quizzes: 44,
+    score: 82,
+    streak: 3,
+    avatar: "NS",
+  },
+  {
+    rank: 10,
+    name: "Rohan Pawar",
+    points: 8420,
+    quizzes: 41,
+    score: 80,
+    streak: 3,
+    avatar: "RP",
+  },
+];
+
+const categories = [
+  "All Categories",
+  "General Knowledge",
+  "Science",
+  "Technology",
+  "Mathematics",
 ];
 
 export default function LeaderboardPage() {
+  const [players, setPlayers] =
+    useState<Player[]>(initialPlayers);
+
+  const [period, setPeriod] =
+    useState("This Week");
+
+  const [category, setCategory] =
+    useState("All Categories");
+
+  const [search, setSearch] = useState("");
+
+  /* =========================================
+     UPDATE USER SCORE FROM RESULT
+  ========================================= */
+
+  useEffect(() => {
+    const savedResult =
+      localStorage.getItem("quizResult");
+
+    if (!savedResult) return;
+
+    try {
+      const result = JSON.parse(savedResult);
+
+      if (!result || typeof result.score !== "number") {
+        return;
+      }
+
+      setPlayers((currentPlayers) => {
+        const exists = currentPlayers.find(
+          (player) => player.current
+        );
+
+        if (!exists) {
+          return currentPlayers;
+        }
+
+        const updated = currentPlayers.map(
+          (player) => {
+            if (!player.current) {
+              return player;
+            }
+
+            return {
+              ...player,
+              points:
+                player.points +
+                result.correct * 100,
+              quizzes:
+                player.quizzes + 1,
+              score: result.score,
+            };
+          }
+        );
+
+        return updated
+          .sort((a, b) => b.points - a.points)
+          .map((player, index) => ({
+            ...player,
+            rank: index + 1,
+          }));
+      });
+    } catch {
+      // Ignore invalid localStorage data
+    }
+  }, []);
+
+  /* =========================================
+     SEARCH
+  ========================================= */
+
+  const filteredPlayers = useMemo(() => {
+    return players.filter((player) =>
+      player.name
+        .toLowerCase()
+        .includes(search.toLowerCase())
+    );
+  }, [players, search]);
+
+  const topThree = players.slice(0, 3);
+
+  const currentUser =
+    players.find((player) => player.current) ||
+    players[3];
+
   return (
-    <main className="min-h-screen bg-[#f7f8fc]">
-      {/* Navbar */}
-      <nav className="border-b border-gray-200 bg-white">
-        <div className="mx-auto flex max-w-6xl items-center justify-between px-6 py-4">
-          <Link href="/" className="flex items-center gap-3">
-            <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-indigo-600 text-white">
+    <main className="min-h-screen bg-[#050816] text-white">
+      {/* =====================================
+          BACKGROUND
+      ===================================== */}
+
+      <div className="pointer-events-none fixed inset-0 overflow-hidden">
+        <div className="absolute -left-40 -top-40 h-[450px] w-[450px] rounded-full bg-indigo-600/15 blur-[140px]" />
+
+        <div className="absolute -bottom-40 -right-40 h-[450px] w-[450px] rounded-full bg-purple-600/15 blur-[140px]" />
+      </div>
+
+      {/* =====================================
+          HEADER
+      ===================================== */}
+
+      <header className="sticky top-0 z-50 border-b border-white/10 bg-[#050816]/85 backdrop-blur-xl">
+        <div className="mx-auto flex h-20 max-w-7xl items-center justify-between px-5 lg:px-8">
+          <Link
+            href="/student/dashboard"
+            className="flex items-center gap-3"
+          >
+            <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-br from-indigo-500 to-purple-600">
               <Brain size={21} />
             </div>
 
-            <span className="font-extrabold">
-              Quiz<span className="text-indigo-600">Master</span>
-            </span>
+            <div>
+              <h1 className="font-black">
+                Quiz
+                <span className="text-indigo-400">
+                  Master
+                </span>
+              </h1>
+
+              <p className="hidden text-[9px] tracking-[0.2em] text-gray-600 sm:block">
+                PLAY • LEARN • WIN
+              </p>
+            </div>
           </Link>
 
-          <Link
-            href="/"
-            className="flex items-center gap-2 text-sm font-semibold text-gray-500 hover:text-indigo-600"
-          >
-            <ArrowLeft size={16} />
-            Back Home
-          </Link>
+          <div className="flex items-center gap-3">
+            <Link
+              href="/student/dashboard"
+              className="flex items-center gap-2 rounded-xl border border-white/10 bg-white/[0.04] px-4 py-2.5 text-sm font-semibold text-gray-400 transition hover:bg-white/[0.08] hover:text-white"
+            >
+              <ArrowLeft size={16} />
+
+              <span className="hidden sm:block">
+                Dashboard
+              </span>
+            </Link>
+
+            <div className="flex h-10 w-10 items-center justify-center rounded-full bg-gradient-to-br from-indigo-500 to-purple-600 text-sm font-bold">
+              K
+            </div>
+          </div>
         </div>
-      </nav>
+      </header>
 
-      <div className="mx-auto max-w-6xl px-6 py-12">
-        {/* Header */}
-        <div className="text-center">
-          <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-2xl bg-yellow-50 text-yellow-500">
-            <Trophy size={32} />
+      {/* =====================================
+          CONTENT
+      ===================================== */}
+
+      <div className="relative z-10 mx-auto max-w-7xl px-5 py-10 lg:px-8">
+        {/* HERO */}
+
+        <motion.div
+          initial={{
+            opacity: 0,
+            y: 20,
+          }}
+          animate={{
+            opacity: 1,
+            y: 0,
+          }}
+          className="text-center"
+        >
+          <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-2xl bg-yellow-500/10 text-yellow-400">
+            <Trophy size={31} />
           </div>
 
-          <p className="mt-5 text-sm font-bold uppercase tracking-[0.25em] text-indigo-600">
-            Top Players
+          <p className="mt-5 text-sm font-semibold uppercase tracking-[0.2em] text-indigo-400">
+            Top Performers
           </p>
 
           <h1 className="mt-2 text-4xl font-black sm:text-5xl">
-            Global Leaderboard
+            Leaderboard
           </h1>
 
-          <p className="mx-auto mt-4 max-w-xl text-gray-500">
-            Compete with players around the world and climb your way
-            to the top.
+          <p className="mx-auto mt-3 max-w-xl text-sm leading-6 text-gray-500">
+            Compete with other students, earn points,
+            maintain your streak and become the quiz
+            champion.
           </p>
-        </div>
+        </motion.div>
 
-        {/* Top 3 */}
-        <div className="mx-auto mt-12 grid max-w-4xl items-end gap-5 md:grid-cols-3">
-          {/* 2nd */}
-          <div className="order-2 rounded-[28px] border border-gray-100 bg-white p-6 text-center shadow-sm md:order-1">
-            <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-full bg-gray-100 text-xl font-black text-gray-500">
-              2
-            </div>
+        {/* =====================================
+            PODIUM
+        ===================================== */}
 
-            <h3 className="mt-4 font-black">
-              {players[1].name}
-            </h3>
+        <section className="mt-12">
+          <div className="grid items-end gap-4 md:grid-cols-3">
+            {/* SECOND */}
 
-            <p className="mt-1 font-bold text-indigo-600">
-              {players[1].score.toLocaleString()} XP
-            </p>
+            <PodiumCard
+              player={topThree[1]}
+              position={2}
+              delay={0.15}
+            />
 
-            <div className="mt-4 text-sm text-gray-400">
-              {players[1].quizzes} quizzes
-            </div>
+            {/* FIRST */}
+
+            <PodiumCard
+              player={topThree[0]}
+              position={1}
+              delay={0}
+              first
+            />
+
+            {/* THIRD */}
+
+            <PodiumCard
+              player={topThree[2]}
+              position={3}
+              delay={0.3}
+            />
           </div>
+        </section>
 
-          {/* 1st */}
-          <div className="order-1 rounded-[28px] border-2 border-yellow-200 bg-white p-7 text-center shadow-xl md:order-2 md:-translate-y-5">
-            <div className="mx-auto flex h-20 w-20 items-center justify-center rounded-full bg-yellow-50 text-yellow-500">
-              <Crown size={38} />
-            </div>
+        {/* =====================================
+            USER RANK
+        ===================================== */}
 
-            <p className="mt-3 text-xs font-black uppercase tracking-widest text-yellow-500">
-              Champion
-            </p>
-
-            <h3 className="mt-2 text-xl font-black">
-              {players[0].name}
-            </h3>
-
-            <p className="mt-1 text-lg font-black text-indigo-600">
-              {players[0].score.toLocaleString()} XP
-            </p>
-
-            <div className="mt-4 flex items-center justify-center gap-2 text-sm text-gray-400">
-              <Flame size={16} className="text-orange-500" />
-              {players[0].quizzes} quizzes completed
-            </div>
-          </div>
-
-          {/* 3rd */}
-          <div className="order-3 rounded-[28px] border border-gray-100 bg-white p-6 text-center shadow-sm">
-            <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-full bg-orange-50 text-xl font-black text-orange-500">
-              3
-            </div>
-
-            <h3 className="mt-4 font-black">
-              {players[2].name}
-            </h3>
-
-            <p className="mt-1 font-bold text-indigo-600">
-              {players[2].score.toLocaleString()} XP
-            </p>
-
-            <div className="mt-4 text-sm text-gray-400">
-              {players[2].quizzes} quizzes
-            </div>
-          </div>
-        </div>
-
-        {/* Full Ranking */}
-        <section className="mt-10 overflow-hidden rounded-[28px] border border-gray-100 bg-white shadow-sm">
-          <div className="border-b border-gray-100 px-6 py-5">
-            <h2 className="font-black">All Rankings</h2>
-          </div>
-
-          <div className="divide-y divide-gray-100">
-            {players.map((player) => (
-              <div
-                key={player.rank}
-                className="flex items-center gap-4 px-6 py-5 transition hover:bg-gray-50"
-              >
-                <div className="flex w-10 justify-center">
-                  {player.rank <= 3 ? (
-                    <Medal
-                      size={22}
-                      className={
-                        player.rank === 1
-                          ? "text-yellow-500"
-                          : player.rank === 2
-                          ? "text-gray-400"
-                          : "text-orange-500"
-                      }
-                    />
-                  ) : (
-                    <span className="font-bold text-gray-400">
-                      #{player.rank}
-                    </span>
-                  )}
-                </div>
-
-                <div className="flex h-11 w-11 items-center justify-center rounded-full bg-indigo-50 font-black text-indigo-600">
-                  {player.name.charAt(0)}
-                </div>
-
-                <div className="flex-1">
-                  <p className="font-bold">{player.name}</p>
-                  <p className="text-xs text-gray-400">
-                    {player.quizzes} quizzes completed
-                  </p>
-                </div>
-
-                <p className="font-black text-indigo-600">
-                  {player.score.toLocaleString()} XP
-                </p>
+        <motion.div
+          initial={{
+            opacity: 0,
+            y: 20,
+          }}
+          animate={{
+            opacity: 1,
+            y: 0,
+          }}
+          transition={{
+            delay: 0.3,
+          }}
+          className="mt-8 rounded-2xl border border-indigo-500/20 bg-indigo-500/[0.07] p-5"
+        >
+          <div className="flex flex-col gap-5 sm:flex-row sm:items-center sm:justify-between">
+            <div className="flex items-center gap-4">
+              <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-indigo-500/10 text-indigo-400">
+                <Medal size={23} />
               </div>
-            ))}
+
+              <div>
+                <p className="text-xs font-semibold uppercase tracking-wider text-indigo-400">
+                  Your Current Rank
+                </p>
+
+                <div className="mt-1 flex items-center gap-3">
+                  <span className="text-2xl font-black">
+                    #{currentUser.rank}
+                  </span>
+
+                  <span className="text-sm font-semibold text-gray-300">
+                    {currentUser.name}
+                  </span>
+                </div>
+              </div>
+            </div>
+
+            <div className="grid grid-cols-3 gap-5 sm:flex sm:items-center sm:gap-8">
+              <MiniStat
+                value={currentUser.points.toLocaleString()}
+                label="Points"
+              />
+
+              <MiniStat
+                value={String(currentUser.quizzes)}
+                label="Quizzes"
+              />
+
+              <MiniStat
+                value={`${currentUser.score}%`}
+                label="Avg Score"
+              />
+            </div>
+          </div>
+        </motion.div>
+
+        {/* =====================================
+            FILTERS
+        ===================================== */}
+
+        <section className="mt-10">
+          <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
+            {/* Search */}
+
+            <div className="relative w-full lg:max-w-sm">
+              <Search
+                size={18}
+                className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-600"
+              />
+
+              <input
+                type="text"
+                value={search}
+                onChange={(e) =>
+                  setSearch(e.target.value)
+                }
+                placeholder="Search player..."
+                className="w-full rounded-xl border border-white/10 bg-white/[0.04] py-3 pl-11 pr-4 text-sm text-white outline-none placeholder:text-gray-600 focus:border-indigo-500/50"
+              />
+            </div>
+
+            {/* Filters */}
+
+            <div className="flex flex-col gap-3 sm:flex-row">
+              <FilterSelect
+                value={period}
+                options={[
+                  "This Week",
+                  "This Month",
+                  "All Time",
+                ]}
+                onChange={setPeriod}
+              />
+
+              <FilterSelect
+                value={category}
+                options={categories}
+                onChange={setCategory}
+              />
+            </div>
+          </div>
+        </section>
+
+        {/* =====================================
+            TABLE
+        ===================================== */}
+
+        <section className="mt-5 overflow-hidden rounded-2xl border border-white/10 bg-white/[0.035]">
+          {/* Desktop Header */}
+
+          <div className="hidden grid-cols-12 gap-4 border-b border-white/10 px-6 py-4 text-xs font-semibold uppercase tracking-wider text-gray-600 md:grid">
+            <div className="col-span-1">
+              Rank
+            </div>
+
+            <div className="col-span-4">
+              Player
+            </div>
+
+            <div className="col-span-2 text-center">
+              Points
+            </div>
+
+            <div className="col-span-2 text-center">
+              Quizzes
+            </div>
+
+            <div className="col-span-2 text-center">
+              Avg. Score
+            </div>
+
+            <div className="col-span-1 text-center">
+              Streak
+            </div>
+          </div>
+
+          {/* Rows */}
+
+          {filteredPlayers.length === 0 ? (
+            <div className="p-12 text-center">
+              <Search
+                size={30}
+                className="mx-auto text-gray-700"
+              />
+
+              <p className="mt-4 font-semibold text-gray-400">
+                No player found
+              </p>
+
+              <p className="mt-1 text-sm text-gray-600">
+                Try another name.
+              </p>
+            </div>
+          ) : (
+            filteredPlayers.map((player, index) => (
+              <motion.div
+                key={player.name}
+                initial={{
+                  opacity: 0,
+                  y: 8,
+                }}
+                animate={{
+                  opacity: 1,
+                  y: 0,
+                }}
+                transition={{
+                  delay: index * 0.03,
+                }}
+                className={`border-b border-white/[0.06] p-4 transition last:border-b-0 md:grid md:grid-cols-12 md:items-center md:gap-4 md:px-6 ${
+                  player.current
+                    ? "bg-indigo-500/[0.07]"
+                    : "hover:bg-white/[0.025]"
+                }`}
+              >
+                {/* Mobile */}
+
+                <div className="flex items-center gap-4 md:contents">
+                  {/* Rank */}
+
+                  <div className="flex w-8 shrink-0 items-center justify-center md:col-span-1 md:w-auto">
+                    {player.rank <= 3 ? (
+                      <RankIcon
+                        rank={player.rank}
+                      />
+                    ) : (
+                      <span className="text-sm font-bold text-gray-500">
+                        {player.rank}
+                      </span>
+                    )}
+                  </div>
+
+                  {/* Player */}
+
+                  <div className="flex min-w-0 flex-1 items-center gap-3 md:col-span-4">
+                    <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-gradient-to-br from-indigo-500 to-purple-600 text-xs font-bold">
+                      {player.avatar}
+                    </div>
+
+                    <div className="min-w-0">
+                      <p className="truncate text-sm font-bold">
+                        {player.name}
+
+                        {player.current && (
+                          <span className="ml-2 rounded-full bg-indigo-500/10 px-2 py-0.5 text-[9px] font-bold text-indigo-400">
+                            YOU
+                          </span>
+                        )}
+                      </p>
+
+                      <p className="mt-0.5 text-xs text-gray-600 md:hidden">
+                        {player.quizzes} quizzes
+                      </p>
+                    </div>
+                  </div>
+
+                  {/* Mobile points */}
+
+                  <div className="text-right md:hidden">
+                    <p className="text-sm font-black">
+                      {player.points.toLocaleString()}
+                    </p>
+
+                    <p className="mt-0.5 flex items-center justify-end gap-1 text-[10px] text-gray-600">
+                      <Zap size={10} />
+                      points
+                    </p>
+                  </div>
+                </div>
+
+                {/* Desktop Points */}
+
+                <div className="hidden text-center text-sm font-bold md:col-span-2 md:block">
+                  {player.points.toLocaleString()}
+                </div>
+
+                {/* Desktop Quizzes */}
+
+                <div className="hidden text-center text-sm text-gray-400 md:col-span-2 md:block">
+                  {player.quizzes}
+                </div>
+
+                {/* Desktop Score */}
+
+                <div className="hidden text-center md:col-span-2 md:block">
+                  <span
+                    className={`rounded-full px-2.5 py-1 text-xs font-bold ${
+                      player.score >= 90
+                        ? "bg-green-500/10 text-green-400"
+                        : player.score >= 75
+                        ? "bg-indigo-500/10 text-indigo-400"
+                        : "bg-yellow-500/10 text-yellow-400"
+                    }`}
+                  >
+                    {player.score}%
+                  </span>
+                </div>
+
+                {/* Desktop Streak */}
+
+                <div className="hidden items-center justify-center gap-1 text-sm text-orange-400 md:col-span-1 md:flex">
+                  <Flame size={15} />
+                  {player.streak}
+                </div>
+
+                {/* Mobile Bottom Stats */}
+
+                <div className="mt-4 grid grid-cols-3 gap-3 border-t border-white/[0.06] pt-4 md:hidden">
+                  <MobileStat
+                    label="Score"
+                    value={`${player.score}%`}
+                  />
+
+                  <MobileStat
+                    label="Quizzes"
+                    value={String(player.quizzes)}
+                  />
+
+                  <MobileStat
+                    label="Streak"
+                    value={`${player.streak} 🔥`}
+                  />
+                </div>
+              </motion.div>
+            ))
+          )}
+        </section>
+
+        {/* =====================================
+            INFO CARDS
+        ===================================== */}
+
+        <section className="mt-8 grid gap-4 sm:grid-cols-3">
+          <InfoCard
+            icon={Trophy}
+            title="Earn Points"
+            description="Get points for every correct answer."
+            iconClass="text-yellow-400"
+            bgClass="bg-yellow-500/10"
+          />
+
+          <InfoCard
+            icon={Flame}
+            title="Build Streaks"
+            description="Play every day to maintain your streak."
+            iconClass="text-orange-400"
+            bgClass="bg-orange-500/10"
+          />
+
+          <InfoCard
+            icon={Award}
+            title="Climb Higher"
+            description="Compete with students and reach #1."
+            iconClass="text-purple-400"
+            bgClass="bg-purple-500/10"
+          />
+        </section>
+
+        {/* =====================================
+            CTA
+        ===================================== */}
+
+        <section className="mt-10 pb-10">
+          <div className="relative overflow-hidden rounded-3xl border border-indigo-500/20 bg-gradient-to-r from-indigo-600/15 to-purple-600/10 p-7 text-center sm:p-10">
+            <div className="pointer-events-none absolute left-1/2 top-0 h-40 w-80 -translate-x-1/2 rounded-full bg-indigo-500/10 blur-[100px]" />
+
+            <div className="relative">
+              <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-xl bg-indigo-500/10 text-indigo-400">
+                <Zap size={23} />
+              </div>
+
+              <h2 className="mt-5 text-2xl font-black">
+                Ready to climb the leaderboard?
+              </h2>
+
+              <p className="mx-auto mt-2 max-w-lg text-sm text-gray-500">
+                Take another quiz, earn more points and
+                move one step closer to the #1 spot.
+              </p>
+
+              <Link
+                href="/quiz"
+                className="mt-6 inline-flex items-center gap-2 rounded-xl bg-gradient-to-r from-indigo-600 to-purple-600 px-6 py-3.5 font-bold shadow-lg shadow-indigo-600/20 transition hover:scale-[1.02]"
+              >
+                Start New Quiz
+                <ArrowRight size={17} />
+              </Link>
+            </div>
           </div>
         </section>
       </div>
     </main>
+  );
+}
+
+/* =========================================
+   PODIUM CARD
+========================================= */
+
+function PodiumCard({
+  player,
+  position,
+  delay,
+  first = false,
+}: {
+  player: Player;
+  position: number;
+  delay: number;
+  first?: boolean;
+}) {
+  return (
+    <motion.div
+      initial={{
+        opacity: 0,
+        y: 30,
+      }}
+      animate={{
+        opacity: 1,
+        y: 0,
+      }}
+      transition={{
+        delay,
+        duration: 0.5,
+      }}
+      className={`relative overflow-hidden rounded-3xl border p-6 text-center ${
+        first
+          ? "border-yellow-500/30 bg-gradient-to-b from-yellow-500/[0.10] to-white/[0.03] md:-translate-y-5"
+          : position === 2
+          ? "border-gray-400/10 bg-white/[0.035]"
+          : "border-orange-500/10 bg-white/[0.035]"
+      }`}
+    >
+      {first && (
+        <div className="absolute left-1/2 top-0 h-20 w-40 -translate-x-1/2 rounded-full bg-yellow-500/10 blur-[50px]" />
+      )}
+
+      <div className="relative">
+        <div className="mx-auto mb-4 flex items-center justify-center">
+          <RankIcon rank={position} large />
+        </div>
+
+        <div
+          className={`mx-auto flex items-center justify-center rounded-full bg-gradient-to-br from-indigo-500 to-purple-600 font-black ring-4 ${
+            first
+              ? "h-20 w-20 text-xl ring-yellow-500/20"
+              : "h-16 w-16 text-base ring-white/5"
+          }`}
+        >
+          {player.avatar}
+        </div>
+
+        <h3 className="mt-4 font-bold">
+          {player.name}
+        </h3>
+
+        <p className="mt-1 text-xs text-gray-600">
+          {player.quizzes} quizzes completed
+        </p>
+
+        <div className="mt-5 flex items-center justify-center gap-2">
+          <Trophy
+            size={16}
+            className={
+              first
+                ? "text-yellow-400"
+                : "text-gray-500"
+            }
+          />
+
+          <span className="text-lg font-black">
+            {player.points.toLocaleString()}
+          </span>
+
+          <span className="text-xs text-gray-600">
+            pts
+          </span>
+        </div>
+      </div>
+    </motion.div>
+  );
+}
+
+/* =========================================
+   RANK ICON
+========================================= */
+
+function RankIcon({
+  rank,
+  large = false,
+}: {
+  rank: number;
+  large?: boolean;
+}) {
+  const size = large ? 28 : 20;
+
+  if (rank === 1) {
+    return (
+      <div className="text-yellow-400">
+        <Trophy size={size} />
+      </div>
+    );
+  }
+
+  if (rank === 2) {
+    return (
+      <div className="text-gray-300">
+        <Medal size={size} />
+      </div>
+    );
+  }
+
+  return (
+    <div className="text-orange-400">
+      <Medal size={size} />
+    </div>
+  );
+}
+
+/* =========================================
+   MINI STAT
+========================================= */
+
+function MiniStat({
+  value,
+  label,
+}: {
+  value: string;
+  label: string;
+}) {
+  return (
+    <div className="text-center sm:text-right">
+      <p className="text-sm font-black">
+        {value}
+      </p>
+
+      <p className="mt-0.5 text-[10px] text-gray-600">
+        {label}
+      </p>
+    </div>
+  );
+}
+
+/* =========================================
+   FILTER SELECT
+========================================= */
+
+function FilterSelect({
+  value,
+  options,
+  onChange,
+}: {
+  value: string;
+  options: string[];
+  onChange: (value: string) => void;
+}) {
+  return (
+    <div className="relative">
+      <select
+        value={value}
+        onChange={(e) =>
+          onChange(e.target.value)
+        }
+        className="w-full appearance-none rounded-xl border border-white/10 bg-white/[0.04] py-3 pl-4 pr-10 text-sm font-semibold text-gray-300 outline-none transition focus:border-indigo-500/50 sm:w-auto"
+      >
+        {options.map((option) => (
+          <option
+            key={option}
+            value={option}
+            className="bg-[#0b1024]"
+          >
+            {option}
+          </option>
+        ))}
+      </select>
+
+      <ChevronDown
+        size={16}
+        className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-gray-600"
+      />
+    </div>
+  );
+}
+
+/* =========================================
+   MOBILE STAT
+========================================= */
+
+function MobileStat({
+  label,
+  value,
+}: {
+  label: string;
+  value: string;
+}) {
+  return (
+    <div className="text-center">
+      <p className="text-sm font-bold text-gray-300">
+        {value}
+      </p>
+
+      <p className="mt-1 text-[10px] uppercase tracking-wider text-gray-600">
+        {label}
+      </p>
+    </div>
+  );
+}
+
+/* =========================================
+   INFO CARD
+========================================= */
+
+function InfoCard({
+  icon: Icon,
+  title,
+  description,
+  iconClass,
+  bgClass,
+}: {
+  icon: typeof Trophy;
+  title: string;
+  description: string;
+  iconClass: string;
+  bgClass: string;
+}) {
+  return (
+    <div className="rounded-2xl border border-white/10 bg-white/[0.035] p-5">
+      <div
+        className={`flex h-11 w-11 items-center justify-center rounded-xl ${bgClass} ${iconClass}`}
+      >
+        <Icon size={21} />
+      </div>
+
+      <h3 className="mt-5 font-bold">
+        {title}
+      </h3>
+
+      <p className="mt-1 text-xs leading-5 text-gray-600">
+        {description}
+      </p>
+    </div>
   );
 }
 
