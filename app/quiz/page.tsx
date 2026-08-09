@@ -1,6 +1,12 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import {
+  Suspense,
+  useEffect,
+  useMemo,
+  useState,
+} from "react";
+
 import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
 
@@ -12,7 +18,6 @@ import {
   Clock3,
   Flag,
   Trophy,
-  XCircle,
 } from "lucide-react";
 
 import { motion } from "framer-motion";
@@ -29,7 +34,7 @@ type Question = {
 };
 
 /* =========================================
-   QUESTIONS
+   QUESTION BANK
 ========================================= */
 
 const questionBank: Record<string, Question[]> = {
@@ -270,7 +275,7 @@ const questionBank: Record<string, Question[]> = {
     {
       id: 5,
       question:
-        "Which language is used with React?",
+        "Which language is commonly used with React?",
       options: [
         "JavaScript",
         "SQL",
@@ -284,8 +289,7 @@ const questionBank: Record<string, Question[]> = {
   Mathematics: [
     {
       id: 1,
-      question:
-        "What is 12 × 8?",
+      question: "What is 12 × 8?",
       options: [
         "86",
         "96",
@@ -346,30 +350,39 @@ const questionBank: Record<string, Question[]> = {
 };
 
 /* =========================================
-   CATEGORY FALLBACK
-========================================= */
-
-const defaultQuestions =
-  questionBank["General Knowledge"];
-
-/* =========================================
-   QUIZ PAGE
+   MAIN PAGE
 ========================================= */
 
 export default function QuizPage() {
+  return (
+    <Suspense
+      fallback={
+        <QuizLoading />
+      }
+    >
+      <QuizContent />
+    </Suspense>
+  );
+}
+
+/* =========================================
+   QUIZ CONTENT
+========================================= */
+
+function QuizContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
 
-  const categoryFromUrl =
+  const category =
     searchParams.get("category") ||
     "General Knowledge";
 
   const questions = useMemo(() => {
     return (
-      questionBank[categoryFromUrl] ||
-      defaultQuestions
+      questionBank[category] ||
+      questionBank["General Knowledge"]
     );
-  }, [categoryFromUrl]);
+  }, [category]);
 
   const [currentQuestion, setCurrentQuestion] =
     useState(0);
@@ -381,7 +394,7 @@ export default function QuizPage() {
   const [timeLeft, setTimeLeft] =
     useState(15 * 60);
 
-  const [submitted, setSubmitted] =
+  const [isSubmitting, setIsSubmitting] =
     useState(false);
 
   const question =
@@ -392,27 +405,43 @@ export default function QuizPage() {
   ========================================= */
 
   useEffect(() => {
-    if (submitted) return;
-
-    if (timeLeft <= 0) {
-      handleSubmit();
+    if (isSubmitting) {
       return;
     }
 
-    const timer = setInterval(() => {
-      setTimeLeft((prev) =>
-        prev > 0 ? prev - 1 : 0
-      );
+    const timer = window.setInterval(() => {
+      setTimeLeft((previous) => {
+        if (previous <= 1) {
+          window.clearInterval(timer);
+          return 0;
+        }
+
+        return previous - 1;
+      });
     }, 1000);
 
-    return () => clearInterval(timer);
-  }, [timeLeft, submitted]);
+    return () => {
+      window.clearInterval(timer);
+    };
+  }, [isSubmitting]);
 
   /* =========================================
-     FORMAT TIMER
+     AUTO SUBMIT WHEN TIME ENDS
   ========================================= */
 
-  const minutes = Math.floor(timeLeft / 60)
+  useEffect(() => {
+    if (timeLeft === 0 && !isSubmitting) {
+      submitQuiz();
+    }
+  }, [timeLeft, isSubmitting]);
+
+  /* =========================================
+     TIMER FORMAT
+  ========================================= */
+
+  const minutes = Math.floor(
+    timeLeft / 60
+  )
     .toString()
     .padStart(2, "0");
 
@@ -425,8 +454,8 @@ export default function QuizPage() {
   ========================================= */
 
   function selectAnswer(index: number) {
-    setAnswers((prev) => ({
-      ...prev,
+    setAnswers((previous) => ({
+      ...previous,
       [question.id]: index,
     }));
   }
@@ -441,7 +470,7 @@ export default function QuizPage() {
       questions.length - 1
     ) {
       setCurrentQuestion(
-        (prev) => prev + 1
+        (previous) => previous + 1
       );
     }
   }
@@ -453,7 +482,7 @@ export default function QuizPage() {
   function previousQuestion() {
     if (currentQuestion > 0) {
       setCurrentQuestion(
-        (prev) => prev - 1
+        (previous) => previous - 1
       );
     }
   }
@@ -462,39 +491,52 @@ export default function QuizPage() {
      SUBMIT
   ========================================= */
 
-  function handleSubmit() {
-    if (submitted) return;
+  function submitQuiz() {
+    if (isSubmitting) {
+      return;
+    }
+
+    setIsSubmitting(true);
 
     let correct = 0;
 
-    questions.forEach((q) => {
-      if (answers[q.id] === q.answer) {
+    questions.forEach((item) => {
+      if (
+        answers[item.id] === item.answer
+      ) {
         correct++;
       }
     });
 
-    const score = Math.round(
-      (correct / questions.length) * 100
-    );
+    const wrong =
+      questions.length - correct;
+
+    const score =
+      questions.length > 0
+        ? Math.round(
+            (correct /
+              questions.length) *
+              100
+          )
+        : 0;
 
     const result = {
-      category: categoryFromUrl,
+      category,
       total: questions.length,
       correct,
-      wrong:
-        questions.length - correct,
+      wrong,
       score,
       timeLeft,
       completedAt:
         new Date().toISOString(),
     };
 
-    localStorage.setItem(
-      "quizResult",
-      JSON.stringify(result)
-    );
-
-    setSubmitted(true);
+    if (typeof window !== "undefined") {
+      localStorage.setItem(
+        "quizResult",
+        JSON.stringify(result)
+      );
+    }
 
     router.push("/student/result");
   }
@@ -514,16 +556,24 @@ export default function QuizPage() {
   const selectedAnswer =
     answers[question.id];
 
+  /* =========================================
+     UI
+  ========================================= */
+
   return (
     <main className="min-h-screen bg-[#050816] text-white">
-      {/* =====================================
-          HEADER
-      ===================================== */}
+      {/* Background */}
+
+      <div className="pointer-events-none fixed inset-0 overflow-hidden">
+        <div className="absolute -left-40 -top-40 h-[450px] w-[450px] rounded-full bg-indigo-600/10 blur-[130px]" />
+
+        <div className="absolute -bottom-40 -right-40 h-[450px] w-[450px] rounded-full bg-purple-600/10 blur-[130px]" />
+      </div>
+
+      {/* Header */}
 
       <header className="sticky top-0 z-50 border-b border-white/10 bg-[#050816]/90 backdrop-blur-xl">
         <div className="mx-auto flex h-20 max-w-6xl items-center justify-between px-5">
-          {/* Logo */}
-
           <Link
             href="/student/dashboard"
             className="flex items-center gap-3"
@@ -564,18 +614,16 @@ export default function QuizPage() {
         </div>
       </header>
 
-      {/* =====================================
-          CONTENT
-      ===================================== */}
+      {/* Content */}
 
-      <div className="mx-auto max-w-5xl px-5 py-8">
+      <div className="relative z-10 mx-auto max-w-5xl px-5 py-8">
         {/* Quiz Info */}
 
         <div className="mb-7">
           <div className="mb-3 flex flex-col justify-between gap-3 sm:flex-row sm:items-center">
             <div>
               <p className="text-sm font-semibold text-indigo-400">
-                {categoryFromUrl}
+                {category}
               </p>
 
               <h2 className="mt-1 text-2xl font-black sm:text-3xl">
@@ -603,7 +651,7 @@ export default function QuizPage() {
           </div>
         </div>
 
-        {/* Question Card */}
+        {/* Question */}
 
         <motion.div
           key={question.id}
@@ -616,11 +664,11 @@ export default function QuizPage() {
             x: 0,
           }}
           transition={{
-            duration: 0.3,
+            duration: 0.25,
           }}
           className="rounded-3xl border border-white/10 bg-white/[0.04] p-6 shadow-2xl sm:p-8"
         >
-          {/* Question Number */}
+          {/* Number */}
 
           <div className="mb-7 flex items-center justify-between">
             <div className="flex items-center gap-3">
@@ -677,10 +725,10 @@ export default function QuizPage() {
                     }`}
                   >
                     <div
-                      className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border text-sm font-bold transition ${
+                      className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border text-sm font-bold ${
                         selected
                           ? "border-indigo-500 bg-indigo-500 text-white"
-                          : "border-white/10 bg-white/[0.03] text-gray-500 group-hover:border-white/20 group-hover:text-gray-300"
+                          : "border-white/10 bg-white/[0.03] text-gray-500"
                       }`}
                     >
                       {String.fromCharCode(
@@ -727,17 +775,21 @@ export default function QuizPage() {
             questions.length - 1 ? (
               <button
                 type="button"
-                onClick={handleSubmit}
-                className="flex items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-green-600 to-emerald-600 px-6 py-3 text-sm font-bold text-white shadow-lg shadow-green-600/10 transition hover:scale-[1.01]"
+                onClick={submitQuiz}
+                disabled={isSubmitting}
+                className="flex items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-green-600 to-emerald-600 px-6 py-3 text-sm font-bold text-white transition hover:scale-[1.01] disabled:cursor-not-allowed disabled:opacity-60"
               >
                 <Trophy size={17} />
-                Submit Quiz
+
+                {isSubmitting
+                  ? "Submitting..."
+                  : "Submit Quiz"}
               </button>
             ) : (
               <button
                 type="button"
                 onClick={nextQuestion}
-                className="flex items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-indigo-600 to-purple-600 px-6 py-3 text-sm font-bold text-white shadow-lg shadow-indigo-600/10 transition hover:scale-[1.01]"
+                className="flex items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-indigo-600 to-purple-600 px-6 py-3 text-sm font-bold text-white transition hover:scale-[1.01]"
               >
                 Next Question
                 <ArrowRight size={17} />
@@ -760,32 +812,38 @@ export default function QuizPage() {
           </div>
 
           <div className="flex flex-wrap gap-2">
-            {questions.map((q, index) => {
-              const answered =
-                answers[q.id] !== undefined;
+            {questions.map(
+              (item, index) => {
+                const answered =
+                  answers[item.id] !==
+                  undefined;
 
-              const active =
-                currentQuestion === index;
+                const active =
+                  currentQuestion ===
+                  index;
 
-              return (
-                <button
-                  key={q.id}
-                  type="button"
-                  onClick={() =>
-                    setCurrentQuestion(index)
-                  }
-                  className={`flex h-9 w-9 items-center justify-center rounded-lg text-xs font-bold transition ${
-                    active
-                      ? "bg-indigo-600 text-white"
-                      : answered
-                      ? "bg-green-500/15 text-green-400"
-                      : "bg-white/[0.05] text-gray-500 hover:bg-white/10"
-                  }`}
-                >
-                  {index + 1}
-                </button>
-              );
-            })}
+                return (
+                  <button
+                    key={item.id}
+                    type="button"
+                    onClick={() =>
+                      setCurrentQuestion(
+                        index
+                      )
+                    }
+                    className={`flex h-9 w-9 items-center justify-center rounded-lg text-xs font-bold transition ${
+                      active
+                        ? "bg-indigo-600 text-white"
+                        : answered
+                        ? "bg-green-500/15 text-green-400"
+                        : "bg-white/[0.05] text-gray-500 hover:bg-white/10"
+                    }`}
+                  >
+                    {index + 1}
+                  </button>
+                );
+              }
+            )}
           </div>
         </div>
 
@@ -798,12 +856,36 @@ export default function QuizPage() {
           />
 
           <p>
-            Your quiz will be submitted automatically
-            when the timer reaches zero. Make sure you
-            answer all questions before time runs out.
+            Your quiz will be submitted
+            automatically when the timer reaches
+            zero.
           </p>
         </div>
       </div>
     </main>
   );
 }
+
+/* =========================================
+   LOADING
+========================================= */
+
+function QuizLoading() {
+  return (
+    <main className="flex min-h-screen items-center justify-center bg-[#050816] text-white">
+      <div className="text-center">
+        <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-2xl bg-indigo-500/10">
+          <Brain
+            size={27}
+            className="animate-pulse text-indigo-400"
+          />
+        </div>
+
+        <p className="mt-4 text-sm text-gray-500">
+          Loading quiz...
+        </p>
+      </div>
+    </main>
+  );
+}
+
