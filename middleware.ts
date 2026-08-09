@@ -1,185 +1,165 @@
-import { NextResponse, type NextRequest } from "next/server";
+import { NextResponse } from "next/server";
+import type { NextRequest } from "next/server";
 import { createServerClient } from "@supabase/ssr";
 
-
-export async function middleware(request: NextRequest) {
-
-
+export async function middleware(
+  request: NextRequest
+) {
   let response = NextResponse.next({
     request,
   });
 
-
-
   const supabase = createServerClient(
-
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
-
-    process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY!,
-
-
+    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
     {
-
       cookies: {
-
         getAll() {
-
           return request.cookies.getAll();
-
         },
-
 
         setAll(cookiesToSet) {
-
-
-          cookiesToSet.forEach(({ name, value }) => {
-
-            request.cookies.set(
-              name,
-              value
-            );
-
-          });
-
-
-
-          response = NextResponse.next({
-
-            request,
-
-          });
-
-
-
           cookiesToSet.forEach(
-            ({ name, value, options }) => {
-
-
-              response.cookies.set(
-
+            ({
+              name,
+              value,
+              options,
+            }) => {
+              request.cookies.set({
                 name,
-
                 value,
+                ...options,
+              });
 
-                options
+              response = NextResponse.next({
+                request,
+              });
 
-              );
-
-
+              response.cookies.set({
+                name,
+                value,
+                ...options,
+              });
             }
           );
-
-
         },
-
-
       },
-
-
     }
-
   );
 
-
-
-
   const {
-    data:{
-      user
-    }
-
+    data: { user },
   } = await supabase.auth.getUser();
-
-
-
 
   const pathname = request.nextUrl.pathname;
 
+  const isStudentRoute =
+    pathname.startsWith("/student");
 
+  const isAdminRoute =
+    pathname.startsWith("/admin");
 
-  const publicRoutes = [
+  const isAuthRoute =
+    pathname === "/login" ||
+    pathname === "/register";
 
-    "/",
+  /*
+   * Not logged in
+   */
 
-    "/login",
-
-    "/register",
-
-    "/forgot-password"
-
-  ];
-
-
-
-
-  if(
-
+  if (
     !user &&
-
-    !publicRoutes.includes(pathname)
-
-  ){
-
+    (isStudentRoute || isAdminRoute)
+  ) {
     return NextResponse.redirect(
-
-      new URL("/login",request.url)
-
+      new URL("/login", request.url)
     );
-
   }
 
+  /*
+   * Logged in user trying to access
+   * login/register
+   */
 
+  if (user && isAuthRoute) {
+    return NextResponse.redirect(
+      new URL(
+        "/student/dashboard",
+        request.url
+      )
+    );
+  }
 
+  /*
+   * Get profile for role protection
+   */
 
-  if(
-
+  if (
     user &&
+    (isStudentRoute || isAdminRoute)
+  ) {
+    const { data: profile } =
+      await supabase
+        .from("profiles")
+        .select("role, status")
+        .eq("id", user.id)
+        .single();
 
-    (
+    /*
+     * Account inactive
+     */
 
-      pathname === "/login" ||
+    if (
+      profile?.status &&
+      profile.status !== "ACTIVE"
+    ) {
+      return NextResponse.redirect(
+        new URL("/login", request.url)
+      );
+    }
 
-      pathname === "/register"
+    /*
+     * Student trying admin route
+     */
 
-    )
+    if (
+      isAdminRoute &&
+      profile?.role !== "ADMIN"
+    ) {
+      return NextResponse.redirect(
+        new URL(
+          "/student/dashboard",
+          request.url
+        )
+      );
+    }
 
-  ){
+    /*
+     * Admin trying student route
+     */
 
-    return NextResponse.redirect(
-
-      new URL("/student/dashboard",request.url)
-
-    );
-
+    if (
+      isStudentRoute &&
+      profile?.role === "ADMIN"
+    ) {
+      return NextResponse.redirect(
+        new URL(
+          "/admin/dashboard",
+          request.url
+        )
+      );
+    }
   }
-
-
-
 
   return response;
-
-
 }
 
-
-
-
 export const config = {
-
-
-  matcher:[
-
-    "/admin/:path*",
-
+  matcher: [
     "/student/:path*",
-
+    "/admin/:path*",
     "/login",
-
     "/register",
-
-    "/forgot-password"
-
   ],
-
-
 };
+
