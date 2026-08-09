@@ -1,140 +1,103 @@
 import { NextResponse } from "next/server";
 import { createClient } from "@supabase/supabase-js";
 
-function getSupabaseAdmin() {
-  const supabaseUrl =
-    process.env.NEXT_PUBLIC_SUPABASE_URL;
-
-  const serviceRoleKey =
-    process.env.SUPABASE_SERVICE_ROLE_KEY;
-
-  if (!supabaseUrl || !serviceRoleKey) {
-    throw new Error(
-      "Supabase environment variables are missing."
-    );
-  }
-
-  return createClient(
-    supabaseUrl,
-    serviceRoleKey
-  );
-}
-
-export async function POST(request: Request) {
+export async function POST(
+  request: Request
+) {
   try {
-    const supabase = getSupabaseAdmin();
-
     const body = await request.json();
 
-    const email = String(body.email || "")
-      .trim()
-      .toLowerCase();
+    const email = body.email?.trim();
+    const password = body.password;
 
-    const password = String(body.password || "");
-
-    // Validation
     if (!email || !password) {
       return NextResponse.json(
         {
           message:
-            "Please enter email and password.",
+            "Email and password are required.",
         },
         { status: 400 }
       );
     }
 
-    if (!email.includes("@")) {
+    const supabaseUrl =
+      process.env.NEXT_PUBLIC_SUPABASE_URL;
+
+    const supabaseKey =
+      process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY ||
+      process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY;
+
+    if (!supabaseUrl || !supabaseKey) {
       return NextResponse.json(
         {
           message:
-            "Please enter a valid email address.",
+            "Supabase environment variables are missing.",
         },
-        { status: 400 }
+        { status: 500 }
       );
     }
 
-    // Authenticate user
-    const { data, error } =
-      await supabase.auth.signInWithPassword({
+    const supabase = createClient(
+      supabaseUrl,
+      supabaseKey
+    );
+
+    const {
+      data,
+      error,
+    } = await supabase.auth.signInWithPassword(
+      {
         email,
         password,
-      });
+      }
+    );
 
-    if (error || !data.user) {
+    if (error) {
       return NextResponse.json(
         {
           message:
+            error.message ||
             "Invalid email or password.",
         },
         { status: 401 }
       );
     }
 
-    // Get user profile
-    const { data: profile, error: profileError } =
-      await supabase
-        .from("profiles")
-        .select(
-          "id, name, email, role, status"
-        )
-        .eq("id", data.user.id)
-        .single();
-
-    if (profileError || !profile) {
-      console.error(
-        "Profile error:",
-        profileError
-      );
-
+    if (!data.user) {
       return NextResponse.json(
         {
           message:
-            "User profile was not found.",
+            "Unable to login.",
         },
-        { status: 404 }
+        { status: 401 }
       );
     }
 
-    // Check account status
-    if (profile.status !== "ACTIVE") {
-      return NextResponse.json(
-        {
-          message:
-            "Your account has been deactivated. Please contact the administrator.",
-        },
-        { status: 403 }
-      );
-    }
-
-    // Successful login
     return NextResponse.json(
       {
         success: true,
-
-        message: "Login successful.",
-
+        message:
+          "Login successful.",
         user: {
-          id: profile.id,
-          name: profile.name,
-          email: profile.email,
-          role: profile.role,
-          status: profile.status,
+          id: data.user.id,
+          email:
+            data.user.email,
         },
-
-        session: data.session,
+        session:
+          data.session,
       },
       { status: 200 }
     );
   } catch (error) {
     console.error(
-      "Login API Error:",
+      "LOGIN ERROR:",
       error
     );
 
     return NextResponse.json(
       {
         message:
-          "Server configuration error. Please check Supabase environment variables.",
+          "Something went wrong during login.",
       },
       { status: 500 }
     );
