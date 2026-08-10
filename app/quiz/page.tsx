@@ -206,8 +206,7 @@ const questionBank: Record<string, Question[]> = {
   Technology: [
     {
       id: 1,
-      question:
-        "What does HTML stand for?",
+      question: "What does HTML stand for?",
       options: [
         "Hyper Text Markup Language",
         "High Text Machine Language",
@@ -232,8 +231,7 @@ const questionBank: Record<string, Question[]> = {
     },
     {
       id: 4,
-      question:
-        "What does CPU stand for?",
+      question: "What does CPU stand for?",
       options: [
         "Central Processing Unit",
         "Computer Personal Unit",
@@ -251,8 +249,7 @@ const questionBank: Record<string, Question[]> = {
     },
     {
       id: 6,
-      question:
-        "What does API stand for?",
+      question: "What does API stand for?",
       options: [
         "Application Programming Interface",
         "Advanced Program Integration",
@@ -357,7 +354,8 @@ function QuizContent() {
   const searchParams = useSearchParams();
 
   const category =
-    searchParams.get("category") || "General Knowledge";
+    searchParams.get("category") ||
+    "General Knowledge";
 
   const questions = useMemo(() => {
     return (
@@ -366,7 +364,8 @@ function QuizContent() {
     );
   }, [category]);
 
-  const [quizStarted, setQuizStarted] = useState(false);
+  const [quizStarted, setQuizStarted] =
+    useState(false);
 
   const [currentQuestion, setCurrentQuestion] =
     useState(0);
@@ -381,11 +380,12 @@ function QuizContent() {
   const [isSubmitting, setIsSubmitting] =
     useState(false);
 
-  const question = questions[currentQuestion];
+  const question =
+    questions[currentQuestion];
 
-  /* =========================================
+  /* =========================================================
      START QUIZ
-  ========================================= */
+  ========================================================= */
 
   function startQuiz() {
     setQuizStarted(true);
@@ -395,9 +395,9 @@ function QuizContent() {
     setIsSubmitting(false);
   }
 
-  /* =========================================
+  /* =========================================================
      TIMER
-  ========================================= */
+  ========================================================= */
 
   useEffect(() => {
     if (!quizStarted || isSubmitting) {
@@ -420,9 +420,9 @@ function QuizContent() {
     };
   }, [quizStarted, isSubmitting]);
 
-  /* =========================================
+  /* =========================================================
      AUTO SUBMIT
-  ========================================= */
+  ========================================================= */
 
   useEffect(() => {
     if (
@@ -432,13 +432,19 @@ function QuizContent() {
     ) {
       submitQuiz();
     }
-  }, [timeLeft, quizStarted, isSubmitting]);
+  }, [
+    timeLeft,
+    quizStarted,
+    isSubmitting,
+  ]);
 
-  /* =========================================
+  /* =========================================================
      TIMER FORMAT
-  ========================================= */
+  ========================================================= */
 
-  const minutes = Math.floor(timeLeft / 60)
+  const minutes = Math.floor(
+    timeLeft / 60
+  )
     .toString()
     .padStart(2, "0");
 
@@ -446,12 +452,14 @@ function QuizContent() {
     .toString()
     .padStart(2, "0");
 
-  /* =========================================
+  /* =========================================================
      SELECT ANSWER
-  ========================================= */
+  ========================================================= */
 
   function selectAnswer(index: number) {
-    if (!question) return;
+    if (!question || isSubmitting) {
+      return;
+    }
 
     setAnswers((previous) => ({
       ...previous,
@@ -459,21 +467,24 @@ function QuizContent() {
     }));
   }
 
-  /* =========================================
-     NEXT
-  ========================================= */
+  /* =========================================================
+     NEXT QUESTION
+  ========================================================= */
 
   function nextQuestion() {
-    if (currentQuestion < questions.length - 1) {
+    if (
+      currentQuestion <
+      questions.length - 1
+    ) {
       setCurrentQuestion(
         (previous) => previous + 1
       );
     }
   }
 
-  /* =========================================
-     PREVIOUS
-  ========================================= */
+  /* =========================================================
+     PREVIOUS QUESTION
+  ========================================================= */
 
   function previousQuestion() {
     if (currentQuestion > 0) {
@@ -483,43 +494,54 @@ function QuizContent() {
     }
   }
 
-  /* =========================================
-     SUBMIT
-  ========================================= */
+  /* =========================================================
+     SUBMIT QUIZ
+  ========================================================= */
 
   function submitQuiz() {
-    if (isSubmitting) return;
+    if (isSubmitting) {
+      return;
+    }
 
     setIsSubmitting(true);
 
     let correct = 0;
 
     questions.forEach((item) => {
-      if (answers[item.id] === item.answer) {
+      if (
+        answers[item.id] ===
+        item.answer
+      ) {
         correct++;
       }
     });
 
-    const wrong = questions.length - correct;
+    const wrong =
+      questions.length - correct;
 
     const score =
       questions.length > 0
         ? Math.round(
-            (correct / questions.length) * 100
+            (correct /
+              questions.length) *
+              100
           )
         : 0;
 
-    const result = {
+    const result: QuizResult = {
       category,
       total: questions.length,
       correct,
       wrong,
       score,
       timeLeft,
-      completedAt: new Date().toISOString(),
+      completedAt:
+        new Date().toISOString(),
     };
 
-    if (typeof window !== "undefined") {
+    if (
+      typeof window !== "undefined"
+    ) {
       localStorage.setItem(
         "quizResult",
         JSON.stringify(result)
@@ -529,13 +551,13 @@ function QuizContent() {
     router.push("/student/result");
   }
 
-  /* =========================================
+  /* =========================================================
      START SCREEN
-  ========================================= */
+  ========================================================= */
 
   if (!quizStarted) {
     return (
-      <main className="min-h-screen bg-[#050816] text-white">
+      <main className="min-h-screen overflow-hidden bg-[#050816] text-white">
         {/* Background */}
 
         <div className="pointer-events-none fixed inset-0 overflow-hidden">
@@ -627,7 +649,8 @@ function QuizContent() {
                 <span className="font-semibold text-gray-300">
                   {category}
                 </span>{" "}
-                quiz and see how high you can score.
+                quiz and see how high you can
+                score.
               </p>
             </div>
 
@@ -637,7 +660,7 @@ function QuizContent() {
               {/* Category */}
 
               <div className="border-b border-white/10 bg-white/[0.025] px-6 py-5 sm:px-8">
-                <div className="flex items-center justify-between">
+                <div className="flex items-center justify-between gap-4">
                   <div>
                     <p className="text-xs uppercase tracking-wider text-gray-600">
                       Selected Category
@@ -747,8 +770,8 @@ function QuizContent() {
                 </button>
 
                 <p className="mt-3 text-center text-xs text-gray-600">
-                  Your timer starts only after you click
-                  Start Quiz.
+                  Your timer starts only after you
+                  click Start Quiz.
                 </p>
               </div>
             </div>
@@ -758,9 +781,9 @@ function QuizContent() {
     );
   }
 
-  /* =========================================
+  /* =========================================================
      QUIZ STARTED
-  ========================================= */
+  ========================================================= */
 
   const answeredCount =
     Object.keys(answers).length;
@@ -771,10 +794,16 @@ function QuizContent() {
     100;
 
   const selectedAnswer =
-    answers[question.id];
+    question
+      ? answers[question.id]
+      : undefined;
+
+  /* =========================================================
+     QUIZ UI
+  ========================================================= */
 
   return (
-    <main className="min-h-screen bg-[#050816] text-white">
+    <main className="min-h-screen overflow-hidden bg-[#050816] text-white">
       {/* Background */}
 
       <div className="pointer-events-none fixed inset-0 overflow-hidden">
@@ -859,6 +888,9 @@ function QuizContent() {
               animate={{
                 width: `${progress}%`,
               }}
+              transition={{
+                duration: 0.3,
+              }}
               className="h-full rounded-full bg-gradient-to-r from-indigo-500 to-purple-500"
             />
           </div>
@@ -866,150 +898,160 @@ function QuizContent() {
 
         {/* Question */}
 
-        <motion.div
-          key={question.id}
-          initial={{
-            opacity: 0,
-            x: 20,
-          }}
-          animate={{
-            opacity: 1,
-            x: 0,
-          }}
-          transition={{
-            duration: 0.25,
-          }}
-          className="rounded-3xl border border-white/10 bg-white/[0.04] p-6 shadow-2xl sm:p-8"
-        >
-          {/* Number */}
+        {question && (
+          <motion.div
+            key={`${category}-${question.id}`}
+            initial={{
+              opacity: 0,
+              x: 20,
+            }}
+            animate={{
+              opacity: 1,
+              x: 0,
+            }}
+            transition={{
+              duration: 0.25,
+            }}
+            className="rounded-3xl border border-white/10 bg-white/[0.04] p-6 shadow-2xl sm:p-8"
+          >
+            {/* Number */}
 
-          <div className="mb-7 flex items-center justify-between">
-            <div className="flex items-center gap-3">
-              <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-indigo-500/10 text-sm font-black text-indigo-400">
-                {currentQuestion + 1}
+            <div className="mb-7 flex items-center justify-between">
+              <div className="flex items-center gap-3">
+                <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-indigo-500/10 text-sm font-black text-indigo-400">
+                  {currentQuestion + 1}
+                </div>
+
+                <div>
+                  <p className="text-xs uppercase tracking-wider text-gray-600">
+                    Question
+                  </p>
+
+                  <p className="text-sm font-semibold text-gray-400">
+                    {currentQuestion + 1} of{" "}
+                    {questions.length}
+                  </p>
+                </div>
               </div>
 
-              <div>
-                <p className="text-xs uppercase tracking-wider text-gray-600">
-                  Question
-                </p>
-
-                <p className="text-sm font-semibold text-gray-400">
-                  {currentQuestion + 1} of{" "}
-                  {questions.length}
-                </p>
-              </div>
+              <button
+                type="button"
+                onClick={() => {
+                  // Report functionality can be connected later.
+                }}
+                className="flex items-center gap-2 rounded-lg px-3 py-2 text-xs font-semibold text-gray-500 transition hover:bg-white/5 hover:text-gray-300"
+              >
+                <Flag size={15} />
+                Report
+              </button>
             </div>
 
-            <button
-              type="button"
-              className="flex items-center gap-2 rounded-lg px-3 py-2 text-xs font-semibold text-gray-500 transition hover:bg-white/5 hover:text-gray-300"
-            >
-              <Flag size={15} />
-              Report
-            </button>
-          </div>
+            {/* Question */}
 
-          {/* Question */}
+            <h3 className="max-w-3xl text-xl font-bold leading-8 sm:text-2xl">
+              {question.question}
+            </h3>
 
-          <h3 className="max-w-3xl text-xl font-bold leading-8 sm:text-2xl">
-            {question.question}
-          </h3>
+            {/* Options */}
 
-          {/* Options */}
+            <div className="mt-8 grid gap-3">
+              {question.options.map(
+                (option, index) => {
+                  const selected =
+                    selectedAnswer === index;
 
-          <div className="mt-8 grid gap-3">
-            {question.options.map(
-              (option, index) => {
-                const selected =
-                  selectedAnswer === index;
-
-                return (
-                  <button
-                    key={option}
-                    type="button"
-                    onClick={() =>
-                      selectAnswer(index)
-                    }
-                    className={`group flex w-full items-center gap-4 rounded-2xl border p-4 text-left transition ${
-                      selected
-                        ? "border-indigo-500 bg-indigo-500/10 shadow-lg shadow-indigo-500/5"
-                        : "border-white/10 bg-white/[0.02] hover:border-white/20 hover:bg-white/[0.05]"
-                    }`}
-                  >
-                    <div
-                      className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border text-sm font-bold ${
+                  return (
+                    <button
+                      key={option}
+                      type="button"
+                      onClick={() =>
+                        selectAnswer(index)
+                      }
+                      disabled={isSubmitting}
+                      className={`group flex w-full items-center gap-4 rounded-2xl border p-4 text-left transition ${
                         selected
-                          ? "border-indigo-500 bg-indigo-500 text-white"
-                          : "border-white/10 bg-white/[0.03] text-gray-500"
-                      }`}
+                          ? "border-indigo-500 bg-indigo-500/10 shadow-lg shadow-indigo-500/5"
+                          : "border-white/10 bg-white/[0.02] hover:border-white/20 hover:bg-white/[0.05]"
+                      } disabled:cursor-not-allowed`}
                     >
-                      {String.fromCharCode(
-                        65 + index
+                      <div
+                        className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border text-sm font-bold ${
+                          selected
+                            ? "border-indigo-500 bg-indigo-500 text-white"
+                            : "border-white/10 bg-white/[0.03] text-gray-500"
+                        }`}
+                      >
+                        {String.fromCharCode(
+                          65 + index
+                        )}
+                      </div>
+
+                      <span
+                        className={`font-medium ${
+                          selected
+                            ? "text-white"
+                            : "text-gray-400"
+                        }`}
+                      >
+                        {option}
+                      </span>
+
+                      {selected && (
+                        <CheckCircle2
+                          size={20}
+                          className="ml-auto text-indigo-400"
+                        />
                       )}
-                    </div>
+                    </button>
+                  );
+                }
+              )}
+            </div>
 
-                    <span
-                      className={`font-medium ${
-                        selected
-                          ? "text-white"
-                          : "text-gray-400"
-                      }`}
-                    >
-                      {option}
-                    </span>
+            {/* Navigation */}
 
-                    {selected && (
-                      <CheckCircle2
-                        size={20}
-                        className="ml-auto text-indigo-400"
-                      />
-                    )}
-                  </button>
-                );
-              }
-            )}
-          </div>
-
-          {/* Navigation */}
-
-          <div className="mt-8 flex flex-col-reverse justify-between gap-3 border-t border-white/10 pt-6 sm:flex-row">
-            <button
-              type="button"
-              onClick={previousQuestion}
-              disabled={currentQuestion === 0}
-              className="flex items-center justify-center gap-2 rounded-xl border border-white/10 px-5 py-3 text-sm font-semibold text-gray-400 transition hover:bg-white/5 hover:text-white disabled:cursor-not-allowed disabled:opacity-30"
-            >
-              <ArrowLeft size={17} />
-              Previous
-            </button>
-
-            {currentQuestion ===
-            questions.length - 1 ? (
+            <div className="mt-8 flex flex-col-reverse justify-between gap-3 border-t border-white/10 pt-6 sm:flex-row">
               <button
                 type="button"
-                onClick={submitQuiz}
-                disabled={isSubmitting}
-                className="flex items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-green-600 to-emerald-600 px-6 py-3 text-sm font-bold text-white transition hover:scale-[1.01] disabled:cursor-not-allowed disabled:opacity-60"
+                onClick={previousQuestion}
+                disabled={
+                  currentQuestion === 0 ||
+                  isSubmitting
+                }
+                className="flex items-center justify-center gap-2 rounded-xl border border-white/10 px-5 py-3 text-sm font-semibold text-gray-400 transition hover:bg-white/5 hover:text-white disabled:cursor-not-allowed disabled:opacity-30"
               >
-                <Trophy size={17} />
+                <ArrowLeft size={17} />
+                Previous
+              </button>
 
-                {isSubmitting
-                  ? "Submitting..."
-                  : "Submit Quiz"}
-              </button>
-            ) : (
-              <button
-                type="button"
-                onClick={nextQuestion}
-                className="flex items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-indigo-600 to-purple-600 px-6 py-3 text-sm font-bold text-white transition hover:scale-[1.01]"
-              >
-                Next Question
-                <ArrowRight size={17} />
-              </button>
-            )}
-          </div>
-        </motion.div>
+              {currentQuestion ===
+              questions.length - 1 ? (
+                <button
+                  type="button"
+                  onClick={submitQuiz}
+                  disabled={isSubmitting}
+                  className="flex items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-green-600 to-emerald-600 px-6 py-3 text-sm font-bold text-white transition hover:scale-[1.01] disabled:cursor-not-allowed disabled:opacity-60"
+                >
+                  <Trophy size={17} />
+
+                  {isSubmitting
+                    ? "Submitting..."
+                    : "Submit Quiz"}
+                </button>
+              ) : (
+                <button
+                  type="button"
+                  onClick={nextQuestion}
+                  disabled={isSubmitting}
+                  className="flex items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-indigo-600 to-purple-600 px-6 py-3 text-sm font-bold text-white transition hover:scale-[1.01] disabled:cursor-not-allowed disabled:opacity-60"
+                >
+                  Next Question
+                  <ArrowRight size={17} />
+                </button>
+              )}
+            </div>
+          </motion.div>
+        )}
 
         {/* Question Navigator */}
 
@@ -1044,13 +1086,14 @@ function QuizContent() {
                         index
                       )
                     }
+                    disabled={isSubmitting}
                     className={`flex h-9 w-9 items-center justify-center rounded-lg text-xs font-bold transition ${
                       active
                         ? "bg-indigo-600 text-white"
                         : answered
                         ? "bg-green-500/15 text-green-400"
                         : "bg-white/[0.05] text-gray-500 hover:bg-white/10"
-                    }`}
+                    } disabled:cursor-not-allowed`}
                   >
                     {index + 1}
                   </button>
@@ -1074,6 +1117,28 @@ function QuizContent() {
             zero.
           </p>
         </div>
+      </div>
+    </main>
+  );
+}
+
+/* =========================================================
+   LOADING
+========================================================= */
+
+function QuizLoading() {
+  return (
+    <main className="flex min-h-screen items-center justify-center bg-[#050816] text-white">
+      <div className="flex flex-col items-center text-center">
+        <div className="flex h-16 w-16 items-center justify-center rounded-2xl bg-gradient-to-br from-indigo-500 to-purple-600 shadow-lg shadow-indigo-500/20">
+          <Brain size={28} />
+        </div>
+
+        <div className="mt-5 h-6 w-6 animate-spin rounded-full border-2 border-white/20 border-t-indigo-400" />
+
+        <p className="mt-4 text-sm text-gray-500">
+          Loading quiz...
+        </p>
       </div>
     </main>
   );
