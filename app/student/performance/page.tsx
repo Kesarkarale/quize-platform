@@ -136,56 +136,78 @@ const recentAttempts = [
 
 export default function PerformancePage() {
   const router = useRouter();
+
   const supabase = createClient();
 
   const [profile, setProfile] = useState<Profile | null>(null);
   const [loading, setLoading] = useState(true);
-const [darkMode, setDarkMode] = useState(false);
-const [themeLoaded, setThemeLoaded] = useState(false);
-  
+
+  // Sidebar
+  const [sidebarOpen, setSidebarOpen] = useState(false);
+
+  // Theme
+  const [darkMode, setDarkMode] = useState(false);
+  const [themeLoaded, setThemeLoaded] = useState(false);
+
+  /*
+   * ---------------------------------------------------------
+   * LOAD THEME
+   * ---------------------------------------------------------
+   */
+
   useEffect(() => {
     const savedTheme = localStorage.getItem("quiz-theme");
 
-    if (savedTheme === "dark") {
-      setDarkMode(true);
+    const isDark = savedTheme === "dark";
+
+    setDarkMode(isDark);
+
+    if (isDark) {
       document.documentElement.classList.add("dark");
+    } else {
+      document.documentElement.classList.remove("dark");
     }
+
+    setThemeLoaded(true);
   }, []);
 
-useEffect(() => {
-  const savedTheme = localStorage.getItem("quiz-theme");
+  /*
+   * ---------------------------------------------------------
+   * APPLY THEME
+   * ---------------------------------------------------------
+   */
 
-  const isDark = savedTheme === "dark";
-
-  setDarkMode(isDark);
-
-  if (isDark) {
-    document.documentElement.classList.add("dark");
-  } else {
-    document.documentElement.classList.remove("dark");
-  }
-
-  setThemeLoaded(true);
-}, []);
-
-useEffect(() => {
-  if (!themeLoaded) return;
-
-  if (darkMode) {
-    document.documentElement.classList.add("dark");
-    localStorage.setItem("quiz-theme", "dark");
-  } else {
-    document.documentElement.classList.remove("dark");
-    localStorage.setItem("quiz-theme", "light");
-  }
-}, [darkMode, themeLoaded]);
-  
   useEffect(() => {
+    if (!themeLoaded) return;
+
+    if (darkMode) {
+      document.documentElement.classList.add("dark");
+      localStorage.setItem("quiz-theme", "dark");
+    } else {
+      document.documentElement.classList.remove("dark");
+      localStorage.setItem("quiz-theme", "light");
+    }
+  }, [darkMode, themeLoaded]);
+
+  /*
+   * ---------------------------------------------------------
+   * LOAD STUDENT PROFILE
+   * ---------------------------------------------------------
+   */
+
+  useEffect(() => {
+    let mounted = true;
+
     async function loadProfile() {
       try {
         const {
           data: { user },
+          error: userError,
         } = await supabase.auth.getUser();
+
+        if (userError) {
+          console.error("Auth error:", userError);
+        }
 
         if (!user) {
           router.replace("/login");
@@ -199,7 +221,10 @@ useEffect(() => {
           .single();
 
         if (error || !data) {
-          toast.error("Unable to load profile.");
+          console.error("Profile error:", error);
+
+          toast.error("Unable to load your profile.");
+
           router.replace("/login");
           return;
         }
@@ -211,34 +236,74 @@ useEffect(() => {
 
         if (data.status !== "ACTIVE") {
           await supabase.auth.signOut();
+
+          toast.error("Your account is inactive.");
+
           router.replace("/login");
           return;
         }
 
-        setProfile(data);
+        if (mounted) {
+          setProfile(data);
+        }
       } catch (error) {
-        console.error(error);
+        console.error("Profile loading error:", error);
+
         router.replace("/login");
       } finally {
-        setLoading(false);
+        if (mounted) {
+          setLoading(false);
+        }
       }
     }
 
     loadProfile();
+
+    return () => {
+      mounted = false;
+    };
   }, [router, supabase]);
 
+  /*
+   * ---------------------------------------------------------
+   * LOGOUT
+   * ---------------------------------------------------------
+   */
+
   const handleLogout = async () => {
-    await supabase.auth.signOut();
+    try {
+      await supabase.auth.signOut();
 
-    toast.success("Logged out successfully.");
+      toast.success("Logged out successfully.");
 
-    router.replace("/login");
-    router.refresh();
+      router.replace("/login");
+      router.refresh();
+    } catch (error) {
+      console.error("Logout error:", error);
+
+      toast.error("Unable to logout.");
+    }
   };
+
+  /*
+   * ---------------------------------------------------------
+   * CLOSE SIDEBAR AFTER NAVIGATION
+   * ---------------------------------------------------------
+   */
+
+  const closeSidebar = () => {
+    setSidebarOpen(false);
+  };
+
+  /*
+   * ---------------------------------------------------------
+   * LOADING
+   * ---------------------------------------------------------
+   */
 
   if (loading) {
     return (
-      <div className="flex min-h-screen items-center justify-center bg-[#f6f7fb] dark:bg-[#08090b]">
+      <div className="flex min-h-screen items-center justify-center bg-[#f7f7f8] dark:bg-[#080808]">
         <div className="flex flex-col items-center gap-4">
           <div className="h-12 w-12 animate-spin rounded-full border-4 border-indigo-500/20 border-t-indigo-600" />
 
@@ -256,16 +321,20 @@ useEffect(() => {
   return (
     <div className="min-h-screen bg-[#f6f7fb] text-gray-900 transition-colors duration-300 dark:bg-[#08090b] dark:text-white">
 
-      {/* MOBILE OVERLAY */}
+      {/* =====================================================
+          MOBILE OVERLAY
+      ====================================================== */}
 
       {sidebarOpen && (
         <div
-          onClick={() => setSidebarOpen(false)}
-          className="fixed inset-0 z-40 bg-black/50 lg:hidden"
+          onClick={closeSidebar}
+          className="fixed inset-0 z-40 bg-black/50 backdrop-blur-sm lg:hidden"
         />
       )}
 
-      {/* SIDEBAR */}
+      {/* =====================================================
+          SIDEBAR
+      ====================================================== */}
 
       <aside
         className={`fixed left-0 top-0 z-50 h-screen w-[270px] border-r border-gray-200 bg-white px-5 py-6 transition-transform duration-300 dark:border-white/10 dark:bg-[#101114] ${
@@ -279,14 +348,15 @@ useEffect(() => {
         <div className="flex items-center justify-between">
           <Link
             href="/student/dashboard"
+            onClick={closeSidebar}
             className="flex items-center gap-3"
           >
-            <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-gradient-to-br from-indigo-600 to-purple-600 text-white shadow-lg">
+            <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-gradient-to-br from-indigo-600 to-purple-600 text-white shadow-lg shadow-indigo-500/20">
               <Sparkles size={21} />
             </div>
 
             <div>
-              <h1 className="text-lg font-black">
+              <h1 className="text-lg font-black tracking-tight">
                 Quiz<span className="text-indigo-600">Pro</span>
               </h1>
 
@@ -297,8 +367,9 @@ useEffect(() => {
           </Link>
 
           <button
-            onClick={() => setSidebarOpen(false)}
-            className="rounded-xl p-2 text-gray-500 hover:bg-gray-100 lg:hidden dark:hover:bg-white/10"
+            type="button"
+            onClick={closeSidebar}
+            className="rounded-xl p-2 text-gray-500 transition hover:bg-gray-100 lg:hidden dark:hover:bg-white/10"
           >
             <X size={20} />
           </button>
@@ -312,21 +383,30 @@ useEffect(() => {
           </p>
 
           <nav className="space-y-1">
-            <Link href="/student/dashboard">
+            <Link
+              href="/student/dashboard"
+              onClick={closeSidebar}
+            >
               <SidebarItem
                 icon={<Home size={19} />}
                 label="Dashboard"
               />
             </Link>
 
-            <Link href="/quiz">
+            <Link
+              href="/quiz"
+              onClick={closeSidebar}
+            >
               <SidebarItem
                 icon={<BookOpen size={19} />}
                 label="Explore Quizzes"
               />
             </Link>
 
-            <Link href="/leaderboard">
+            <Link
+              href="/leaderboard"
+              onClick={closeSidebar}
+            >
               <SidebarItem
                 icon={<Trophy size={19} />}
                 label="Leaderboard"
@@ -349,14 +429,20 @@ useEffect(() => {
           </p>
 
           <nav className="space-y-1">
-            <Link href="/student/profile">
+            <Link
+              href="/student/profile"
+              onClick={closeSidebar}
+            >
               <SidebarItem
                 icon={<User size={19} />}
                 label="Profile"
               />
             </Link>
 
-            <Link href="/student/settings">
+            <Link
+              href="/student/settings"
+              onClick={closeSidebar}
+            >
               <SidebarItem
                 icon={<Settings size={19} />}
                 label="Settings"
@@ -365,7 +451,7 @@ useEffect(() => {
           </nav>
         </div>
 
-        {/* BOTTOM */}
+        {/* SIDEBAR BOTTOM */}
 
         <div className="absolute bottom-5 left-5 right-5">
           <div className="mb-4 rounded-2xl border border-indigo-100 bg-indigo-50 p-4 dark:border-indigo-500/20 dark:bg-indigo-500/10">
@@ -387,6 +473,7 @@ useEffect(() => {
           </div>
 
           <button
+            type="button"
             onClick={handleLogout}
             className="flex w-full items-center gap-3 rounded-xl px-3 py-3 text-sm font-semibold text-red-500 transition hover:bg-red-50 dark:hover:bg-red-500/10"
           >
@@ -396,18 +483,25 @@ useEffect(() => {
         </div>
       </aside>
 
-      {/* MAIN */}
+      {/* =====================================================
+          MAIN
+      ====================================================== */}
 
       <main className="lg:ml-[270px]">
 
         {/* HEADER */}
 
         <header className="sticky top-0 z-30 border-b border-gray-200/80 bg-white/80 px-4 py-4 backdrop-blur-xl sm:px-6 lg:px-8 dark:border-white/10 dark:bg-[#08090b]/80">
-          <div className="flex items-center justify-between">
+          <div className="flex items-center justify-between gap-4">
+
+            {/* LEFT */}
+
             <div className="flex items-center gap-3">
               <button
+                type="button"
                 onClick={() => setSidebarOpen(true)}
-                className="rounded-xl border border-gray-200 bg-white p-2.5 lg:hidden dark:border-white/10 dark:bg-white/5"
+                className="rounded-xl border border-gray-200 bg-white p-2.5 transition hover:bg-gray-50 lg:hidden dark:border-white/10 dark:bg-white/5 dark:hover:bg-white/10"
+                aria-label="Open sidebar"
               >
                 <Menu size={20} />
               </button>
@@ -423,50 +517,43 @@ useEffect(() => {
               </div>
             </div>
 
+            {/* RIGHT */}
+
             <div className="flex items-center gap-3">
-<button
-  type="button"
-  aria-label={
-    darkMode
-      ? "Switch to light mode"
-      : "Switch to dark mode"
-  }
-  onClick={() => setDarkMode((prev) => !prev)}
-  className="
-    relative
-    flex
-    h-10
-    w-10
-    items-center
-    justify-center
-    overflow-hidden
-    rounded-xl
-    border
-    border-gray-200
-    bg-white
-    text-gray-700
-    shadow-sm
-    transition-all
-    duration-300
-    hover:-translate-y-0.5
-    hover:shadow-md
-    dark:border-white/10
-    dark:bg-white/5
-    dark:text-white
-  "
->
-  {darkMode ? (
-    <Sun
-      size={19}
-      className="text-yellow-400"
-    />
-  ) : (
-    <Moon
-      size={19}
-      className="text-indigo-600"
-    />
-  )}
-</button>
+
+              {/* THEME BUTTON */}
+
+              <button
+                type="button"
+                aria-label={
+                  darkMode
+                    ? "Switch to light mode"
+                    : "Switch to dark mode"
+                }
+                title={
+                  darkMode
+                    ? "Light Mode"
+                    : "Dark Mode"
+                }
+                onClick={() =>
+                  setDarkMode((prev) => !prev)
+                }
+                className="relative flex h-10 w-10 items-center justify-center overflow-hidden rounded-xl border border-gray-200 bg-white text-gray-700 shadow-sm transition-all duration-300 hover:-translate-y-0.5 hover:shadow-md dark:border-white/10 dark:bg-white/5 dark:text-white"
+              >
+                {darkMode ? (
+                  <Sun
+                    size={19}
+                    className="text-yellow-400"
+                  />
+                ) : (
+                  <Moon
+                    size={19}
+                    className="text-gray-700"
+                  />
+                )}
+              </button>
+
+              {/* USER */}
 
               <div className="hidden items-center gap-3 sm:flex">
                 <div className="text-right">
@@ -479,15 +566,19 @@ useEffect(() => {
                   </p>
                 </div>
 
-                <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-br from-indigo-500 to-purple-600 font-bold text-white">
-                  {firstName.charAt(0).toUpperCase()}
+                <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-br from-indigo-500 to-purple-600 font-bold text-white shadow-lg">
+                  {firstName
+                    .charAt(0)
+                    .toUpperCase()}
                 </div>
               </div>
             </div>
           </div>
         </header>
 
-        {/* CONTENT */}
+        {/* =====================================================
+            CONTENT
+        ====================================================== */}
 
         <div className="mx-auto max-w-[1500px] px-4 py-6 sm:px-6 lg:px-8 lg:py-8">
 
@@ -503,7 +594,7 @@ useEffect(() => {
 
           {/* HERO */}
 
-          <section className="relative overflow-hidden rounded-[28px] bg-gradient-to-br from-indigo-600 via-indigo-700 to-purple-700 p-6 text-white shadow-2xl sm:p-8">
+          <section className="relative overflow-hidden rounded-[28px] bg-gradient-to-br from-indigo-600 via-indigo-700 to-purple-700 p-6 text-white shadow-2xl shadow-indigo-500/10 sm:p-8">
             <div className="absolute -right-20 -top-20 h-64 w-64 rounded-full bg-white/10 blur-3xl" />
 
             <div className="absolute -bottom-24 left-1/3 h-64 w-64 rounded-full bg-purple-300/10 blur-3xl" />
@@ -523,8 +614,9 @@ useEffect(() => {
                 </h1>
 
                 <p className="mt-2 max-w-2xl text-sm leading-6 text-indigo-100">
-                  Track your quiz scores, identify your strengths,
-                  and improve your performance with every challenge.
+                  Track your quiz scores, identify your
+                  strengths, and improve your performance
+                  with every challenge.
                 </p>
               </div>
 
@@ -574,7 +666,7 @@ useEffect(() => {
             />
           </section>
 
-          {/* PERFORMANCE CHART */}
+          {/* WEEKLY PERFORMANCE */}
 
           <section className="mt-6 rounded-[24px] border border-gray-200 bg-white p-5 shadow-sm sm:p-6 dark:border-white/10 dark:bg-[#101114]">
             <div className="flex flex-col justify-between gap-3 sm:flex-row sm:items-center">
@@ -594,7 +686,10 @@ useEffect(() => {
             </div>
 
             <div className="mt-6 h-[320px] w-full">
-              <ResponsiveContainer width="100%" height="100%">
+              <ResponsiveContainer
+                width="100%"
+                height="100%"
+              >
                 <AreaChart data={weeklyData}>
                   <defs>
                     <linearGradient
@@ -697,7 +792,10 @@ useEffect(() => {
               </div>
 
               <div className="mt-6 h-[300px]">
-                <ResponsiveContainer width="100%" height="100%">
+                <ResponsiveContainer
+                  width="100%"
+                  height="100%"
+                >
                   <BarChart data={categoryData}>
                     <CartesianGrid
                       strokeDasharray="3 3"
@@ -742,6 +840,9 @@ useEffect(() => {
                         background: darkMode
                           ? "#18181b"
                           : "#ffffff",
+                        color: darkMode
+                          ? "#ffffff"
+                          : "#111827",
                       }}
                     />
 
@@ -796,27 +897,33 @@ useEffect(() => {
                   label="Passed Quizzes"
                   value="18"
                   percentage="75%"
-                  icon={<CheckCircle2 size={16} />}
+                  icon={
+                    <CheckCircle2 size={16} />
+                  }
                 />
 
                 <ProgressItem
                   label="Failed Quizzes"
                   value="6"
                   percentage="25%"
-                  icon={<XCircle size={16} />}
+                  icon={
+                    <XCircle size={16} />
+                  }
                 />
 
                 <ProgressItem
                   label="Current Streak"
                   value="7 days"
                   percentage="🔥"
-                  icon={<Flame size={16} />}
+                  icon={
+                    <Flame size={16} />
+                  }
                 />
               </div>
             </div>
           </section>
 
-          {/* CATEGORY DETAILS */}
+          {/* SUBJECT BREAKDOWN */}
 
           <section className="mt-6 rounded-[24px] border border-gray-200 bg-white p-5 shadow-sm sm:p-6 dark:border-white/10 dark:bg-[#101114]">
             <div>
@@ -853,7 +960,7 @@ useEffect(() => {
 
                   <div className="mt-4 h-2 overflow-hidden rounded-full bg-gray-100 dark:bg-white/10">
                     <div
-                      className="h-full rounded-full bg-indigo-600 transition-all"
+                      className="h-full rounded-full bg-indigo-600 transition-all duration-700"
                       style={{
                         width: `${item.score}%`,
                       }}
@@ -904,10 +1011,18 @@ useEffect(() => {
                       </p>
 
                       <div className="mt-1 flex flex-wrap gap-2 text-[10px] text-gray-400">
-                        <span>{attempt.category}</span>
+                        <span>
+                          {attempt.category}
+                        </span>
+
                         <span>•</span>
-                        <span>{attempt.date}</span>
+
+                        <span>
+                          {attempt.date}
+                        </span>
+
                         <span>•</span>
+
                         <span className="flex items-center gap-1">
                           <Clock3 size={11} />
                           {attempt.time}
@@ -923,7 +1038,8 @@ useEffect(() => {
                       </p>
 
                       <p className="mt-1 text-sm font-bold">
-                        {attempt.correct}/{attempt.total}
+                        {attempt.correct}/
+                        {attempt.total}
                       </p>
                     </div>
 
@@ -934,7 +1050,8 @@ useEffect(() => {
 
                       <p
                         className={`text-[10px] font-bold ${
-                          attempt.status === "Passed"
+                          attempt.status ===
+                          "Passed"
                             ? "text-emerald-500"
                             : "text-red-500"
                         }`}
@@ -957,7 +1074,8 @@ useEffect(() => {
 
           <footer className="mt-10 border-t border-gray-200 py-6 text-center dark:border-white/10">
             <p className="text-xs text-gray-400">
-              © 2026 QuizPro. Learn. Challenge. Achieve.
+              © 2026 QuizPro. Learn. Challenge.
+              Achieve.
             </p>
           </footer>
         </div>
@@ -966,7 +1084,11 @@ useEffect(() => {
   );
 }
 
-/* SIDEBAR ITEM */
+/*
+|--------------------------------------------------------------------------
+| SIDEBAR ITEM
+|--------------------------------------------------------------------------
+*/
 
 function SidebarItem({
   icon,
@@ -991,7 +1113,11 @@ function SidebarItem({
   );
 }
 
-/* PERFORMANCE STAT */
+/*
+|--------------------------------------------------------------------------
+| PERFORMANCE STAT
+|--------------------------------------------------------------------------
+*/
 
 function PerformanceStat({
   icon,
@@ -1007,7 +1133,7 @@ function PerformanceStat({
   className: string;
 }) {
   return (
-    <div className="rounded-[22px] border border-gray-200 bg-white p-4 shadow-sm transition hover:-translate-y-1 hover:shadow-lg sm:p-5 dark:border-white/10 dark:bg-[#101114]">
+    <div className="rounded-[22px] border border-gray-200 bg-white p-4 shadow-sm transition duration-300 hover:-translate-y-1 hover:shadow-lg sm:p-5 dark:border-white/10 dark:bg-[#101114]">
       <div className="flex items-start justify-between">
         <div
           className={`flex h-10 w-10 items-center justify-center rounded-xl ${className}`}
@@ -1035,7 +1161,11 @@ function PerformanceStat({
   );
 }
 
-/* PROGRESS ITEM */
+/*
+|--------------------------------------------------------------------------
+| PROGRESS ITEM
+|--------------------------------------------------------------------------
+*/
 
 function ProgressItem({
   label,
@@ -1072,3 +1202,4 @@ function ProgressItem({
     </div>
   );
 }
+
