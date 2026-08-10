@@ -140,9 +140,9 @@ export default function PerformancePage() {
 
   const [profile, setProfile] = useState<Profile | null>(null);
   const [loading, setLoading] = useState(true);
-  const [darkMode, setDarkMode] = useState(false);
-  const [sidebarOpen, setSidebarOpen] = useState(false);
-
+const [darkMode, setDarkMode] = useState(false);
+const [themeLoaded, setThemeLoaded] = useState(false);
+  
   useEffect(() => {
     const savedTheme = localStorage.getItem("quiz-theme");
 
@@ -152,16 +152,34 @@ export default function PerformancePage() {
     }
   }, []);
 
-  useEffect(() => {
-    if (darkMode) {
-      document.documentElement.classList.add("dark");
-      localStorage.setItem("quiz-theme", "dark");
-    } else {
-      document.documentElement.classList.remove("dark");
-      localStorage.setItem("quiz-theme", "light");
-    }
-  }, [darkMode]);
+useEffect(() => {
+  const savedTheme = localStorage.getItem("quiz-theme");
 
+  const isDark = savedTheme === "dark";
+
+  setDarkMode(isDark);
+
+  if (isDark) {
+    document.documentElement.classList.add("dark");
+  } else {
+    document.documentElement.classList.remove("dark");
+  }
+
+  setThemeLoaded(true);
+}, []);
+
+useEffect(() => {
+  if (!themeLoaded) return;
+
+  if (darkMode) {
+    document.documentElement.classList.add("dark");
+    localStorage.setItem("quiz-theme", "dark");
+  } else {
+    document.documentElement.classList.remove("dark");
+    localStorage.setItem("quiz-theme", "light");
+  }
+}, [darkMode, themeLoaded]);
+  
   useEffect(() => {
     async function loadProfile() {
       try {
@@ -406,22 +424,49 @@ export default function PerformancePage() {
             </div>
 
             <div className="flex items-center gap-3">
-              <button
-                onClick={() => setDarkMode(!darkMode)}
-                className="flex h-10 w-10 items-center justify-center rounded-xl border border-gray-200 bg-white transition hover:scale-105 dark:border-white/10 dark:bg-white/5"
-              >
-                {darkMode ? (
-                  <Sun
-                    size={19}
-                    className="text-yellow-400"
-                  />
-                ) : (
-                  <Moon
-                    size={19}
-                    className="text-gray-600"
-                  />
-                )}
-              </button>
+<button
+  type="button"
+  aria-label={
+    darkMode
+      ? "Switch to light mode"
+      : "Switch to dark mode"
+  }
+  onClick={() => setDarkMode((prev) => !prev)}
+  className="
+    relative
+    flex
+    h-10
+    w-10
+    items-center
+    justify-center
+    overflow-hidden
+    rounded-xl
+    border
+    border-gray-200
+    bg-white
+    text-gray-700
+    shadow-sm
+    transition-all
+    duration-300
+    hover:-translate-y-0.5
+    hover:shadow-md
+    dark:border-white/10
+    dark:bg-white/5
+    dark:text-white
+  "
+>
+  {darkMode ? (
+    <Sun
+      size={19}
+      className="text-yellow-400"
+    />
+  ) : (
+    <Moon
+      size={19}
+      className="text-indigo-600"
+    />
+  )}
+</button>
 
               <div className="hidden items-center gap-3 sm:flex">
                 <div className="text-right">
