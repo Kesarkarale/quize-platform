@@ -2,22 +2,20 @@
 
 import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
-
 import {
   ArrowLeft,
   ArrowRight,
   Award,
-  BarChart3,
   Brain,
   ChevronDown,
   Flame,
   Medal,
   Search,
   Trophy,
-  Users,
   Zap,
+  Crown,
+  Star,
 } from "lucide-react";
-
 import { motion } from "framer-motion";
 
 type Player = {
@@ -134,24 +132,17 @@ const categories = [
 ];
 
 export default function LeaderboardPage() {
-  const [players, setPlayers] =
-    useState<Player[]>(initialPlayers);
-
-  const [period, setPeriod] =
-    useState("This Week");
-
-  const [category, setCategory] =
-    useState("All Categories");
-
+  const [players, setPlayers] = useState<Player[]>(initialPlayers);
+  const [period, setPeriod] = useState("This Week");
+  const [category, setCategory] = useState("All Categories");
   const [search, setSearch] = useState("");
 
   /* =========================================
-     UPDATE USER SCORE FROM RESULT
+     UPDATE USER SCORE FROM QUIZ RESULT
   ========================================= */
 
   useEffect(() => {
-    const savedResult =
-      localStorage.getItem("quizResult");
+    const savedResult = localStorage.getItem("quizResult");
 
     if (!savedResult) return;
 
@@ -163,64 +154,75 @@ export default function LeaderboardPage() {
       }
 
       setPlayers((currentPlayers) => {
-        const exists = currentPlayers.find(
+        const currentUser = currentPlayers.find(
           (player) => player.current
         );
 
-        if (!exists) {
+        if (!currentUser) {
           return currentPlayers;
         }
 
-        const updated = currentPlayers.map(
-          (player) => {
-            if (!player.current) {
-              return player;
-            }
-
-            return {
-              ...player,
-              points:
-                player.points +
-                result.correct * 100,
-              quizzes:
-                player.quizzes + 1,
-              score: result.score,
-            };
-          }
+        const alreadyUpdated = localStorage.getItem(
+          "leaderboardResultUpdated"
         );
 
-        return updated
+        if (alreadyUpdated === savedResult) {
+          return currentPlayers;
+        }
+
+        const updatedPlayers = currentPlayers.map((player) => {
+          if (!player.current) {
+            return player;
+          }
+
+          return {
+            ...player,
+            points:
+              player.points +
+              (typeof result.correct === "number"
+                ? result.correct * 100
+                : 0),
+            quizzes: player.quizzes + 1,
+            score: result.score,
+          };
+        });
+
+        const sortedPlayers = [...updatedPlayers]
           .sort((a, b) => b.points - a.points)
           .map((player, index) => ({
             ...player,
             rank: index + 1,
           }));
+
+        localStorage.setItem(
+          "leaderboardResultUpdated",
+          savedResult
+        );
+
+        return sortedPlayers;
       });
-    } catch {
-      // Ignore invalid localStorage data
+    } catch (error) {
+      console.error("Leaderboard result error:", error);
     }
   }, []);
 
   /* =========================================
-     SEARCH
+     SEARCH + FILTER
   ========================================= */
 
   const filteredPlayers = useMemo(() => {
     return players.filter((player) =>
-      player.name
-        .toLowerCase()
-        .includes(search.toLowerCase())
+      player.name.toLowerCase().includes(search.toLowerCase())
     );
   }, [players, search]);
 
   const topThree = players.slice(0, 3);
 
   const currentUser =
-    players.find((player) => player.current) ||
-    players[3];
+    players.find((player) => player.current) ?? players[3];
 
   return (
-    <main className="min-h-screen bg-[#050816] text-white">
+    <main className="min-h-screen overflow-x-hidden bg-[#050816] text-white">
       {/* =====================================
           BACKGROUND
       ===================================== */}
@@ -228,7 +230,9 @@ export default function LeaderboardPage() {
       <div className="pointer-events-none fixed inset-0 overflow-hidden">
         <div className="absolute -left-40 -top-40 h-[450px] w-[450px] rounded-full bg-indigo-600/15 blur-[140px]" />
 
-        <div className="absolute -bottom-40 -right-40 h-[450px] w-[450px] rounded-full bg-purple-600/15 blur-[140px]" />
+        <div className="absolute right-[-180px] top-[30%] h-[450px] w-[450px] rounded-full bg-purple-600/10 blur-[140px]" />
+
+        <div className="absolute -bottom-40 -left-40 h-[450px] w-[450px] rounded-full bg-blue-600/10 blur-[140px]" />
       </div>
 
       {/* =====================================
@@ -237,32 +241,36 @@ export default function LeaderboardPage() {
 
       <header className="sticky top-0 z-50 border-b border-white/10 bg-[#050816]/85 backdrop-blur-xl">
         <div className="mx-auto flex h-20 max-w-7xl items-center justify-between px-5 lg:px-8">
+          {/* LOGO */}
+
           <Link
             href="/student/dashboard"
-            className="flex items-center gap-3"
+            className="group flex items-center gap-3"
           >
-            <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-br from-indigo-500 to-purple-600">
+            <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-gradient-to-br from-indigo-500 to-purple-600 shadow-lg shadow-indigo-600/20 transition group-hover:scale-105">
               <Brain size={21} />
             </div>
 
             <div>
-              <h1 className="font-black">
+              <h1 className="text-lg font-black tracking-tight">
                 Quiz
                 <span className="text-indigo-400">
                   Master
                 </span>
               </h1>
 
-              <p className="hidden text-[9px] tracking-[0.2em] text-gray-600 sm:block">
+              <p className="hidden text-[9px] font-medium tracking-[0.2em] text-gray-600 sm:block">
                 PLAY • LEARN • WIN
               </p>
             </div>
           </Link>
 
+          {/* HEADER RIGHT */}
+
           <div className="flex items-center gap-3">
             <Link
               href="/student/dashboard"
-              className="flex items-center gap-2 rounded-xl border border-white/10 bg-white/[0.04] px-4 py-2.5 text-sm font-semibold text-gray-400 transition hover:bg-white/[0.08] hover:text-white"
+              className="flex items-center gap-2 rounded-xl border border-white/10 bg-white/[0.04] px-4 py-2.5 text-sm font-semibold text-gray-400 transition hover:border-white/20 hover:bg-white/[0.08] hover:text-white"
             >
               <ArrowLeft size={16} />
 
@@ -271,7 +279,7 @@ export default function LeaderboardPage() {
               </span>
             </Link>
 
-            <div className="flex h-10 w-10 items-center justify-center rounded-full bg-gradient-to-br from-indigo-500 to-purple-600 text-sm font-bold">
+            <div className="flex h-10 w-10 items-center justify-center rounded-full bg-gradient-to-br from-indigo-500 to-purple-600 text-sm font-bold shadow-lg shadow-indigo-600/20">
               K
             </div>
           </div>
@@ -283,53 +291,46 @@ export default function LeaderboardPage() {
       ===================================== */}
 
       <div className="relative z-10 mx-auto max-w-7xl px-5 py-10 lg:px-8">
-        {/* HERO */}
+        {/* =====================================
+            HERO
+        ===================================== */}
 
-        <motion.div
-          initial={{
-            opacity: 0,
-            y: 20,
-          }}
-          animate={{
-            opacity: 1,
-            y: 0,
-          }}
+        <motion.section
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.5 }}
           className="text-center"
         >
-          <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-2xl bg-yellow-500/10 text-yellow-400">
+          <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-2xl border border-yellow-500/20 bg-yellow-500/10 text-yellow-400 shadow-lg shadow-yellow-500/5">
             <Trophy size={31} />
           </div>
 
-          <p className="mt-5 text-sm font-semibold uppercase tracking-[0.2em] text-indigo-400">
+          <p className="mt-5 text-xs font-bold uppercase tracking-[0.25em] text-indigo-400">
             Top Performers
           </p>
 
-          <h1 className="mt-2 text-4xl font-black sm:text-5xl">
+          <h1 className="mt-2 text-4xl font-black tracking-tight sm:text-5xl">
             Leaderboard
           </h1>
 
-          <p className="mx-auto mt-3 max-w-xl text-sm leading-6 text-gray-500">
+          <p className="mx-auto mt-4 max-w-xl text-sm leading-6 text-gray-500">
             Compete with other students, earn points,
             maintain your streak and become the quiz
             champion.
           </p>
-        </motion.div>
+        </motion.section>
 
         {/* =====================================
             PODIUM
         ===================================== */}
 
         <section className="mt-12">
-          <div className="grid items-end gap-4 md:grid-cols-3">
-            {/* SECOND */}
-
+          <div className="grid items-end gap-5 md:grid-cols-3">
             <PodiumCard
               player={topThree[1]}
               position={2}
               delay={0.15}
             />
-
-            {/* FIRST */}
 
             <PodiumCard
               player={topThree[0]}
@@ -337,8 +338,6 @@ export default function LeaderboardPage() {
               delay={0}
               first
             />
-
-            {/* THIRD */}
 
             <PodiumCard
               player={topThree[2]}
@@ -352,28 +351,20 @@ export default function LeaderboardPage() {
             USER RANK
         ===================================== */}
 
-        <motion.div
-          initial={{
-            opacity: 0,
-            y: 20,
-          }}
-          animate={{
-            opacity: 1,
-            y: 0,
-          }}
-          transition={{
-            delay: 0.3,
-          }}
-          className="mt-8 rounded-2xl border border-indigo-500/20 bg-indigo-500/[0.07] p-5"
+        <motion.section
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.35 }}
+          className="mt-8 overflow-hidden rounded-2xl border border-indigo-500/20 bg-gradient-to-r from-indigo-500/[0.10] to-purple-500/[0.06] p-5 shadow-xl shadow-indigo-950/10"
         >
           <div className="flex flex-col gap-5 sm:flex-row sm:items-center sm:justify-between">
             <div className="flex items-center gap-4">
-              <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-indigo-500/10 text-indigo-400">
+              <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-indigo-500/10 text-indigo-400">
                 <Medal size={23} />
               </div>
 
               <div>
-                <p className="text-xs font-semibold uppercase tracking-wider text-indigo-400">
+                <p className="text-[10px] font-bold uppercase tracking-[0.18em] text-indigo-400">
                   Your Current Rank
                 </p>
 
@@ -406,7 +397,7 @@ export default function LeaderboardPage() {
               />
             </div>
           </div>
-        </motion.div>
+        </motion.section>
 
         {/* =====================================
             FILTERS
@@ -414,7 +405,7 @@ export default function LeaderboardPage() {
 
         <section className="mt-10">
           <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
-            {/* Search */}
+            {/* SEARCH */}
 
             <div className="relative w-full lg:max-w-sm">
               <Search
@@ -425,17 +416,15 @@ export default function LeaderboardPage() {
               <input
                 type="text"
                 value={search}
-                onChange={(e) =>
-                  setSearch(e.target.value)
-                }
+                onChange={(e) => setSearch(e.target.value)}
                 placeholder="Search player..."
-                className="w-full rounded-xl border border-white/10 bg-white/[0.04] py-3 pl-11 pr-4 text-sm text-white outline-none placeholder:text-gray-600 focus:border-indigo-500/50"
+                className="w-full rounded-xl border border-white/10 bg-white/[0.04] py-3 pl-11 pr-4 text-sm text-white outline-none transition placeholder:text-gray-600 focus:border-indigo-500/60 focus:bg-white/[0.06]"
               />
             </div>
 
-            {/* Filters */}
+            {/* FILTERS */}
 
-            <div className="flex flex-col gap-3 sm:flex-row">
+            <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
               <FilterSelect
                 value={period}
                 options={[
@@ -459,17 +448,13 @@ export default function LeaderboardPage() {
             TABLE
         ===================================== */}
 
-        <section className="mt-5 overflow-hidden rounded-2xl border border-white/10 bg-white/[0.035]">
-          {/* Desktop Header */}
+        <section className="mt-5 overflow-hidden rounded-2xl border border-white/10 bg-white/[0.035] shadow-2xl shadow-black/10">
+          {/* DESKTOP HEADER */}
 
-          <div className="hidden grid-cols-12 gap-4 border-b border-white/10 px-6 py-4 text-xs font-semibold uppercase tracking-wider text-gray-600 md:grid">
-            <div className="col-span-1">
-              Rank
-            </div>
+          <div className="hidden grid-cols-12 gap-4 border-b border-white/10 bg-white/[0.02] px-6 py-4 text-[10px] font-bold uppercase tracking-[0.15em] text-gray-600 md:grid">
+            <div className="col-span-1">Rank</div>
 
-            <div className="col-span-4">
-              Player
-            </div>
+            <div className="col-span-4">Player</div>
 
             <div className="col-span-2 text-center">
               Points
@@ -488,14 +473,16 @@ export default function LeaderboardPage() {
             </div>
           </div>
 
-          {/* Rows */}
+          {/* ROWS */}
 
           {filteredPlayers.length === 0 ? (
-            <div className="p-12 text-center">
-              <Search
-                size={30}
-                className="mx-auto text-gray-700"
-              />
+            <div className="p-14 text-center">
+              <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-2xl bg-white/[0.04]">
+                <Search
+                  size={28}
+                  className="text-gray-700"
+                />
+              </div>
 
               <p className="mt-4 font-semibold text-gray-400">
                 No player found
@@ -509,14 +496,8 @@ export default function LeaderboardPage() {
             filteredPlayers.map((player, index) => (
               <motion.div
                 key={player.name}
-                initial={{
-                  opacity: 0,
-                  y: 8,
-                }}
-                animate={{
-                  opacity: 1,
-                  y: 0,
-                }}
+                initial={{ opacity: 0, y: 8 }}
+                animate={{ opacity: 1, y: 0 }}
                 transition={{
                   delay: index * 0.03,
                 }}
@@ -526,16 +507,14 @@ export default function LeaderboardPage() {
                     : "hover:bg-white/[0.025]"
                 }`}
               >
-                {/* Mobile */}
+                {/* MOBILE TOP */}
 
                 <div className="flex items-center gap-4 md:contents">
-                  {/* Rank */}
+                  {/* RANK */}
 
                   <div className="flex w-8 shrink-0 items-center justify-center md:col-span-1 md:w-auto">
                     {player.rank <= 3 ? (
-                      <RankIcon
-                        rank={player.rank}
-                      />
+                      <RankIcon rank={player.rank} />
                     ) : (
                       <span className="text-sm font-bold text-gray-500">
                         {player.rank}
@@ -543,10 +522,10 @@ export default function LeaderboardPage() {
                     )}
                   </div>
 
-                  {/* Player */}
+                  {/* PLAYER */}
 
                   <div className="flex min-w-0 flex-1 items-center gap-3 md:col-span-4">
-                    <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-gradient-to-br from-indigo-500 to-purple-600 text-xs font-bold">
+                    <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-gradient-to-br from-indigo-500 to-purple-600 text-xs font-bold shadow-lg shadow-indigo-600/10">
                       {player.avatar}
                     </div>
 
@@ -567,7 +546,7 @@ export default function LeaderboardPage() {
                     </div>
                   </div>
 
-                  {/* Mobile points */}
+                  {/* MOBILE POINTS */}
 
                   <div className="text-right md:hidden">
                     <p className="text-sm font-black">
@@ -581,23 +560,23 @@ export default function LeaderboardPage() {
                   </div>
                 </div>
 
-                {/* Desktop Points */}
+                {/* DESKTOP POINTS */}
 
                 <div className="hidden text-center text-sm font-bold md:col-span-2 md:block">
                   {player.points.toLocaleString()}
                 </div>
 
-                {/* Desktop Quizzes */}
+                {/* DESKTOP QUIZZES */}
 
                 <div className="hidden text-center text-sm text-gray-400 md:col-span-2 md:block">
                   {player.quizzes}
                 </div>
 
-                {/* Desktop Score */}
+                {/* DESKTOP SCORE */}
 
                 <div className="hidden text-center md:col-span-2 md:block">
                   <span
-                    className={`rounded-full px-2.5 py-1 text-xs font-bold ${
+                    className={`inline-flex rounded-full px-2.5 py-1 text-xs font-bold ${
                       player.score >= 90
                         ? "bg-green-500/10 text-green-400"
                         : player.score >= 75
@@ -609,14 +588,14 @@ export default function LeaderboardPage() {
                   </span>
                 </div>
 
-                {/* Desktop Streak */}
+                {/* DESKTOP STREAK */}
 
                 <div className="hidden items-center justify-center gap-1 text-sm text-orange-400 md:col-span-1 md:flex">
                   <Flame size={15} />
                   {player.streak}
                 </div>
 
-                {/* Mobile Bottom Stats */}
+                {/* MOBILE STATS */}
 
                 <div className="mt-4 grid grid-cols-3 gap-3 border-t border-white/[0.06] pt-4 md:hidden">
                   <MobileStat
@@ -674,7 +653,7 @@ export default function LeaderboardPage() {
         ===================================== */}
 
         <section className="mt-10 pb-10">
-          <div className="relative overflow-hidden rounded-3xl border border-indigo-500/20 bg-gradient-to-r from-indigo-600/15 to-purple-600/10 p-7 text-center sm:p-10">
+          <div className="relative overflow-hidden rounded-3xl border border-indigo-500/20 bg-gradient-to-r from-indigo-600/15 to-purple-600/10 p-7 text-center shadow-2xl shadow-indigo-950/10 sm:p-10">
             <div className="pointer-events-none absolute left-1/2 top-0 h-40 w-80 -translate-x-1/2 rounded-full bg-indigo-500/10 blur-[100px]" />
 
             <div className="relative">
@@ -686,14 +665,14 @@ export default function LeaderboardPage() {
                 Ready to climb the leaderboard?
               </h2>
 
-              <p className="mx-auto mt-2 max-w-lg text-sm text-gray-500">
+              <p className="mx-auto mt-2 max-w-lg text-sm leading-6 text-gray-500">
                 Take another quiz, earn more points and
                 move one step closer to the #1 spot.
               </p>
 
               <Link
                 href="/quiz"
-                className="mt-6 inline-flex items-center gap-2 rounded-xl bg-gradient-to-r from-indigo-600 to-purple-600 px-6 py-3.5 font-bold shadow-lg shadow-indigo-600/20 transition hover:scale-[1.02]"
+                className="mt-6 inline-flex items-center gap-2 rounded-xl bg-gradient-to-r from-indigo-600 to-purple-600 px-6 py-3.5 text-sm font-bold shadow-lg shadow-indigo-600/20 transition hover:-translate-y-0.5 hover:shadow-indigo-600/30"
               >
                 Start New Quiz
                 <ArrowRight size={17} />
@@ -737,14 +716,17 @@ function PodiumCard({
       }}
       className={`relative overflow-hidden rounded-3xl border p-6 text-center ${
         first
-          ? "border-yellow-500/30 bg-gradient-to-b from-yellow-500/[0.10] to-white/[0.03] md:-translate-y-5"
+          ? "border-yellow-500/30 bg-gradient-to-b from-yellow-500/[0.10] to-white/[0.03] shadow-xl shadow-yellow-950/10 md:-translate-y-5"
           : position === 2
           ? "border-gray-400/10 bg-white/[0.035]"
           : "border-orange-500/10 bg-white/[0.035]"
       }`}
     >
       {first && (
-        <div className="absolute left-1/2 top-0 h-20 w-40 -translate-x-1/2 rounded-full bg-yellow-500/10 blur-[50px]" />
+        <div className="absolute right-4 top-4 flex items-center gap-1 rounded-full bg-yellow-500/10 px-2.5 py-1 text-[9px] font-bold uppercase tracking-wider text-yellow-400">
+          <Crown size={11} />
+          Champion
+        </div>
       )}
 
       <div className="relative">
@@ -788,6 +770,14 @@ function PodiumCard({
             pts
           </span>
         </div>
+
+        <div className="mt-3 flex items-center justify-center gap-1 text-xs text-gray-500">
+          <Flame
+            size={13}
+            className="text-orange-400"
+          />
+          {player.streak} day streak
+        </div>
       </div>
     </motion.div>
   );
@@ -808,22 +798,22 @@ function RankIcon({
 
   if (rank === 1) {
     return (
-      <div className="text-yellow-400">
-        <Trophy size={size} />
+      <div className="flex items-center justify-center text-yellow-400">
+        <Crown size={size} />
       </div>
     );
   }
 
   if (rank === 2) {
     return (
-      <div className="text-gray-300">
+      <div className="flex items-center justify-center text-gray-300">
         <Medal size={size} />
       </div>
     );
   }
 
   return (
-    <div className="text-orange-400">
+    <div className="flex items-center justify-center text-orange-400">
       <Medal size={size} />
     </div>
   );
@@ -842,11 +832,11 @@ function MiniStat({
 }) {
   return (
     <div className="text-center sm:text-right">
-      <p className="text-sm font-black">
+      <p className="text-base font-black sm:text-lg">
         {value}
       </p>
 
-      <p className="mt-0.5 text-[10px] text-gray-600">
+      <p className="mt-0.5 text-[10px] uppercase tracking-wider text-gray-600">
         {label}
       </p>
     </div>
@@ -870,16 +860,14 @@ function FilterSelect({
     <div className="relative">
       <select
         value={value}
-        onChange={(e) =>
-          onChange(e.target.value)
-        }
-        className="w-full appearance-none rounded-xl border border-white/10 bg-white/[0.04] py-3 pl-4 pr-10 text-sm font-semibold text-gray-300 outline-none transition focus:border-indigo-500/50 sm:w-auto"
+        onChange={(e) => onChange(e.target.value)}
+        className="w-full appearance-none rounded-xl border border-white/10 bg-white/[0.04] py-3 pl-4 pr-10 text-sm font-semibold text-gray-300 outline-none transition focus:border-indigo-500/50 focus:bg-white/[0.06] sm:w-auto"
       >
         {options.map((option) => (
           <option
             key={option}
             value={option}
-            className="bg-[#0b1024]"
+            className="bg-[#101426] text-white"
           >
             {option}
           </option>
@@ -907,7 +895,7 @@ function MobileStat({
 }) {
   return (
     <div className="text-center">
-      <p className="text-sm font-bold text-gray-300">
+      <p className="text-sm font-black">
         {value}
       </p>
 
@@ -936,7 +924,7 @@ function InfoCard({
   bgClass: string;
 }) {
   return (
-    <div className="rounded-2xl border border-white/10 bg-white/[0.035] p-5">
+    <div className="group rounded-2xl border border-white/10 bg-white/[0.035] p-5 transition hover:-translate-y-1 hover:border-white/15 hover:bg-white/[0.05]">
       <div
         className={`flex h-11 w-11 items-center justify-center rounded-xl ${bgClass} ${iconClass}`}
       >
@@ -953,4 +941,3 @@ function InfoCard({
     </div>
   );
 }
-
