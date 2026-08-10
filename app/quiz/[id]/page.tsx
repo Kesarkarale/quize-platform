@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useParams, useRouter } from "next/navigation";
+import { useParams } from "next/navigation";
 import { useEffect, useMemo, useState } from "react";
 import {
   ArrowLeft,
@@ -17,20 +17,36 @@ import { getQuizById } from "@/lib/quiz-data";
 
 export default function QuizAttemptPage() {
   const params = useParams();
-  const router = useRouter();
 
-  const quizId = Array.isArray(params.id)
-    ? params.id[0]
-    : params.id;
+  /* =====================================================
+     QUIZ ID
+  ===================================================== */
 
-  const quiz = getQuizById(quizId);
+  const rawId = params?.id;
+
+  const quizId =
+    typeof rawId === "string"
+      ? rawId
+      : Array.isArray(rawId)
+        ? rawId[0]
+        : undefined;
+
+  const quiz = quizId ? getQuizById(quizId) : undefined;
+
+  /* =====================================================
+     STATE
+  ===================================================== */
 
   const [currentQuestion, setCurrentQuestion] = useState(0);
-  const [answers, setAnswers] = useState<Record<number, number>>({});
+  const [answers, setAnswers] = useState<Record<string, number>>({});
   const [timeLeft, setTimeLeft] = useState(
     quiz ? quiz.duration * 60 : 0
   );
   const [submitted, setSubmitted] = useState(false);
+
+  /* =====================================================
+     CURRENT QUESTION
+  ===================================================== */
 
   const question = quiz?.questions[currentQuestion];
 
@@ -57,7 +73,9 @@ export default function QuizAttemptPage() {
       });
     }, 1000);
 
-    return () => window.clearInterval(timer);
+    return () => {
+      window.clearInterval(timer);
+    };
   }, [quiz, submitted, timeLeft]);
 
   /* =====================================================
@@ -82,23 +100,27 @@ export default function QuizAttemptPage() {
 
   const correctAnswers = quiz
     ? quiz.questions.reduce((total, item) => {
-        return total + (answers[item.id] === item.answer ? 1 : 0);
+        return total + (
+          answers[item.id] === item.answer ? 1 : 0
+        );
       }, 0)
     : 0;
 
-  const score = quiz
-    ? Math.round(
-        (correctAnswers / quiz.questions.length) * 100
-      )
-    : 0;
+  const score =
+    quiz && quiz.questions.length > 0
+      ? Math.round(
+          (correctAnswers / quiz.questions.length) * 100
+        )
+      : 0;
 
   const passed = quiz
     ? score >= quiz.passingScore
     : false;
 
-  const progress = quiz
-    ? ((currentQuestion + 1) / quiz.questions.length) * 100
-    : 0;
+  const progress =
+    quiz && quiz.questions.length > 0
+      ? ((currentQuestion + 1) / quiz.questions.length) * 100
+      : 0;
 
   /* =====================================================
      INVALID QUIZ
@@ -106,24 +128,57 @@ export default function QuizAttemptPage() {
 
   if (!quiz) {
     return (
-      <main className="flex min-h-screen items-center justify-center bg-gray-50 px-6 dark:bg-[#08090b]">
-        <div className="max-w-md rounded-3xl border border-gray-200 bg-white p-8 text-center shadow-xl dark:border-white/10 dark:bg-[#101114]">
-          <XCircle
-            size={45}
-            className="mx-auto text-red-500"
-          />
+      <main className="min-h-screen bg-gray-50 px-4 py-12 text-gray-900 dark:bg-[#08090b] dark:text-white">
+        <div className="mx-auto max-w-xl rounded-[28px] border border-gray-200 bg-white p-8 text-center shadow-xl dark:border-white/10 dark:bg-[#101114] sm:p-12">
+          <div className="mx-auto flex h-20 w-20 items-center justify-center rounded-3xl bg-red-50 text-red-500 dark:bg-red-500/10">
+            <XCircle size={40} />
+          </div>
 
           <h1 className="mt-5 text-xl font-black">
             Quiz Not Found
           </h1>
 
-          <p className="mt-2 text-sm text-gray-400">
-            The quiz you are looking for does not exist.
+          <p className="mt-2 text-sm leading-6 text-gray-400">
+            The quiz you are looking for does not exist
+            or the quiz ID is invalid.
           </p>
 
           <Link
             href="/quiz"
-            className="mt-6 inline-flex items-center gap-2 rounded-xl bg-indigo-600 px-5 py-3 text-sm font-bold text-white"
+            className="mt-6 inline-flex items-center gap-2 rounded-xl bg-indigo-600 px-5 py-3 text-sm font-bold text-white transition hover:bg-indigo-700"
+          >
+            <ArrowLeft size={16} />
+            Back to Quizzes
+          </Link>
+        </div>
+      </main>
+    );
+  }
+
+  /* =====================================================
+     INVALID QUESTION
+  ===================================================== */
+
+  if (!question) {
+    return (
+      <main className="min-h-screen bg-gray-50 px-4 py-12 text-gray-900 dark:bg-[#08090b] dark:text-white">
+        <div className="mx-auto max-w-xl rounded-[28px] border border-gray-200 bg-white p-8 text-center shadow-xl dark:border-white/10 dark:bg-[#101114] sm:p-12">
+          <div className="mx-auto flex h-20 w-20 items-center justify-center rounded-3xl bg-amber-50 text-amber-500 dark:bg-amber-500/10">
+            <XCircle size={40} />
+          </div>
+
+          <h1 className="mt-5 text-xl font-black">
+            Question Not Found
+          </h1>
+
+          <p className="mt-2 text-sm leading-6 text-gray-400">
+            This quiz does not contain the selected
+            question.
+          </p>
+
+          <Link
+            href="/quiz"
+            className="mt-6 inline-flex items-center gap-2 rounded-xl bg-indigo-600 px-5 py-3 text-sm font-bold text-white transition hover:bg-indigo-700"
           >
             <ArrowLeft size={16} />
             Back to Quizzes
@@ -147,7 +202,7 @@ export default function QuizAttemptPage() {
   };
 
   /* =====================================================
-     NEXT
+     NEXT QUESTION
   ===================================================== */
 
   const handleNext = () => {
@@ -159,7 +214,7 @@ export default function QuizAttemptPage() {
   };
 
   /* =====================================================
-     PREVIOUS
+     PREVIOUS QUESTION
   ===================================================== */
 
   const handlePrevious = () => {
@@ -186,16 +241,18 @@ export default function QuizAttemptPage() {
   if (submitted) {
     return (
       <main className="min-h-screen bg-gray-50 px-4 py-8 text-gray-900 dark:bg-[#08090b] dark:text-white sm:px-6">
-        <div className="mx-auto max-w-3xl">
+        <div className="mx-auto max-w-4xl">
           <Link
             href="/quiz"
-            className="mb-6 inline-flex items-center gap-2 text-sm font-semibold text-gray-500 transition hover:text-indigo-600 dark:text-gray-400 dark:hover:text-indigo-400"
+            className="mb-6 inline-flex items-center gap-2 text-sm font-bold text-gray-500 transition hover:text-indigo-600 dark:text-gray-400 dark:hover:text-indigo-400"
           >
-            <ArrowLeft size={17} />
+            <ArrowLeft size={18} />
             Back to Quizzes
           </Link>
 
           <div className="overflow-hidden rounded-[30px] border border-gray-200 bg-white shadow-xl dark:border-white/10 dark:bg-[#101114]">
+            {/* RESULT HEADER */}
+
             <div
               className={`p-8 text-center text-white sm:p-12 ${
                 passed
@@ -221,12 +278,14 @@ export default function QuizAttemptPage() {
                   : "Keep Practicing! 💪"}
               </h1>
 
-              <p className="mx-auto mt-3 max-w-lg text-sm text-white/80">
+              <p className="mx-auto mt-3 max-w-lg text-sm leading-6 text-white/80">
                 {passed
                   ? "Excellent work! You have successfully passed this quiz."
                   : "Don't worry. Review the concepts and try the quiz again."}
               </p>
             </div>
+
+            {/* RESULT BODY */}
 
             <div className="p-6 sm:p-8">
               <div className="grid gap-4 sm:grid-cols-3">
@@ -247,7 +306,7 @@ export default function QuizAttemptPage() {
               </div>
 
               <div className="mt-8 rounded-2xl border border-gray-200 bg-gray-50 p-5 dark:border-white/10 dark:bg-white/[0.03]">
-                <div className="flex items-center justify-between">
+                <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
                   <div>
                     <p className="text-sm font-black">
                       {quiz.title}
@@ -259,7 +318,7 @@ export default function QuizAttemptPage() {
                   </div>
 
                   <span
-                    className={`rounded-xl px-3 py-2 text-xs font-bold ${
+                    className={`w-fit rounded-xl px-3 py-2 text-xs font-bold ${
                       passed
                         ? "bg-emerald-50 text-emerald-600 dark:bg-emerald-500/10 dark:text-emerald-400"
                         : "bg-red-50 text-red-600 dark:bg-red-500/10 dark:text-red-400"
@@ -308,26 +367,27 @@ export default function QuizAttemptPage() {
           <div className="flex items-center justify-between gap-4">
             <Link
               href="/quiz"
-              className="flex items-center gap-2 text-sm font-bold text-gray-500 hover:text-indigo-600 dark:text-gray-400 dark:hover:text-indigo-400"
+              className="flex items-center gap-2 text-sm font-bold text-gray-500 transition hover:text-indigo-600 dark:text-gray-400 dark:hover:text-indigo-400"
             >
               <ArrowLeft size={18} />
+
               <span className="hidden sm:inline">
                 Exit Quiz
               </span>
             </Link>
 
-            <div className="text-center">
+            <div className="min-w-0 text-center">
               <p className="text-xs font-bold text-gray-400">
                 {quiz.category}
               </p>
 
-              <h1 className="text-sm font-black sm:text-base">
+              <h1 className="truncate text-sm font-black sm:text-base">
                 {quiz.title}
               </h1>
             </div>
 
             <div
-              className={`flex items-center gap-2 rounded-xl px-3 py-2 text-sm font-black ${
+              className={`flex shrink-0 items-center gap-2 rounded-xl px-3 py-2 text-sm font-black ${
                 timeLeft <= 60
                   ? "bg-red-50 text-red-600 dark:bg-red-500/10 dark:text-red-400"
                   : "bg-indigo-50 text-indigo-600 dark:bg-indigo-500/10 dark:text-indigo-400"
@@ -353,8 +413,8 @@ export default function QuizAttemptPage() {
         <div className="grid gap-6 lg:grid-cols-[1fr_260px]">
           {/* QUESTION */}
 
-          <section className="rounded-[28px] border border-gray-200 bg-white p-5 shadow-sm sm:p-8 dark:border-white/10 dark:bg-[#101114]">
-            <div className="flex items-center justify-between">
+          <section className="rounded-[28px] border border-gray-200 bg-white p-5 shadow-sm dark:border-white/10 dark:bg-[#101114] sm:p-8">
+            <div className="flex items-center justify-between gap-3">
               <span className="rounded-xl bg-indigo-50 px-3 py-2 text-xs font-bold text-indigo-600 dark:bg-indigo-500/10 dark:text-indigo-400">
                 Question {currentQuestion + 1}
               </span>
@@ -369,62 +429,58 @@ export default function QuizAttemptPage() {
               {question.question}
             </h2>
 
-            <div className="mt-8 space-y-3">
-              {question.options.map(
-                (option, index) => {
-                  const selected =
-                    answers[question.id] === index;
+            {/* OPTIONS */}
 
-                  return (
-                    <button
-                      type="button"
-                      key={option}
-                      onClick={() =>
-                        selectAnswer(index)
-                      }
-                      className={`group flex w-full items-center gap-4 rounded-2xl border p-4 text-left transition ${
+            <div className="mt-8 space-y-3">
+              {question.options.map((option, index) => {
+                const selected =
+                  answers[question.id] === index;
+
+                return (
+                  <button
+                    type="button"
+                    key={`${question.id}-${index}`}
+                    onClick={() => selectAnswer(index)}
+                    className={`group flex w-full items-center gap-4 rounded-2xl border p-4 text-left transition ${
+                      selected
+                        ? "border-indigo-600 bg-indigo-50 shadow-sm dark:border-indigo-500 dark:bg-indigo-500/10"
+                        : "border-gray-200 bg-white hover:border-indigo-300 hover:bg-indigo-50/50 dark:border-white/10 dark:bg-[#141518] dark:hover:border-indigo-500/50"
+                    }`}
+                  >
+                    <span
+                      className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-xl text-sm font-black transition ${
                         selected
-                          ? "border-indigo-600 bg-indigo-50 shadow-sm dark:border-indigo-500 dark:bg-indigo-500/10"
-                          : "border-gray-200 bg-white hover:border-indigo-300 hover:bg-indigo-50/50 dark:border-white/10 dark:bg-[#141518] dark:hover:border-indigo-500/50"
+                          ? "bg-indigo-600 text-white"
+                          : "bg-gray-100 text-gray-500 dark:bg-white/10 dark:text-gray-400"
                       }`}
                     >
-                      <span
-                        className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-xl text-sm font-black transition ${
-                          selected
-                            ? "bg-indigo-600 text-white"
-                            : "bg-gray-100 text-gray-500 dark:bg-white/10 dark:text-gray-400"
-                        }`}
-                      >
-                        {String.fromCharCode(
-                          65 + index
-                        )}
-                      </span>
+                      {String.fromCharCode(65 + index)}
+                    </span>
 
-                      <span
-                        className={`text-sm font-semibold ${
-                          selected
-                            ? "text-indigo-700 dark:text-indigo-300"
-                            : "text-gray-700 dark:text-gray-200"
-                        }`}
-                      >
-                        {option}
-                      </span>
+                    <span
+                      className={`text-sm font-semibold ${
+                        selected
+                          ? "text-indigo-700 dark:text-indigo-300"
+                          : "text-gray-700 dark:text-gray-200"
+                      }`}
+                    >
+                      {option}
+                    </span>
 
-                      {selected && (
-                        <CheckCircle2
-                          size={20}
-                          className="ml-auto shrink-0 text-indigo-600"
-                        />
-                      )}
-                    </button>
-                  );
-                }
-              )}
+                    {selected && (
+                      <CheckCircle2
+                        size={20}
+                        className="ml-auto shrink-0 text-indigo-600"
+                      />
+                    )}
+                  </button>
+                );
+              })}
             </div>
 
             {/* NAVIGATION */}
 
-            <div className="mt-8 flex items-center justify-between border-t border-gray-100 pt-6 dark:border-white/10">
+            <div className="mt-8 flex items-center justify-between gap-3 border-t border-gray-100 pt-6 dark:border-white/10">
               <button
                 type="button"
                 disabled={currentQuestion === 0}
@@ -432,7 +488,9 @@ export default function QuizAttemptPage() {
                 className="inline-flex items-center gap-2 rounded-xl border border-gray-200 px-4 py-3 text-xs font-bold transition hover:bg-gray-50 disabled:cursor-not-allowed disabled:opacity-40 dark:border-white/10 dark:hover:bg-white/5"
               >
                 <ArrowLeft size={16} />
-                Previous
+                <span className="hidden sm:inline">
+                  Previous
+                </span>
               </button>
 
               <button
@@ -485,8 +543,8 @@ export default function QuizAttemptPage() {
                       active
                         ? "bg-indigo-600 text-white shadow-lg shadow-indigo-500/20"
                         : answered
-                        ? "bg-emerald-50 text-emerald-600 dark:bg-emerald-500/10 dark:text-emerald-400"
-                        : "bg-gray-100 text-gray-500 hover:bg-gray-200 dark:bg-white/10 dark:text-gray-400 dark:hover:bg-white/15"
+                          ? "bg-emerald-50 text-emerald-600 dark:bg-emerald-500/10 dark:text-emerald-400"
+                          : "bg-gray-100 text-gray-500 hover:bg-gray-200 dark:bg-white/10 dark:text-gray-400 dark:hover:bg-white/15"
                     }`}
                   >
                     {index + 1}
@@ -494,6 +552,8 @@ export default function QuizAttemptPage() {
                 );
               })}
             </div>
+
+            {/* LEGEND */}
 
             <div className="mt-6 space-y-3 border-t border-gray-100 pt-5 text-[11px] font-semibold dark:border-white/10">
               <div className="flex items-center gap-2">
@@ -519,7 +579,7 @@ export default function QuizAttemptPage() {
 }
 
 /* =========================================================
-RESULT CARD
+   RESULT CARD
 ========================================================= */
 
 function ResultCard({
@@ -531,7 +591,7 @@ function ResultCard({
 }) {
   return (
     <div className="rounded-2xl border border-gray-200 bg-gray-50 p-5 text-center dark:border-white/10 dark:bg-white/[0.03]">
-      <p className="text-xs font-semibold text-gray-400">
+      <p className="text-xs font-bold uppercase tracking-wider text-gray-400">
         {label}
       </p>
 
@@ -541,3 +601,4 @@ function ResultCard({
     </div>
   );
 }
+
