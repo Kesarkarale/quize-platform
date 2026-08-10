@@ -12,93 +12,169 @@ export type Quiz = {
   category: string;
   difficulty: "Easy" | "Medium" | "Hard";
   duration: number;
-  questions: QuizQuestion[];
   passingScore: number;
+  questions: QuizQuestion[];
 };
 
 export const quizzes: Quiz[] = [
   // =====================================================
-  // JAVASCRIPT
+  // JAVASCRIPT - BASIC
   // =====================================================
+
   {
-    id: "javascript",
-    title: "JavaScript Fundamentals",
+    id: "javascript-basics",
+    title: "JavaScript Basics",
     description:
-      "Test your knowledge of JavaScript fundamentals, syntax, variables, functions and modern concepts.",
+      "Learn and test your knowledge of JavaScript fundamentals, variables, data types and operators.",
     category: "JavaScript",
-    difficulty: "Medium",
-    duration: 20,
+    difficulty: "Easy",
+    duration: 10,
     passingScore: 60,
     questions: [
       {
         id: 1,
-        question: "Which keyword is used to declare a block-scoped variable?",
-        options: ["var", "let", "define", "constant"],
-        answer: 1,
-      },
-      {
-        id: 2,
-        question: "Which method is used to add an item to the end of an array?",
-        options: ["push()", "pop()", "shift()", "unshift()"],
+        question: "Which keyword is used to declare a variable in JavaScript?",
+        options: ["var", "int", "string", "define"],
         answer: 0,
       },
       {
-        id: 3,
-        question: "What does === check in JavaScript?",
-        options: [
-          "Only value",
-          "Only type",
-          "Value and type",
-          "Variable name",
-        ],
+        id: 2,
+        question: "Which symbol is used for strict equality?",
+        options: ["=", "==", "===", "!="],
         answer: 2,
       },
       {
+        id: 3,
+        question: "Which data type represents true or false?",
+        options: ["String", "Boolean", "Number", "Object"],
+        answer: 1,
+      },
+      {
         id: 4,
-        question: "Which function converts JSON string into a JavaScript object?",
+        question: "Which method converts JSON text into a JavaScript object?",
         options: [
           "JSON.parse()",
           "JSON.stringify()",
-          "JSON.object()",
           "JSON.convert()",
+          "JSON.object()",
         ],
         answer: 0,
       },
       {
         id: 5,
-        question: "Which array method creates a new array by transforming every element?",
-        options: ["filter()", "map()", "find()", "reduce()"],
+        question: "Which keyword creates a block-scoped variable?",
+        options: ["var", "let", "define", "global"],
         answer: 1,
       },
       {
         id: 6,
-        question: "What is the result of typeof null?",
-        options: ["null", "object", "undefined", "boolean"],
+        question: "What does typeof 10 return?",
+        options: ["integer", "number", "float", "numeric"],
         answer: 1,
       },
       {
         id: 7,
-        question: "Which symbol is used for an arrow function?",
-        options: ["->", "=>", "::", "<-"],
-        answer: 1,
+        question: "Which method adds an item to the end of an array?",
+        options: ["push()", "pop()", "shift()", "add()"],
+        answer: 0,
       },
       {
         id: 8,
-        question: "Which keyword stops a loop immediately?",
-        options: ["stop", "exit", "break", "return"],
+        question: "Which method removes the last item from an array?",
+        options: ["push()", "remove()", "pop()", "delete()"],
         answer: 2,
       },
       {
         id: 9,
-        question: "Which method removes the last element from an array?",
-        options: ["shift()", "remove()", "delete()", "pop()"],
-        answer: 3,
+        question: "Which keyword is used to define a function?",
+        options: ["function", "func", "method", "define"],
+        answer: 0,
       },
       {
         id: 10,
         question: "Which value represents an intentional absence of a value?",
-        options: ["undefined", "null", "empty", "NaN"],
+        options: ["undefined", "null", "empty", "false"],
         answer: 1,
+      },
+    ],
+  },
+
+  // =====================================================
+  // JAVASCRIPT - ADVANCED
+  // =====================================================
+
+  {
+    id: "javascript-advanced",
+    title: "JavaScript Advanced",
+    description:
+      "Challenge yourself with closures, promises, async programming, scope and modern JavaScript.",
+    category: "JavaScript",
+    difficulty: "Hard",
+    duration: 15,
+    passingScore: 60,
+    questions: [
+      {
+        id: 1,
+        question: "What is a closure in JavaScript?",
+        options: [
+          "A function with access to its outer scope",
+          "A closed browser window",
+          "A type of loop",
+          "A JavaScript class",
+        ],
+        answer: 0,
+      },
+      {
+        id: 2,
+        question: "Which keyword is used to handle asynchronous promises?",
+        options: ["async", "await", "Both A and B", "promise"],
+        answer: 2,
+      },
+      {
+        id: 3,
+        question: "What does Promise.all() return?",
+        options: [
+          "A single value",
+          "A promise resolving when all promises resolve",
+          "An array immediately",
+          "A callback",
+        ],
+        answer: 1,
+      },
+      {
+        id: 4,
+        question: "Which statement creates a constant?",
+        options: ["let", "var", "const", "static"],
+        answer: 2,
+      },
+      {
+        id: 5,
+        question: "What does the spread operator look like?",
+        options: ["...", "***", "=>", "??"],
+        answer: 0,
+      },
+      {
+        id: 6,
+        question: "Which method creates a new array by transforming each element?",
+        options: ["filter()", "map()", "reduce()", "find()"],
+        answer: 1,
+      },
+      {
+        id: 7,
+        question: "Which method returns elements that satisfy a condition?",
+        options: ["map()", "filter()", "reduce()", "join()"],
+        answer: 1,
+      },
+      {
+        id: 8,
+        question: "What is event bubbling?",
+        options: [
+          "Event moving from child toward parent",
+          "Event being deleted",
+          "Event running twice",
+          "Event being paused",
+        ],
+        answer: 0,
       },
     ],
   },
@@ -106,30 +182,31 @@ export const quizzes: Quiz[] = [
   // =====================================================
   // REACT
   // =====================================================
+
   {
-    id: "react",
+    id: "react-development",
     title: "React Development",
     description:
-      "Challenge yourself with React components, hooks, props, state and modern React development.",
+      "Test your React knowledge including components, props, state, hooks and rendering.",
     category: "React",
-    difficulty: "Hard",
-    duration: 25,
+    difficulty: "Medium",
+    duration: 15,
     passingScore: 60,
     questions: [
       {
         id: 1,
         question: "What is React primarily used for?",
         options: [
-          "Database management",
           "Building user interfaces",
-          "Operating systems",
-          "Server hardware",
+          "Managing databases",
+          "Creating operating systems",
+          "Writing SQL queries",
         ],
-        answer: 1,
+        answer: 0,
       },
       {
         id: 2,
-        question: "Which hook is used to manage state in a functional component?",
+        question: "Which hook is used to manage state?",
         options: ["useEffect", "useState", "useMemo", "useRef"],
         answer: 1,
       },
@@ -141,64 +218,47 @@ export const quizzes: Quiz[] = [
       },
       {
         id: 4,
-        question: "What are props used for?",
+        question: "What are props?",
         options: [
-          "Passing data to components",
-          "Creating databases",
-          "Styling only",
-          "Installing packages",
+          "Data passed from parent to child",
+          "Database records",
+          "CSS properties",
+          "React packages",
         ],
         answer: 0,
       },
       {
         id: 5,
-        question: "Which syntax is commonly used to return multiple elements from a component without a wrapper?",
-        options: ["Fragments", "Arrays only", "Classes", "Modules"],
+        question: "What should be used as a unique identifier when rendering lists?",
+        options: ["key", "idName", "indexOnly", "unique"],
         answer: 0,
       },
       {
         id: 6,
-        question: "What is JSX?",
+        question: "JSX allows you to write:",
         options: [
-          "A database",
-          "A JavaScript syntax extension",
-          "A CSS framework",
-          "A testing library",
+          "HTML-like syntax inside JavaScript",
+          "SQL inside CSS",
+          "Python inside HTML",
+          "Only CSS",
         ],
-        answer: 1,
-      },
-      {
-        id: 7,
-        question: "Why is the key prop used when rendering lists?",
-        options: [
-          "For styling",
-          "To identify list elements",
-          "For authentication",
-          "For routing",
-        ],
-        answer: 1,
-      },
-      {
-        id: 8,
-        question: "Which hook can be used to access a DOM element directly?",
-        options: ["useRef", "useState", "useEffect", "useReducer"],
         answer: 0,
       },
       {
-        id: 9,
-        question: "What happens when React state changes?",
+        id: 7,
+        question: "Which command is commonly used to create a React project with Vite?",
         options: [
-          "The page always reloads",
-          "The component can re-render",
-          "The browser closes",
-          "The database resets",
+          "npm create vite",
+          "npm create react-project",
+          "react start vite",
+          "vite new react",
         ],
-        answer: 1,
+        answer: 0,
       },
       {
-        id: 10,
-        question: "Which library is commonly used for routing in React applications?",
-        options: ["React Router", "React SQL", "React DB", "React Server"],
+        id: 8,
+        question: "Which hook is used to store a mutable reference?",
+        options: ["useRef", "useState", "useMemo", "useEffect"],
         answer: 0,
       },
     ],
@@ -207,14 +267,15 @@ export const quizzes: Quiz[] = [
   // =====================================================
   // PYTHON
   // =====================================================
+
   {
-    id: "python",
+    id: "python-basics",
     title: "Python Basics",
     description:
-      "Test your Python programming knowledge including variables, lists, functions and loops.",
+      "Test your Python fundamentals including variables, lists, functions, loops and conditions.",
     category: "Python",
     difficulty: "Easy",
-    duration: 15,
+    duration: 12,
     passingScore: 60,
     questions: [
       {
@@ -225,72 +286,61 @@ export const quizzes: Quiz[] = [
       },
       {
         id: 2,
-        question: "Which data type stores an ordered collection of items?",
-        options: ["list", "bool", "int", "float"],
-        answer: 0,
+        question: "Which symbol is used to create a comment?",
+        options: ["//", "#", "/*", "--"],
+        answer: 1,
       },
       {
         id: 3,
-        question: "Which symbol is used for comments in Python?",
-        options: ["//", "/*", "#", "--"],
-        answer: 2,
+        question: "Which data structure stores ordered items?",
+        options: ["List", "Set", "Dictionary", "None"],
+        answer: 0,
       },
       {
         id: 4,
-        question: "What is the output type of input()?",
-        options: ["integer", "string", "boolean", "float"],
+        question: "Which keyword is used for a loop over a sequence?",
+        options: ["foreach", "for", "loop", "repeat"],
         answer: 1,
       },
       {
         id: 5,
-        question: "Which keyword is used for a loop over a sequence?",
-        options: ["loop", "foreach", "for", "repeat"],
-        answer: 2,
-      },
-      {
-        id: 6,
-        question: "Which data structure stores key-value pairs?",
-        options: ["List", "Tuple", "Dictionary", "Set"],
-        answer: 2,
-      },
-      {
-        id: 7,
-        question: "Which operator is used for exponentiation?",
-        options: ["^", "**", "//", "%%"],
+        question: "What is the extension of a Python file?",
+        options: [".java", ".py", ".python", ".pt"],
         answer: 1,
       },
       {
-        id: 8,
+        id: 6,
+        question: "Which function prints output?",
+        options: ["console.log()", "print()", "echo()", "write()"],
+        answer: 1,
+      },
+      {
+        id: 7,
         question: "Which value represents no value in Python?",
         options: ["null", "undefined", "None", "empty"],
         answer: 2,
       },
       {
-        id: 9,
-        question: "Which function returns the number of items in a collection?",
-        options: ["size()", "count()", "len()", "length()"],
-        answer: 2,
-      },
-      {
-        id: 10,
-        question: "Which keyword is used to import a module?",
-        options: ["include", "require", "import", "module"],
-        answer: 2,
+        id: 8,
+        question: "Which operator is used for exponentiation?",
+        options: ["^", "**", "//", "%%"],
+        answer: 1,
       },
     ],
   },
 
   // =====================================================
-  // HTML & CSS
+  // HTML
   // =====================================================
+
   {
-    id: "html-css",
-    title: "HTML & CSS",
+    id: "html-basics",
+    title: "HTML Fundamentals",
     description:
-      "Test your frontend fundamentals with HTML structure, CSS styling and responsive design.",
+      "Test your knowledge of HTML elements, structure, forms, links and semantic tags.",
     category: "HTML",
     difficulty: "Easy",
-    duration: 15,
+    duration: 10,
     passingScore: 60,
     questions: [
       {
@@ -299,7 +349,7 @@ export const quizzes: Quiz[] = [
         options: [
           "Hyper Text Markup Language",
           "High Text Machine Language",
-          "Hyperlink Text Management Language",
+          "Hyper Tool Multi Language",
           "Home Tool Markup Language",
         ],
         answer: 0,
@@ -307,7 +357,7 @@ export const quizzes: Quiz[] = [
       {
         id: 2,
         question: "Which tag is used for the largest heading?",
-        options: ["<head>", "<h6>", "<h1>", "<title>"],
+        options: ["<heading>", "<h6>", "<h1>", "<head>"],
         answer: 2,
       },
       {
@@ -318,50 +368,108 @@ export const quizzes: Quiz[] = [
       },
       {
         id: 4,
-        question: "Which CSS property changes text color?",
-        options: ["font-color", "text-color", "color", "foreground"],
-        answer: 2,
+        question: "Which tag is used to display an image?",
+        options: ["<image>", "<img>", "<picture>", "<src>"],
+        answer: 1,
       },
       {
         id: 5,
-        question: "Which CSS property controls the space inside an element?",
-        options: ["margin", "padding", "spacing", "gap"],
+        question: "Which attribute provides alternative text for an image?",
+        options: ["title", "alt", "src", "text"],
         answer: 1,
       },
       {
         id: 6,
+        question: "Which tag creates an unordered list?",
+        options: ["<ol>", "<list>", "<ul>", "<li>"],
+        answer: 2,
+      },
+      {
+        id: 7,
+        question: "Which tag is used to create a form?",
+        options: ["<input>", "<form>", "<field>", "<submit>"],
+        answer: 1,
+      },
+      {
+        id: 8,
+        question: "Which HTML tag represents navigation links?",
+        options: ["<navigation>", "<nav>", "<menu>", "<links>"],
+        answer: 1,
+      },
+    ],
+  },
+
+  // =====================================================
+  // CSS
+  // =====================================================
+
+  {
+    id: "css-fundamentals",
+    title: "CSS Fundamentals",
+    description:
+      "Learn and test CSS concepts including selectors, Flexbox, Grid, spacing and responsive design.",
+    category: "CSS",
+    difficulty: "Easy",
+    duration: 10,
+    passingScore: 60,
+    questions: [
+      {
+        id: 1,
+        question: "What does CSS stand for?",
+        options: [
+          "Cascading Style Sheets",
+          "Creative Style System",
+          "Computer Style Sheets",
+          "Colorful Style Syntax",
+        ],
+        answer: 0,
+      },
+      {
+        id: 2,
+        question: "Which property changes text color?",
+        options: ["font-color", "text-color", "color", "foreground"],
+        answer: 2,
+      },
+      {
+        id: 3,
+        question: "Which property changes the background color?",
+        options: ["bg-color", "background-color", "color-bg", "background"],
+        answer: 1,
+      },
+      {
+        id: 4,
         question: "Which CSS layout system is designed for one-dimensional layouts?",
         options: ["Grid", "Flexbox", "Float", "Position"],
         answer: 1,
       },
       {
-        id: 7,
-        question: "Which property makes an element a flex container?",
-        options: [
-          "position: flex",
-          "display: flex",
-          "flex: display",
-          "layout: flex",
-        ],
+        id: 5,
+        question: "Which property controls space inside an element?",
+        options: ["margin", "padding", "spacing", "gap"],
         answer: 1,
       },
       {
-        id: 8,
-        question: "Which HTML tag is used to display an image?",
-        options: ["<picture>", "<image>", "<img>", "<src>"],
-        answer: 2,
+        id: 6,
+        question: "Which property controls space outside an element?",
+        options: ["padding", "margin", "border", "outside"],
+        answer: 1,
       },
       {
-        id: 9,
-        question: "Which CSS unit is relative to the root font size?",
+        id: 7,
+        question: "Which unit is relative to the root font size?",
         options: ["px", "em", "rem", "%"],
         answer: 2,
       },
       {
-        id: 10,
-        question: "Which HTML attribute provides alternative text for an image?",
-        options: ["title", "alt", "text", "description"],
-        answer: 1,
+        id: 8,
+        question: "Which property makes an element a flex container?",
+        options: [
+          "display: flex",
+          "position: flex",
+          "flex: display",
+          "layout: flex",
+        ],
+        answer: 0,
       },
     ],
   },
@@ -369,171 +477,209 @@ export const quizzes: Quiz[] = [
   // =====================================================
   // TYPESCRIPT
   // =====================================================
+
   {
-    id: "typescript",
-    title: "TypeScript Essentials",
+    id: "typescript-basics",
+    title: "TypeScript Basics",
     description:
-      "Test your knowledge of TypeScript types, interfaces, functions and modern development.",
+      "Test your knowledge of types, interfaces, functions, unions and TypeScript fundamentals.",
     category: "TypeScript",
     difficulty: "Medium",
-    duration: 20,
+    duration: 12,
     passingScore: 60,
     questions: [
       {
         id: 1,
         question: "TypeScript is a superset of which language?",
-        options: ["Python", "Java", "JavaScript", "C++"],
-        answer: 2,
+        options: ["Python", "JavaScript", "Java", "C++"],
+        answer: 1,
       },
       {
         id: 2,
         question: "Which keyword defines an interface?",
-        options: ["type", "interface", "struct", "schema"],
+        options: ["type", "interface", "struct", "object"],
         answer: 1,
       },
       {
         id: 3,
-        question: "Which type represents true or false?",
-        options: ["bool", "boolean", "BooleanValue", "logic"],
+        question: "Which type represents text?",
+        options: ["text", "string", "char", "StringText"],
         answer: 1,
       },
       {
         id: 4,
-        question: "Which symbol is commonly used for optional properties?",
-        options: ["!", "?", "#", "&"],
+        question: "Which type represents true or false?",
+        options: ["bool", "boolean", "BooleanValue", "bit"],
         answer: 1,
       },
       {
         id: 5,
-        question: "Which type allows any value?",
-        options: ["unknown", "any", "never", "void"],
-        answer: 1,
+        question: "What does a union type allow?",
+        options: [
+          "Multiple possible types",
+          "Only strings",
+          "Only objects",
+          "No types",
+        ],
+        answer: 0,
       },
       {
         id: 6,
-        question: "Which type is safer than any when the type is unknown?",
-        options: ["unknown", "never", "void", "object"],
-        answer: 0,
+        question: "Which symbol is commonly used for a union?",
+        options: ["&", "|", "||", "+"],
+        answer: 1,
       },
       {
         id: 7,
         question: "Which file extension is commonly used for TypeScript?",
-        options: [".js", ".jsx", ".ts", ".css"],
-        answer: 2,
+        options: [".ts", ".typescript", ".tsxonly", ".type"],
+        answer: 0,
       },
       {
         id: 8,
         question: "Which extension is used for TypeScript with JSX?",
-        options: [".tsx", ".ts", ".jsx", ".react"],
-        answer: 0,
-      },
-      {
-        id: 9,
-        question: "What does a union type allow?",
-        options: [
-          "Only one fixed type",
-          "Multiple possible types",
-          "Only objects",
-          "Only strings",
-        ],
-        answer: 1,
-      },
-      {
-        id: 10,
-        question: "Which type represents a function that returns nothing?",
-        options: ["null", "void", "empty", "none"],
+        options: [".jsx", ".tsx", ".tsjsx", ".react"],
         answer: 1,
       },
     ],
   },
 
   // =====================================================
-  // NODE.JS
+  // SQL
   // =====================================================
+
   {
-    id: "nodejs",
-    title: "Node.js Fundamentals",
+    id: "sql-basics",
+    title: "SQL Fundamentals",
     description:
-      "Learn and test your knowledge of Node.js, modules, APIs and server-side JavaScript.",
-    category: "Node.js",
+      "Test your database knowledge with SELECT, INSERT, UPDATE, DELETE, JOIN and filtering.",
+    category: "SQL",
     difficulty: "Medium",
-    duration: 20,
+    duration: 15,
     passingScore: 60,
     questions: [
       {
         id: 1,
-        question: "What is Node.js?",
-        options: [
-          "A JavaScript runtime",
-          "A CSS framework",
-          "A database",
-          "A browser",
-        ],
-        answer: 0,
+        question: "Which SQL statement is used to retrieve data?",
+        options: ["GET", "SELECT", "FETCH", "READ"],
+        answer: 1,
       },
       {
         id: 2,
-        question: "Which engine does Node.js use to execute JavaScript?",
-        options: ["SpiderMonkey", "V8", "JavaScriptCore", "Chakra"],
+        question: "Which command adds new records?",
+        options: ["ADD", "INSERT", "CREATE", "PUSH"],
         answer: 1,
       },
       {
         id: 3,
-        question: "Which command initializes a Node.js project?",
-        options: ["node init", "npm init", "npm start", "node create"],
+        question: "Which command modifies existing records?",
+        options: ["CHANGE", "UPDATE", "MODIFY", "ALTER"],
         answer: 1,
       },
       {
         id: 4,
-        question: "What is npm?",
-        options: [
-          "Node Package Manager",
-          "New Programming Module",
-          "Node Project Manager",
-          "Network Package Module",
-        ],
-        answer: 0,
+        question: "Which command removes records?",
+        options: ["REMOVE", "DELETE", "DROP ROW", "CLEAR"],
+        answer: 1,
       },
       {
         id: 5,
-        question: "Which module is used to work with files?",
-        options: ["http", "fs", "pathway", "file"],
+        question: "Which clause filters records?",
+        options: ["FILTER", "WHERE", "WHEN", "HAVING ONLY"],
         answer: 1,
       },
       {
         id: 6,
-        question: "Which object provides information about the current Node process?",
-        options: ["node", "process", "runtime", "system"],
+        question: "Which keyword sorts query results?",
+        options: ["SORT BY", "ORDER BY", "GROUP BY", "ARRANGE"],
         answer: 1,
       },
       {
         id: 7,
-        question: "Which module can create an HTTP server?",
-        options: ["server", "http", "web", "network"],
+        question: "Which JOIN returns matching rows from both tables?",
+        options: ["INNER JOIN", "OUTER JOIN", "FULL JOIN", "MATCH JOIN"],
+        answer: 0,
+      },
+      {
+        id: 8,
+        question: "Which command creates a table?",
+        options: ["NEW TABLE", "CREATE TABLE", "MAKE TABLE", "BUILD TABLE"],
+        answer: 1,
+      },
+    ],
+  },
+
+  // =====================================================
+  // GIT
+  // =====================================================
+
+  {
+    id: "git-github",
+    title: "Git & GitHub",
+    description:
+      "Test your knowledge of Git commands, repositories, commits, branches and GitHub workflows.",
+    category: "Git",
+    difficulty: "Medium",
+    duration: 12,
+    passingScore: 60,
+    questions: [
+      {
+        id: 1,
+        question: "Which command initializes a Git repository?",
+        options: ["git start", "git init", "git create", "git new"],
+        answer: 1,
+      },
+      {
+        id: 2,
+        question: "Which command checks the current repository status?",
+        options: ["git check", "git status", "git state", "git info"],
+        answer: 1,
+      },
+      {
+        id: 3,
+        question: "Which command creates a commit?",
+        options: ["git save", "git commit", "git push", "git record"],
+        answer: 1,
+      },
+      {
+        id: 4,
+        question: "Which command sends commits to a remote repository?",
+        options: ["git send", "git push", "git upload", "git publish"],
+        answer: 1,
+      },
+      {
+        id: 5,
+        question: "Which command downloads changes from a remote repository?",
+        options: ["git pull", "git download", "git fetch-all", "git receive"],
+        answer: 0,
+      },
+      {
+        id: 6,
+        question: "Which command creates a new branch?",
+        options: [
+          "git branch branch-name",
+          "git new branch-name",
+          "git create branch-name",
+          "git make branch-name",
+        ],
+        answer: 0,
+      },
+      {
+        id: 7,
+        question: "What is GitHub?",
+        options: [
+          "A database",
+          "A cloud platform for Git repositories",
+          "A programming language",
+          "A CSS framework",
+        ],
         answer: 1,
       },
       {
         id: 8,
-        question: "Which file commonly contains npm project configuration?",
-        options: ["project.json", "package.json", "node.json", "config.json"],
+        question: "Which command stages files?",
+        options: ["git stage", "git add", "git prepare", "git include"],
         answer: 1,
-      },
-      {
-        id: 9,
-        question: "Which command installs a package?",
-        options: ["npm add", "npm install", "node install", "package get"],
-        answer: 1,
-      },
-      {
-        id: 10,
-        question: "Node.js is commonly used for which type of development?",
-        options: [
-          "Server-side applications",
-          "Only graphic design",
-          "Only spreadsheets",
-          "Operating system drivers",
-        ],
-        answer: 0,
       },
     ],
   },
@@ -541,14 +687,15 @@ export const quizzes: Quiz[] = [
   // =====================================================
   // NEXT.JS
   // =====================================================
+
   {
-    id: "nextjs",
-    title: "Next.js Development",
+    id: "nextjs-basics",
+    title: "Next.js Fundamentals",
     description:
-      "Test your knowledge of Next.js routing, components, server rendering and modern web development.",
+      "Test your Next.js knowledge including App Router, pages, routing, server components and layouts.",
     category: "Next.js",
-    difficulty: "Hard",
-    duration: 25,
+    difficulty: "Medium",
+    duration: 15,
     passingScore: 60,
     questions: [
       {
@@ -559,523 +706,215 @@ export const quizzes: Quiz[] = [
       },
       {
         id: 2,
-        question: "Which folder is commonly used for the App Router?",
-        options: ["pages", "src", "app", "routes"],
-        answer: 2,
+        question: "Which folder is used by the App Router?",
+        options: ["pages", "app", "routes", "src/pages"],
+        answer: 1,
       },
       {
         id: 3,
-        question: "What directive is used to create a Client Component?",
-        options: [
-          '"use client"',
-          '"client component"',
-          '"use browser"',
-          '"client"',
-        ],
-        answer: 0,
-      },
-      {
-        id: 4,
-        question: "Which component is used for optimized images?",
-        options: ["Image", "NextImage", "OptimizedImage", "Img"],
-        answer: 0,
-      },
-      {
-        id: 5,
-        question: "Which component is used for internal navigation?",
-        options: ["Router", "Link", "Navigate", "NextLink"],
-        answer: 1,
-      },
-      {
-        id: 6,
-        question: "What is a dynamic route example?",
-        options: [
-          "/products/id",
-          "/products/[id]",
-          "/products/:id",
-          "/products/{id}",
-        ],
-        answer: 1,
-      },
-      {
-        id: 7,
-        question: "Which file can define a page in the App Router?",
+        question: "Which file defines a page in the App Router?",
         options: ["index.tsx", "page.tsx", "route.tsx", "screen.tsx"],
         answer: 1,
       },
       {
-        id: 8,
-        question: "Which file is commonly used for shared UI layout?",
-        options: ["layout.tsx", "wrapper.tsx", "main.tsx", "root.tsx"],
+        id: 4,
+        question: "Which file defines a shared layout?",
+        options: ["layout.tsx", "main.tsx", "wrapper.tsx", "app.tsx"],
         answer: 0,
       },
       {
-        id: 9,
-        question: "Which command starts a Next.js development server?",
-        options: ["npm run dev", "npm run next", "next start-dev", "node dev"],
-        answer: 0,
-      },
-      {
-        id: 10,
-        question: "Next.js can support which rendering strategies?",
+        id: 5,
+        question: "What directive creates a Client Component?",
         options: [
-          "Only CSR",
-          "Only SSR",
-          "SSR, SSG and CSR",
-          "Only static HTML",
+          '"use client"',
+          '"client"',
+          '"use browser"',
+          '"client component"',
         ],
-        answer: 2,
+        answer: 0,
+      },
+      {
+        id: 6,
+        question: "Which component is commonly used for internal navigation?",
+        options: ["Navigate", "Link", "RouterLink", "NextLinkOnly"],
+        answer: 1,
+      },
+      {
+        id: 7,
+        question: "Which framework feature can optimize images?",
+        options: ["next/image", "next/photo", "next/img", "next/media"],
+        answer: 0,
+      },
+      {
+        id: 8,
+        question: "Which hook is commonly used to access the current route parameters?",
+        options: ["useParams", "useRoute", "usePath", "usePage"],
+        answer: 0,
       },
     ],
   },
 
   // =====================================================
-  // GIT & GITHUB
+  // NODE.JS
   // =====================================================
+
   {
-    id: "git-github",
-    title: "Git & GitHub",
+    id: "nodejs-basics",
+    title: "Node.js Fundamentals",
     description:
-      "Learn version control, Git commands, branches, commits and GitHub workflows.",
-    category: "Git",
-    difficulty: "Easy",
+      "Learn Node.js fundamentals including modules, npm, APIs, server concepts and asynchronous programming.",
+    category: "Node.js",
+    difficulty: "Medium",
     duration: 15,
     passingScore: 60,
     questions: [
       {
         id: 1,
-        question: "What is Git?",
+        question: "Node.js is built on which JavaScript engine?",
+        options: ["SpiderMonkey", "V8", "Chakra", "JavaScriptCore"],
+        answer: 1,
+      },
+      {
+        id: 2,
+        question: "What is npm?",
         options: [
-          "A version control system",
-          "A database",
-          "A programming language",
-          "A browser",
+          "Node Package Manager",
+          "Node Programming Method",
+          "New Package Module",
+          "Node Process Manager",
         ],
         answer: 0,
       },
       {
-        id: 2,
-        question: "Which command initializes a Git repository?",
-        options: ["git start", "git init", "git create", "git repo"],
-        answer: 1,
-      },
-      {
         id: 3,
-        question: "Which command stages files?",
-        options: ["git stage", "git add", "git save", "git prepare"],
+        question: "Which file usually contains npm project information?",
+        options: ["project.json", "package.json", "npm.json", "node.json"],
         answer: 1,
       },
       {
         id: 4,
-        question: "Which command creates a commit?",
-        options: ["git save", "git commit", "git push", "git record"],
+        question: "Which command installs dependencies?",
+        options: ["npm get", "npm install", "npm add-all", "npm dependencies"],
         answer: 1,
       },
       {
         id: 5,
-        question: "Which command uploads commits to a remote repository?",
-        options: ["git upload", "git push", "git send", "git publish"],
-        answer: 1,
+        question: "Node.js is commonly used for:",
+        options: [
+          "Backend development",
+          "Only CSS",
+          "Only databases",
+          "Image editing",
+        ],
+        answer: 0,
       },
       {
         id: 6,
-        question: "Which command downloads remote changes?",
-        options: ["git pull", "git download", "git fetch-all", "git receive"],
-        answer: 0,
-      },
-      {
-        id: 7,
-        question: "Which command creates a new branch?",
-        options: [
-          "git branch feature",
-          "git new feature",
-          "git create feature",
-          "git branch-new feature",
-        ],
-        answer: 0,
-      },
-      {
-        id: 8,
-        question: "What is GitHub?",
-        options: [
-          "A platform for hosting and collaborating on Git repositories",
-          "A programming language",
-          "A database",
-          "A text editor",
-        ],
-        answer: 0,
-      },
-      {
-        id: 9,
-        question: "Which command shows the current repository status?",
-        options: ["git check", "git status", "git info", "git state"],
+        question: "Which module is used for working with files?",
+        options: ["file", "fs", "files", "storage"],
         answer: 1,
       },
       {
-        id: 10,
-        question: "Which command shows commit history?",
-        options: ["git history", "git commits", "git log", "git records"],
-        answer: 2,
+        id: 7,
+        question: "Node.js uses which model heavily for I/O?",
+        options: [
+          "Blocking only",
+          "Event-driven asynchronous",
+          "Manual threading only",
+          "Static execution",
+        ],
+        answer: 1,
+      },
+      {
+        id: 8,
+        question: "Which command runs a package script named dev?",
+        options: ["npm dev", "npm run dev", "node dev", "npm start-dev"],
+        answer: 1,
       },
     ],
   },
 
   // =====================================================
-  // SQL
+  // WEB DEVELOPMENT
   // =====================================================
-  {
-    id: "sql",
-    title: "SQL & Database",
-    description:
-      "Test your knowledge of SQL queries, tables, filtering, joins and database fundamentals.",
-    category: "SQL",
-    difficulty: "Medium",
-    duration: 20,
-    passingScore: 60,
-    questions: [
-      {
-        id: 1,
-        question: "What does SQL stand for?",
-        options: [
-          "Structured Query Language",
-          "Simple Query Language",
-          "System Query Logic",
-          "Structured Question Language",
-        ],
-        answer: 0,
-      },
-      {
-        id: 2,
-        question: "Which command retrieves data from a table?",
-        options: ["GET", "SELECT", "FETCH", "READ"],
-        answer: 1,
-      },
-      {
-        id: 3,
-        question: "Which command adds new records?",
-        options: ["ADD", "INSERT", "CREATE", "APPEND"],
-        answer: 1,
-      },
-      {
-        id: 4,
-        question: "Which command modifies existing records?",
-        options: ["CHANGE", "MODIFY", "UPDATE", "EDIT"],
-        answer: 2,
-      },
-      {
-        id: 5,
-        question: "Which command removes records?",
-        options: ["REMOVE", "DELETE", "DROP", "CLEAR"],
-        answer: 1,
-      },
-      {
-        id: 6,
-        question: "Which clause filters rows?",
-        options: ["FILTER", "WHERE", "HAVING", "SELECT"],
-        answer: 1,
-      },
-      {
-        id: 7,
-        question: "Which keyword sorts query results?",
-        options: ["SORT BY", "ORDER BY", "GROUP BY", "ARRANGE"],
-        answer: 1,
-      },
-      {
-        id: 8,
-        question: "Which SQL command creates a table?",
-        options: ["MAKE TABLE", "CREATE TABLE", "NEW TABLE", "TABLE CREATE"],
-        answer: 1,
-      },
-      {
-        id: 9,
-        question: "What is a primary key?",
-        options: [
-          "A unique identifier for a row",
-          "A password",
-          "A table name",
-          "A database server",
-        ],
-        answer: 0,
-      },
-      {
-        id: 10,
-        question: "Which JOIN returns matching rows from both tables?",
-        options: ["INNER JOIN", "OUTER JOIN", "LEFT JOIN", "CROSS JOIN"],
-        answer: 0,
-      },
-    ],
-  },
 
-  // =====================================================
-  // C PROGRAMMING
-  // =====================================================
   {
-    id: "c-programming",
-    title: "C Programming",
+    id: "web-development-basics",
+    title: "Web Development Basics",
     description:
-      "Test your knowledge of C programming, variables, loops, functions, arrays and pointers.",
-    category: "C",
-    difficulty: "Medium",
-    duration: 20,
+      "A complete beginner-friendly quiz covering HTML, CSS, JavaScript, browsers and web fundamentals.",
+    category: "Web Development",
+    difficulty: "Easy",
+    duration: 12,
     passingScore: 60,
     questions: [
       {
         id: 1,
-        question: "Who developed the C programming language?",
-        options: ["James Gosling", "Dennis Ritchie", "Bjarne Stroustrup", "Guido van Rossum"],
-        answer: 1,
+        question: "Which language structures a web page?",
+        options: ["HTML", "CSS", "SQL", "Python"],
+        answer: 0,
       },
       {
         id: 2,
-        question: "Which function is the entry point of a C program?",
-        options: ["start()", "main()", "run()", "execute()"],
+        question: "Which language styles a web page?",
+        options: ["HTML", "CSS", "JavaScript", "SQL"],
         answer: 1,
       },
       {
         id: 3,
-        question: "Which format specifier is used for an integer?",
-        options: ["%c", "%f", "%d", "%s"],
+        question: "Which language adds interactivity to websites?",
+        options: ["CSS", "HTML", "JavaScript", "SQL"],
         answer: 2,
       },
       {
         id: 4,
-        question: "Which symbol ends a C statement?",
-        options: [".", ":", ";", ","],
-        answer: 2,
-      },
-      {
-        id: 5,
-        question: "Which header is commonly used for printf()?",
-        options: ["stdlib.h", "stdio.h", "string.h", "math.h"],
-        answer: 1,
-      },
-      {
-        id: 6,
-        question: "Which loop executes while a condition is true?",
-        options: ["while", "repeat", "loop", "iterate"],
-        answer: 0,
-      },
-      {
-        id: 7,
-        question: "Which operator gets the address of a variable?",
-        options: ["*", "&", "#", "@"],
-        answer: 1,
-      },
-      {
-        id: 8,
-        question: "Which data type stores a single character?",
-        options: ["string", "char", "character", "text"],
-        answer: 1,
-      },
-      {
-        id: 9,
-        question: "Which keyword is used to return a value from a function?",
-        options: ["send", "return", "output", "give"],
-        answer: 1,
-      },
-      {
-        id: 10,
-        question: "An array stores what?",
+        question: "What does URL stand for?",
         options: [
-          "Multiple values of the same type",
-          "Only one value",
-          "Only functions",
-          "Only characters",
-        ],
-        answer: 0,
-      },
-    ],
-  },
-
-  // =====================================================
-  // JAVA
-  // =====================================================
-  {
-    id: "java",
-    title: "Java Programming",
-    description:
-      "Test your Java knowledge including OOP, classes, objects, variables and exceptions.",
-    category: "Java",
-    difficulty: "Medium",
-    duration: 20,
-    passingScore: 60,
-    questions: [
-      {
-        id: 1,
-        question: "Java is primarily known as which type of language?",
-        options: [
-          "Object-oriented programming language",
-          "Markup language",
-          "Database language",
-          "Styling language",
+          "Uniform Resource Locator",
+          "Universal Resource Link",
+          "Uniform Routing Language",
+          "User Resource Location",
         ],
         answer: 0,
       },
       {
-        id: 2,
-        question: "Which keyword creates a new object?",
-        options: ["create", "new", "object", "instance"],
-        answer: 1,
-      },
-      {
-        id: 3,
-        question: "Which method is the entry point of a Java application?",
-        options: ["start()", "main()", "run()", "execute()"],
-        answer: 1,
-      },
-      {
-        id: 4,
-        question: "Which keyword is used to inherit a class?",
-        options: ["inherits", "extends", "implements", "super"],
-        answer: 1,
-      },
-      {
         id: 5,
-        question: "Which keyword is used to implement an interface?",
-        options: ["extends", "implements", "interface", "inherits"],
-        answer: 1,
-      },
-      {
-        id: 6,
-        question: "Which data type stores true or false?",
-        options: ["bool", "boolean", "BooleanValue", "logic"],
-        answer: 1,
-      },
-      {
-        id: 7,
-        question: "Which keyword prevents a class from being inherited?",
-        options: ["static", "final", "private", "sealed"],
-        answer: 1,
-      },
-      {
-        id: 8,
-        question: "Which concept allows the same method name with different parameters?",
-        options: ["Inheritance", "Overloading", "Encapsulation", "Abstraction"],
-        answer: 1,
-      },
-      {
-        id: 9,
-        question: "Which keyword refers to the current object?",
-        options: ["self", "this", "current", "object"],
-        answer: 1,
-      },
-      {
-        id: 10,
-        question: "Which block is commonly used to handle exceptions?",
-        options: ["try-catch", "if-else", "switch-case", "for-loop"],
-        answer: 0,
-      },
-    ],
-  },
-
-  // =====================================================
-  // DATA STRUCTURES & ALGORITHMS
-  // =====================================================
-  {
-    id: "dsa",
-    title: "Data Structures & Algorithms",
-    description:
-      "Challenge yourself with arrays, stacks, queues, searching, sorting and algorithm complexity.",
-    category: "DSA",
-    difficulty: "Hard",
-    duration: 30,
-    passingScore: 60,
-    questions: [
-      {
-        id: 1,
-        question: "Which data structure follows LIFO?",
-        options: ["Queue", "Stack", "Array", "Graph"],
-        answer: 1,
-      },
-      {
-        id: 2,
-        question: "Which data structure follows FIFO?",
-        options: ["Stack", "Queue", "Tree", "Heap"],
-        answer: 1,
-      },
-      {
-        id: 3,
-        question: "What is the average time complexity of binary search?",
-        options: ["O(n)", "O(log n)", "O(n²)", "O(1)"],
-        answer: 1,
-      },
-      {
-        id: 4,
-        question: "Binary search requires the data to be:",
-        options: ["Random", "Sorted", "Duplicated", "Reversed"],
-        answer: 1,
-      },
-      {
-        id: 5,
-        question: "Which sorting algorithm repeatedly swaps adjacent elements?",
-        options: ["Merge Sort", "Bubble Sort", "Quick Sort", "Heap Sort"],
-        answer: 1,
-      },
-      {
-        id: 6,
-        question: "Which structure is made of nodes connected by edges?",
-        options: ["Array", "Graph", "Stack", "Queue"],
-        answer: 1,
-      },
-      {
-        id: 7,
-        question: "Which traversal visits root before its subtrees?",
-        options: ["Inorder", "Preorder", "Postorder", "Level order"],
-        answer: 1,
-      },
-      {
-        id: 8,
-        question: "What is the worst-case complexity of linear search?",
-        options: ["O(1)", "O(log n)", "O(n)", "O(n²)"],
+        question: "Which protocol is commonly used for secure web communication?",
+        options: ["FTP", "HTTP", "HTTPS", "SMTP"],
         answer: 2,
       },
       {
-        id: 9,
-        question: "Which data structure is commonly used for BFS?",
-        options: ["Stack", "Queue", "Heap", "Tree"],
-        answer: 1,
+        id: 6,
+        question: "Which tool is commonly used to inspect a webpage?",
+        options: [
+          "Browser DevTools",
+          "Photoshop",
+          "Excel",
+          "Notepad only",
+        ],
+        answer: 0,
       },
       {
-        id: 10,
-        question: "Which data structure is commonly used for DFS?",
-        options: ["Queue", "Stack", "Hash table", "Array only"],
+        id: 7,
+        question: "What does API stand for?",
+        options: [
+          "Application Programming Interface",
+          "Application Page Internet",
+          "Advanced Programming Input",
+          "Application Process Integration",
+        ],
+        answer: 0,
+      },
+      {
+        id: 8,
+        question: "Which HTTP method is commonly used to retrieve data?",
+        options: ["POST", "GET", "DELETE", "PATCH"],
         answer: 1,
       },
     ],
   },
 ];
 
-// =====================================================
-// GET ALL QUIZZES
-// =====================================================
-
-export function getAllQuizzes(): Quiz[] {
-  return quizzes;
-}
-
-// =====================================================
-// GET QUIZ BY ID
-// =====================================================
-
-export function getQuizById(
-  id: string | undefined
-): Quiz | undefined {
-  if (!id) return undefined;
-
+export function getQuizById(id: string): Quiz | undefined {
   return quizzes.find((quiz) => quiz.id === id);
 }
-
-// =====================================================
-// GET QUIZZES BY CATEGORY
-// =====================================================
-
-export function getQuizzesByCategory(
-  category: string
-): Quiz[] {
-  return quizzes.filter(
-    (quiz) =>
-      quiz.category.toLowerCase() ===
-      category.toLowerCase()
-  );
-}
-
