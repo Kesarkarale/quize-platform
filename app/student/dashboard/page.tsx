@@ -519,7 +519,13 @@ export default function StudentDashboard() {
                 )
               }
             />
-
+                        <Link
+              href="/leaderboard"
+              onClick={() =>
+                setActiveMenu("leaderboard")
+              }
+            >
+                          
             <SidebarItem
               icon={
                 <BarChart3 size={19} />
