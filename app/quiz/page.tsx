@@ -16,11 +16,11 @@ import {
   Brain,
   CheckCircle2,
   Clock3,
+  Flag,
   Lock,
   Trophy,
-  RotateCcw,
-  Star,
-  Crown,
+  XCircle,
+  Zap,
 } from "lucide-react";
 
 import { motion } from "framer-motion";
@@ -36,22 +36,15 @@ type Question = {
   answer: number;
 };
 
-type LevelResult = {
-  level: number;
-  correct: number;
-  total: number;
-  score: number;
-};
-
-const TOTAL_LEVELS = 100;
-const QUESTIONS_PER_LEVEL = 5;
-const TIME_PER_LEVEL = 5 * 60;
-
 /* =========================================================
-   GK QUESTION BANK
+   100 LEVEL GENERAL KNOWLEDGE QUESTION BANK
 ========================================================= */
 
-const gkQuestions: Question[] = [
+const questionBank: Question[] = [
+  // =========================
+  // EASY — LEVEL 1-25
+  // =========================
+
   {
     id: 1,
     question: "What is the capital city of India?",
@@ -60,36 +53,37 @@ const gkQuestions: Question[] = [
   },
   {
     id: 2,
-    question: "Who is known as the Father of the Nation in India?",
-    options: [
-      "Jawaharlal Nehru",
-      "Sardar Patel",
-      "Mahatma Gandhi",
-      "B. R. Ambedkar",
-    ],
-    answer: 2,
+    question: "What is the national animal of India?",
+    options: ["Lion", "Tiger", "Elephant", "Leopard"],
+    answer: 1,
   },
   {
     id: 3,
+    question: "What is the national bird of India?",
+    options: ["Eagle", "Peacock", "Sparrow", "Parrot"],
+    answer: 1,
+  },
+  {
+    id: 4,
     question: "Which is the largest planet in our solar system?",
     options: ["Earth", "Mars", "Jupiter", "Saturn"],
     answer: 2,
   },
   {
-    id: 4,
-    question: "Which is the national animal of India?",
-    options: ["Lion", "Tiger", "Elephant", "Leopard"],
+    id: 5,
+    question: "Which planet is known as the Red Planet?",
+    options: ["Venus", "Mars", "Mercury", "Neptune"],
     answer: 1,
   },
   {
-    id: 5,
+    id: 6,
     question: "How many continents are there in the world?",
     options: ["5", "6", "7", "8"],
     answer: 2,
   },
   {
-    id: 6,
-    question: "Which ocean is the largest?",
+    id: 7,
+    question: "Which is the largest ocean in the world?",
     options: [
       "Atlantic Ocean",
       "Indian Ocean",
@@ -99,14 +93,8 @@ const gkQuestions: Question[] = [
     answer: 2,
   },
   {
-    id: 7,
-    question: "Which planet is known as the Red Planet?",
-    options: ["Venus", "Mars", "Mercury", "Neptune"],
-    answer: 1,
-  },
-  {
     id: 8,
-    question: "Which is the fastest land animal?",
+    question: "Which animal is known as the fastest land animal?",
     options: ["Lion", "Horse", "Cheetah", "Tiger"],
     answer: 2,
   },
@@ -124,386 +112,639 @@ const gkQuestions: Question[] = [
   },
   {
     id: 11,
-    question: "What is the chemical formula of water?",
-    options: ["CO2", "H2O", "O2", "NaCl"],
-    answer: 1,
+    question: "Which is the smallest continent?",
+    options: ["Asia", "Europe", "Australia", "Africa"],
+    answer: 2,
   },
   {
     id: 12,
-    question: "Which organ pumps blood throughout the human body?",
-    options: ["Brain", "Lungs", "Heart", "Kidney"],
-    answer: 2,
+    question: "Which is the largest continent?",
+    options: ["Africa", "Asia", "Europe", "North America"],
+    answer: 1,
   },
   {
     id: 13,
-    question: "What gas do plants absorb during photosynthesis?",
-    options: [
-      "Oxygen",
-      "Nitrogen",
-      "Carbon Dioxide",
-      "Hydrogen",
-    ],
-    answer: 2,
+    question: "What is the currency of India?",
+    options: ["Dollar", "Rupee", "Euro", "Pound"],
+    answer: 1,
   },
   {
     id: 14,
-    question: "What is the nearest star to Earth?",
-    options: ["Moon", "Sun", "Sirius", "Polaris"],
+    question: "Which festival is known as the Festival of Lights?",
+    options: ["Holi", "Diwali", "Eid", "Pongal"],
     answer: 1,
   },
   {
     id: 15,
-    question: "How many bones are there in an adult human body?",
-    options: ["196", "206", "216", "226"],
+    question: "Who wrote the Indian national anthem?",
+    options: [
+      "Mahatma Gandhi",
+      "Rabindranath Tagore",
+      "Jawaharlal Nehru",
+      "Sarojini Naidu",
+    ],
     answer: 1,
   },
   {
     id: 16,
-    question: "Which gas is most abundant in Earth's atmosphere?",
-    options: [
-      "Oxygen",
-      "Carbon Dioxide",
-      "Nitrogen",
-      "Hydrogen",
-    ],
-    answer: 2,
+    question: "Which is the longest river in India?",
+    options: ["Yamuna", "Ganga", "Godavari", "Narmada"],
+    answer: 1,
   },
   {
     id: 17,
-    question: "Which part of a plant carries out photosynthesis?",
-    options: ["Root", "Stem", "Leaf", "Flower"],
-    answer: 2,
+    question: "Which city is known as the Pink City of India?",
+    options: ["Jaipur", "Delhi", "Mumbai", "Pune"],
+    answer: 0,
   },
   {
     id: 18,
-    question: "What force keeps us on the ground?",
-    options: [
-      "Magnetism",
-      "Gravity",
-      "Friction",
-      "Electricity",
-    ],
-    answer: 1,
+    question: "Which city is known as the City of Lakes?",
+    options: ["Udaipur", "Mumbai", "Kolkata", "Chennai"],
+    answer: 0,
   },
   {
     id: 19,
-    question: "Which is the largest mammal in the world?",
-    options: [
-      "Elephant",
-      "Giraffe",
-      "Blue Whale",
-      "Hippopotamus",
-    ],
-    answer: 2,
-  },
-  {
-    id: 20,
-    question: "Which bird is known for its ability to mimic human speech?",
-    options: ["Eagle", "Parrot", "Penguin", "Ostrich"],
-    answer: 1,
-  },
-  {
-    id: 21,
-    question: "What does HTML stand for?",
-    options: [
-      "Hyper Text Markup Language",
-      "High Text Machine Language",
-      "Hyperlink Text Management Language",
-      "Home Tool Markup Language",
-    ],
-    answer: 0,
-  },
-  {
-    id: 22,
-    question: "Which language is primarily used for styling web pages?",
-    options: ["HTML", "CSS", "Python", "SQL"],
-    answer: 1,
-  },
-  {
-    id: 23,
-    question: "Which company developed the Android operating system?",
-    options: ["Microsoft", "Apple", "Google", "IBM"],
-    answer: 2,
-  },
-  {
-    id: 24,
-    question: "What does CPU stand for?",
-    options: [
-      "Central Processing Unit",
-      "Computer Personal Unit",
-      "Central Program Utility",
-      "Computer Processing Utility",
-    ],
-    answer: 0,
-  },
-  {
-    id: 25,
-    question: "Which language is commonly used with React?",
-    options: ["JavaScript", "SQL", "PHP", "C"],
-    answer: 0,
-  },
-  {
-    id: 26,
-    question: "What does API stand for?",
-    options: [
-      "Application Programming Interface",
-      "Advanced Program Integration",
-      "Application Process Internet",
-      "Automated Programming Interface",
-    ],
-    answer: 0,
-  },
-  {
-    id: 27,
-    question: "Which planet is closest to the Sun?",
-    options: ["Earth", "Mercury", "Venus", "Mars"],
-    answer: 1,
-  },
-  {
-    id: 28,
-    question: "How many sides does a triangle have?",
-    options: ["2", "3", "4", "5"],
-    answer: 1,
-  },
-  {
-    id: 29,
-    question: "What is 12 × 8?",
-    options: ["86", "96", "108", "112"],
-    answer: 1,
-  },
-  {
-    id: 30,
-    question: "What is the square root of 144?",
-    options: ["10", "11", "12", "14"],
-    answer: 2,
-  },
-  {
-    id: 31,
-    question: "What is 25% of 200?",
-    options: ["25", "40", "50", "75"],
-    answer: 2,
-  },
-  {
-    id: 32,
-    question: "What is 15 + 27?",
-    options: ["40", "41", "42", "43"],
-    answer: 2,
-  },
-  {
-    id: 33,
-    question: "What is the national flower of India?",
-    options: ["Rose", "Lotus", "Lily", "Sunflower"],
-    answer: 1,
-  },
-  {
-    id: 34,
-    question: "Which is the national bird of India?",
-    options: ["Parrot", "Peacock", "Eagle", "Sparrow"],
-    answer: 1,
-  },
-  {
-    id: 35,
-    question: "Which is the longest river in India?",
-    options: ["Yamuna", "Godavari", "Ganga", "Narmada"],
-    answer: 2,
-  },
-  {
-    id: 36,
-    question: "Who wrote the Indian national anthem?",
-    options: [
-      "Rabindranath Tagore",
-      "Bankim Chandra Chatterjee",
-      "Sarojini Naidu",
-      "Subhash Chandra Bose",
-    ],
-    answer: 0,
-  },
-  {
-    id: 37,
-    question: "Which is the smallest continent?",
-    options: ["Europe", "Australia", "Asia", "Africa"],
-    answer: 1,
-  },
-  {
-    id: 38,
-    question: "Which is the largest continent?",
-    options: ["Africa", "Europe", "Asia", "North America"],
-    answer: 2,
-  },
-  {
-    id: 39,
     question: "How many colors are there in a rainbow?",
     options: ["5", "6", "7", "8"],
     answer: 2,
   },
   {
+    id: 20,
+    question: "Which gas do humans need for breathing?",
+    options: ["Carbon Dioxide", "Oxygen", "Nitrogen", "Hydrogen"],
+    answer: 1,
+  },
+  {
+    id: 21,
+    question: "What is the boiling point of water at sea level?",
+    options: ["50°C", "75°C", "100°C", "120°C"],
+    answer: 2,
+  },
+  {
+    id: 22,
+    question: "Which organ pumps blood through the human body?",
+    options: ["Brain", "Lungs", "Heart", "Kidney"],
+    answer: 2,
+  },
+  {
+    id: 23,
+    question: "Which is the nearest star to Earth?",
+    options: ["Moon", "Sun", "Sirius", "Polaris"],
+    answer: 1,
+  },
+  {
+    id: 24,
+    question: "How many bones are there in an adult human body?",
+    options: ["196", "206", "216", "226"],
+    answer: 1,
+  },
+  {
+    id: 25,
+    question: "Which is the largest mammal in the world?",
+    options: ["Elephant", "Blue Whale", "Giraffe", "Hippopotamus"],
+    answer: 1,
+  },
+
+  // =========================
+  // MEDIUM — LEVEL 26-50
+  // =========================
+
+  {
+    id: 26,
+    question: "Who was the first President of India?",
+    options: [
+      "Dr. Rajendra Prasad",
+      "Jawaharlal Nehru",
+      "Sardar Patel",
+      "Dr. B. R. Ambedkar",
+    ],
+    answer: 0,
+  },
+  {
+    id: 27,
+    question: "Who was the first Prime Minister of India?",
+    options: [
+      "Mahatma Gandhi",
+      "Jawaharlal Nehru",
+      "Sardar Patel",
+      "Lal Bahadur Shastri",
+    ],
+    answer: 1,
+  },
+  {
+    id: 28,
+    question: "In which year did India gain independence?",
+    options: ["1945", "1946", "1947", "1950"],
+    answer: 2,
+  },
+  {
+    id: 29,
+    question: "Who is known as the Father of the Indian Constitution?",
+    options: [
+      "Mahatma Gandhi",
+      "Dr. B. R. Ambedkar",
+      "Rajendra Prasad",
+      "Jawaharlal Nehru",
+    ],
+    answer: 1,
+  },
+  {
+    id: 30,
+    question: "Which is the highest civilian award in India?",
+    options: [
+      "Padma Shri",
+      "Padma Bhushan",
+      "Padma Vibhushan",
+      "Bharat Ratna",
+    ],
+    answer: 3,
+  },
+  {
+    id: 31,
+    question: "Which Indian state has the longest coastline?",
+    options: ["Maharashtra", "Gujarat", "Tamil Nadu", "Kerala"],
+    answer: 1,
+  },
+  {
+    id: 32,
+    question: "Which is the largest state in India by area?",
+    options: ["Maharashtra", "Madhya Pradesh", "Rajasthan", "Uttar Pradesh"],
+    answer: 2,
+  },
+  {
+    id: 33,
+    question: "Which is the smallest state in India by area?",
+    options: ["Goa", "Sikkim", "Tripura", "Manipur"],
+    answer: 0,
+  },
+  {
+    id: 34,
+    question: "Which Indian city is known as the Silicon Valley of India?",
+    options: ["Hyderabad", "Pune", "Bengaluru", "Chennai"],
+    answer: 2,
+  },
+  {
+    id: 35,
+    question: "Where is the headquarters of the Reserve Bank of India?",
+    options: ["Delhi", "Mumbai", "Kolkata", "Chennai"],
+    answer: 1,
+  },
+  {
+    id: 36,
+    question: "Which is the largest desert in India?",
+    options: ["Thar Desert", "Sahara Desert", "Gobi Desert", "Kalahari Desert"],
+    answer: 0,
+  },
+  {
+    id: 37,
+    question: "Which mountain range separates India from the Tibetan Plateau?",
+    options: ["Alps", "Himalayas", "Andes", "Rockies"],
+    answer: 1,
+  },
+  {
+    id: 38,
+    question: "Which is the deepest ocean in the world?",
+    options: [
+      "Indian Ocean",
+      "Atlantic Ocean",
+      "Pacific Ocean",
+      "Arctic Ocean",
+    ],
+    answer: 2,
+  },
+  {
+    id: 39,
+    question: "Which country gifted the Statue of Liberty to the USA?",
+    options: ["Germany", "France", "Italy", "Spain"],
+    answer: 1,
+  },
+  {
     id: 40,
-    question: "Which instrument is used to measure temperature?",
-    options: ["Barometer", "Thermometer", "Hygrometer", "Compass"],
+    question: "Who discovered gravity according to the famous apple story?",
+    options: [
+      "Albert Einstein",
+      "Isaac Newton",
+      "Galileo Galilei",
+      "Nikola Tesla",
+    ],
     answer: 1,
   },
   {
     id: 41,
-    question: "Which instrument is used to measure atmospheric pressure?",
-    options: ["Barometer", "Thermometer", "Compass", "Ammeter"],
-    answer: 0,
+    question: "Who developed the theory of relativity?",
+    options: [
+      "Isaac Newton",
+      "Albert Einstein",
+      "Stephen Hawking",
+      "Galileo Galilei",
+    ],
+    answer: 1,
   },
   {
     id: 42,
-    question: "Which metal is liquid at room temperature?",
-    options: ["Iron", "Gold", "Mercury", "Silver"],
-    answer: 2,
+    question: "What is the chemical symbol for gold?",
+    options: ["Ag", "Au", "Gd", "Go"],
+    answer: 1,
   },
   {
     id: 43,
-    question: "What is the boiling point of water at sea level?",
-    options: ["50°C", "75°C", "100°C", "150°C"],
-    answer: 2,
+    question: "What is the chemical symbol for silver?",
+    options: ["Si", "Ag", "Au", "Sr"],
+    answer: 1,
   },
   {
     id: 44,
-    question: "Which vitamin is produced when skin is exposed to sunlight?",
-    options: ["Vitamin A", "Vitamin B", "Vitamin C", "Vitamin D"],
-    answer: 3,
-  },
-  {
-    id: 45,
-    question: "Which is the hardest natural substance?",
-    options: ["Gold", "Iron", "Diamond", "Silver"],
+    question: "Which planet has the most prominent ring system?",
+    options: ["Mars", "Earth", "Saturn", "Venus"],
     answer: 2,
   },
   {
+    id: 45,
+    question: "Which instrument is used to measure atmospheric pressure?",
+    options: ["Thermometer", "Barometer", "Hygrometer", "Altimeter"],
+    answer: 1,
+  },
+  {
     id: 46,
-    question: "Which country is known as the Land of the Rising Sun?",
-    options: ["China", "Japan", "Korea", "Thailand"],
+    question: "Which instrument measures earthquakes?",
+    options: ["Barometer", "Seismograph", "Thermometer", "Compass"],
     answer: 1,
   },
   {
     id: 47,
-    question: "Which is the largest desert in the world?",
-    options: [
-      "Sahara Desert",
-      "Gobi Desert",
-      "Antarctic Desert",
-      "Thar Desert",
-    ],
-    answer: 2,
+    question: "Which vitamin is mainly produced by sunlight exposure?",
+    options: ["Vitamin A", "Vitamin B", "Vitamin C", "Vitamin D"],
+    answer: 3,
   },
   {
     id: 48,
-    question: "Which is the largest hot desert in the world?",
-    options: [
-      "Sahara Desert",
-      "Gobi Desert",
-      "Kalahari Desert",
-      "Thar Desert",
-    ],
-    answer: 0,
+    question: "Which blood group is known as the universal donor?",
+    options: ["A+", "B+", "AB+", "O−"],
+    answer: 3,
   },
   {
     id: 49,
-    question: "How many players are there in a cricket team?",
-    options: ["9", "10", "11", "12"],
-    answer: 2,
+    question: "Which metal is liquid at room temperature?",
+    options: ["Iron", "Mercury", "Copper", "Aluminium"],
+    answer: 1,
   },
   {
     id: 50,
-    question: "How many players are there in a football team on the field?",
-    options: ["9", "10", "11", "12"],
+    question: "Which is the hardest natural substance?",
+    options: ["Gold", "Iron", "Diamond", "Quartz"],
     answer: 2,
   },
+
+  // =========================
+  // HARD — LEVEL 51-75
+  // =========================
+
   {
     id: 51,
-    question: "Which sport uses a shuttlecock?",
-    options: ["Tennis", "Badminton", "Cricket", "Hockey"],
+    question: "Who was the first Indian to win a Nobel Prize?",
+    options: [
+      "C. V. Raman",
+      "Rabindranath Tagore",
+      "Amartya Sen",
+      "Mother Teresa",
+    ],
     answer: 1,
   },
   {
     id: 52,
-    question: "How many rings are there in the Olympic symbol?",
-    options: ["4", "5", "6", "7"],
-    answer: 1,
+    question: "In which year was the Constitution of India adopted?",
+    options: ["1947", "1948", "1949", "1950"],
+    answer: 2,
   },
   {
     id: 53,
-    question: "Which country hosted the first modern Olympic Games?",
-    options: ["France", "Greece", "Italy", "USA"],
+    question: "When did the Constitution of India come into effect?",
+    options: [
+      "15 August 1947",
+      "26 January 1950",
+      "26 November 1949",
+      "2 October 1950",
+    ],
     answer: 1,
   },
   {
     id: 54,
-    question: "Which is the largest ocean on Earth?",
-    options: [
-      "Atlantic",
-      "Indian",
-      "Pacific",
-      "Arctic",
-    ],
-    answer: 2,
-  },
-  {
-    id: 55,
-    question: "Which planet has the most prominent ring system?",
-    options: ["Mars", "Saturn", "Earth", "Venus"],
+    question: "Which Article of the Indian Constitution deals with equality before law?",
+    options: ["Article 12", "Article 14", "Article 19", "Article 21"],
     answer: 1,
   },
   {
+    id: 55,
+    question: "Which Article is associated with the Right to Life and Personal Liberty?",
+    options: ["Article 14", "Article 19", "Article 21", "Article 32"],
+    answer: 2,
+  },
+  {
     id: 56,
-    question: "What is the center of an atom called?",
-    options: ["Electron", "Nucleus", "Proton", "Shell"],
+    question: "Who was the first woman President of India?",
+    options: [
+      "Indira Gandhi",
+      "Pratibha Patil",
+      "Sarojini Naidu",
+      "Sushma Swaraj",
+    ],
     answer: 1,
   },
   {
     id: 57,
-    question: "Which particle has a negative charge?",
-    options: ["Proton", "Neutron", "Electron", "Nucleus"],
-    answer: 2,
+    question: "Who was the first woman Prime Minister of India?",
+    options: [
+      "Indira Gandhi",
+      "Pratibha Patil",
+      "Sarojini Naidu",
+      "Vijaya Lakshmi Pandit",
+    ],
+    answer: 0,
   },
   {
     id: 58,
-    question: "Which particle has no electrical charge?",
-    options: ["Electron", "Proton", "Neutron", "Ion"],
-    answer: 2,
+    question: "Which is the oldest mountain range in India?",
+    options: ["Himalayas", "Aravalli Range", "Western Ghats", "Vindhyas"],
+    answer: 1,
   },
   {
     id: 59,
-    question: "What is the SI unit of force?",
-    options: ["Joule", "Newton", "Watt", "Pascal"],
+    question: "Which Indian river is known as the Sorrow of Bihar?",
+    options: ["Ganga", "Kosi", "Yamuna", "Son"],
     answer: 1,
   },
   {
     id: 60,
+    question: "Which river is known as the Sorrow of Bengal?",
+    options: ["Damodar", "Ganga", "Hooghly", "Teesta"],
+    answer: 0,
+  },
+  {
+    id: 61,
+    question: "Which is the largest freshwater lake in India?",
+    options: [
+      "Dal Lake",
+      "Wular Lake",
+      "Chilika Lake",
+      "Loktak Lake",
+    ],
+    answer: 1,
+  },
+  {
+    id: 62,
+    question: "Which is the largest brackish water lagoon in India?",
+    options: [
+      "Wular Lake",
+      "Chilika Lake",
+      "Dal Lake",
+      "Sambhar Lake",
+    ],
+    answer: 1,
+  },
+  {
+    id: 63,
+    question: "Which Indian state is known as the Land of Rising Sun?",
+    options: [
+      "Assam",
+      "Arunachal Pradesh",
+      "Sikkim",
+      "Nagaland",
+    ],
+    answer: 1,
+  },
+  {
+    id: 64,
+    question: "Which Indian state is famous for Kaziranga National Park?",
+    options: ["Assam", "Kerala", "Gujarat", "Rajasthan"],
+    answer: 0,
+  },
+  {
+    id: 65,
+    question: "Which national park is famous for Asiatic lions?",
+    options: [
+      "Jim Corbett",
+      "Gir National Park",
+      "Kanha National Park",
+      "Bandipur",
+    ],
+    answer: 1,
+  },
+  {
+    id: 66,
+    question: "Which planet rotates in the opposite direction to most planets?",
+    options: ["Mars", "Venus", "Jupiter", "Neptune"],
+    answer: 1,
+  },
+  {
+    id: 67,
+    question: "Which planet has the shortest year?",
+    options: ["Earth", "Mercury", "Venus", "Mars"],
+    answer: 1,
+  },
+  {
+    id: 68,
     question: "What is the SI unit of electric current?",
     options: ["Volt", "Watt", "Ampere", "Ohm"],
     answer: 2,
   },
   {
-    id: 61,
-    question: "Which organ is responsible for breathing?",
-    options: ["Heart", "Lungs", "Kidney", "Stomach"],
+    id: 69,
+    question: "What is the SI unit of force?",
+    options: ["Joule", "Newton", "Pascal", "Watt"],
     answer: 1,
   },
   {
-    id: 62,
-    question: "Which organ filters waste from the blood?",
-    options: ["Heart", "Liver", "Kidney", "Lungs"],
-    answer: 2,
+    id: 70,
+    question: "What is the SI unit of power?",
+    options: ["Watt", "Joule", "Newton", "Volt"],
+    answer: 0,
   },
   {
-    id: 63,
-    question: "Which is the largest organ of the human body?",
-    options: ["Heart", "Skin", "Liver", "Brain"],
+    id: 71,
+    question: "What is the study of earthquakes called?",
+    options: [
+      "Seismology",
+      "Geology",
+      "Meteorology",
+      "Ecology",
+    ],
+    answer: 0,
+  },
+  {
+    id: 72,
+    question: "What is the study of birds called?",
+    options: [
+      "Ornithology",
+      "Entomology",
+      "Botany",
+      "Zoology",
+    ],
+    answer: 0,
+  },
+  {
+    id: 73,
+    question: "What is the study of insects called?",
+    options: [
+      "Entomology",
+      "Ornithology",
+      "Ecology",
+      "Mycology",
+    ],
+    answer: 0,
+  },
+  {
+    id: 74,
+    question: "What is the study of fungi called?",
+    options: [
+      "Botany",
+      "Mycology",
+      "Zoology",
+      "Ecology",
+    ],
     answer: 1,
   },
   {
-    id: 64,
-    question: "How many chambers does the human heart have?",
-    options: ["2", "3", "4", "5"],
+    id: 75,
+    question: "Which is the largest internal organ in the human body?",
+    options: ["Heart", "Liver", "Lungs", "Kidney"],
+    answer: 1,
+  },
+
+  // =========================
+  // EXPERT — LEVEL 76-100
+  // =========================
+
+  {
+    id: 76,
+    question: "Who was the first Indian Governor-General of independent India?",
+    options: [
+      "Rajendra Prasad",
+      "C. Rajagopalachari",
+      "Jawaharlal Nehru",
+      "Sardar Patel",
+    ],
+    answer: 1,
+  },
+  {
+    id: 77,
+    question: "Who was the first Governor-General of independent India?",
+    options: [
+      "Lord Mountbatten",
+      "C. Rajagopalachari",
+      "Warren Hastings",
+      "Lord Curzon",
+    ],
+    answer: 0,
+  },
+  {
+    id: 78,
+    question: "Which Act introduced provincial autonomy in British India?",
+    options: [
+      "Government of India Act 1909",
+      "Government of India Act 1919",
+      "Government of India Act 1935",
+      "Indian Independence Act 1947",
+    ],
     answer: 2,
   },
   {
-    id: 65,
-    question: "Which blood cells fight infections?",
+    id: 79,
+    question: "Who founded the Maurya Empire?",
+    options: [
+      "Ashoka",
+      "Chandragupta Maurya",
+      "Bindusara",
+      "Harsha",
+    ],
+    answer: 1,
+  },
+  {
+    id: 80,
+    question: "Who wrote Arthashastra?",
+    options: [
+      "Kalidasa",
+      "Kautilya",
+      "Banabhatta",
+      "Panini",
+    ],
+    answer: 1,
+  },
+  {
+    id: 81,
+    question: "Which ancient university was located in present-day Bihar?",
+    options: [
+      "Takshashila",
+      "Nalanda",
+      "Vikramashila",
+      "Both B and C",
+    ],
+    answer: 3,
+  },
+  {
+    id: 82,
+    question: "Which language is the oldest among the classical languages of India?",
+    options: [
+      "Hindi",
+      "Tamil",
+      "Bengali",
+      "Marathi",
+    ],
+    answer: 1,
+  },
+  {
+    id: 83,
+    question: "Which Veda is mainly associated with music and chants?",
+    options: [
+      "Rigveda",
+      "Samaveda",
+      "Yajurveda",
+      "Atharvaveda",
+    ],
+    answer: 1,
+  },
+  {
+    id: 84,
+    question: "Who wrote the epic Ramcharitmanas?",
+    options: [
+      "Tulsidas",
+      "Valmiki",
+      "Kalidasa",
+      "Kabir",
+    ],
+    answer: 0,
+  },
+  {
+    id: 85,
+    question: "Who wrote the ancient Sanskrit drama Abhijnanasakuntalam?",
+    options: [
+      "Kalidasa",
+      "Tulsidas",
+      "Banabhatta",
+      "Chanakya",
+    ],
+    answer: 0,
+  },
+  {
+    id: 86,
+    question: "Which is the largest gland in the human body?",
+    options: ["Pancreas", "Liver", "Thyroid", "Pituitary"],
+    answer: 1,
+  },
+  {
+    id: 87,
+    question: "Which part of the brain controls balance and coordination?",
+    options: [
+      "Cerebrum",
+      "Cerebellum",
+      "Medulla",
+      "Hypothalamus",
+    ],
+    answer: 1,
+  },
+  {
+    id: 88,
+    question: "Which blood cells are mainly responsible for immunity?",
     options: [
       "Red blood cells",
       "White blood cells",
@@ -513,259 +754,113 @@ const gkQuestions: Question[] = [
     answer: 1,
   },
   {
-    id: 66,
-    question: "Which vitamin is commonly associated with citrus fruits?",
-    options: ["Vitamin A", "Vitamin B", "Vitamin C", "Vitamin K"],
-    answer: 2,
-  },
-  {
-    id: 67,
-    question: "Which gas do humans need for respiration?",
-    options: [
-      "Carbon dioxide",
-      "Oxygen",
-      "Nitrogen",
-      "Hydrogen",
-    ],
-    answer: 1,
-  },
-  {
-    id: 68,
-    question: "Which is the largest internal organ in the human body?",
-    options: ["Heart", "Liver", "Brain", "Kidney"],
-    answer: 1,
-  },
-  {
-    id: 69,
-    question: "What is the study of plants called?",
-    options: ["Zoology", "Botany", "Geology", "Ecology"],
-    answer: 1,
-  },
-  {
-    id: 70,
-    question: "What is the study of animals called?",
-    options: ["Botany", "Zoology", "Physics", "Astronomy"],
-    answer: 1,
-  },
-  {
-    id: 71,
-    question: "Which is the closest planet to Earth in size?",
-    options: ["Mars", "Venus", "Jupiter", "Mercury"],
-    answer: 1,
-  },
-  {
-    id: 72,
-    question: "Which planet is famous for its Great Red Spot?",
-    options: ["Mars", "Jupiter", "Saturn", "Neptune"],
-    answer: 1,
-  },
-  {
-    id: 73,
-    question: "How many planets are in our solar system?",
-    options: ["7", "8", "9", "10"],
-    answer: 1,
-  },
-  {
-    id: 74,
-    question: "What is Earth's natural satellite?",
-    options: ["Sun", "Moon", "Mars", "Venus"],
-    answer: 1,
-  },
-  {
-    id: 75,
-    question: "What causes day and night on Earth?",
-    options: [
-      "Earth's rotation",
-      "Earth's revolution",
-      "Moon's rotation",
-      "Sun's movement",
-    ],
-    answer: 0,
-  },
-  {
-    id: 76,
-    question: "What causes seasons on Earth?",
-    options: [
-      "Earth's tilt and revolution",
-      "Moon's movement",
-      "Sun's rotation",
-      "Ocean currents",
-    ],
-    answer: 0,
-  },
-  {
-    id: 77,
-    question: "Which country is famous for the Great Wall?",
-    options: ["Japan", "China", "India", "Mongolia"],
-    answer: 1,
-  },
-  {
-    id: 78,
-    question: "Where are the pyramids of Giza located?",
-    options: ["India", "Egypt", "Mexico", "Greece"],
-    answer: 1,
-  },
-  {
-    id: 79,
-    question: "Which city is known as the City of Canals?",
-    options: ["Rome", "Venice", "Paris", "London"],
-    answer: 1,
-  },
-  {
-    id: 80,
-    question: "Which country is shaped like a boot?",
-    options: ["France", "Italy", "Spain", "Portugal"],
-    answer: 1,
-  },
-  {
-    id: 81,
-    question: "Which is the currency of Japan?",
-    options: ["Yuan", "Won", "Yen", "Dollar"],
-    answer: 2,
-  },
-  {
-    id: 82,
-    question: "Which is the currency of the United Kingdom?",
-    options: ["Euro", "Pound Sterling", "Dollar", "Franc"],
-    answer: 1,
-  },
-  {
-    id: 83,
-    question: "Which is the currency of India?",
-    options: ["Rupee", "Dollar", "Pound", "Euro"],
-    answer: 0,
-  },
-  {
-    id: 84,
-    question: "What is the capital of France?",
-    options: ["Madrid", "Paris", "Rome", "Berlin"],
-    answer: 1,
-  },
-  {
-    id: 85,
-    question: "What is the capital of Japan?",
-    options: ["Kyoto", "Tokyo", "Osaka", "Hiroshima"],
-    answer: 1,
-  },
-  {
-    id: 86,
-    question: "What is the capital of Australia?",
-    options: ["Sydney", "Melbourne", "Canberra", "Perth"],
-    answer: 2,
-  },
-  {
-    id: 87,
-    question: "What is the capital of Canada?",
-    options: ["Toronto", "Ottawa", "Vancouver", "Montreal"],
-    answer: 1,
-  },
-  {
-    id: 88,
-    question: "What is the capital of Germany?",
-    options: ["Munich", "Berlin", "Hamburg", "Frankfurt"],
-    answer: 1,
-  },
-  {
     id: 89,
-    question: "Which language has the most native speakers worldwide?",
-    options: ["English", "Hindi", "Mandarin Chinese", "Spanish"],
-    answer: 2,
+    question: "Which molecule carries genetic information?",
+    options: ["RNA", "DNA", "ATP", "Glucose"],
+    answer: 1,
   },
   {
     id: 90,
-    question: "Which is the largest country by land area?",
-    options: ["Canada", "China", "Russia", "USA"],
-    answer: 2,
-  },
-  {
-    id: 91,
-    question: "Which is the smallest country in the world?",
-    options: ["Monaco", "Vatican City", "Malta", "Singapore"],
-    answer: 1,
-  },
-  {
-    id: 92,
-    question: "Which mountain is the highest above sea level?",
+    question: "Which gas is primarily responsible for the greenhouse effect among these?",
     options: [
-      "K2",
-      "Mount Everest",
-      "Kangchenjunga",
-      "Lhotse",
+      "Oxygen",
+      "Carbon dioxide",
+      "Nitrogen",
+      "Helium",
     ],
     answer: 1,
   },
   {
+    id: 91,
+    question: "What is the approximate speed of light in vacuum?",
+    options: [
+      "3 × 10⁶ m/s",
+      "3 × 10⁷ m/s",
+      "3 × 10⁸ m/s",
+      "3 × 10⁹ m/s",
+    ],
+    answer: 2,
+  },
+  {
+    id: 92,
+    question: "Which particle has a negative electric charge?",
+    options: ["Proton", "Neutron", "Electron", "Photon"],
+    answer: 2,
+  },
+  {
     id: 93,
-    question: "Which is the longest river in the world according to common geographic references?",
-    options: ["Amazon", "Nile", "Yangtze", "Mississippi"],
+    question: "Which fundamental force is responsible for keeping planets in orbit?",
+    options: [
+      "Electromagnetic force",
+      "Gravitational force",
+      "Strong nuclear force",
+      "Weak nuclear force",
+    ],
     answer: 1,
   },
   {
     id: 94,
-    question: "Which continent is known as the Dark Continent?",
-    options: ["Asia", "Africa", "Europe", "Australia"],
-    answer: 1,
+    question: "Which country has the largest land area in the world?",
+    options: ["Canada", "China", "Russia", "USA"],
+    answer: 2,
   },
   {
     id: 95,
-    question: "Which animal is known as the Ship of the Desert?",
-    options: ["Horse", "Camel", "Elephant", "Donkey"],
-    answer: 1,
+    question: "Which is the deepest known point in Earth's oceans?",
+    options: [
+      "Mariana Trench",
+      "Java Trench",
+      "Tonga Trench",
+      "Puerto Rico Trench",
+    ],
+    answer: 0,
   },
   {
     id: 96,
-    question: "Which animal is known as the King of the Jungle?",
-    options: ["Tiger", "Lion", "Elephant", "Leopard"],
+    question: "Which desert is the largest hot desert in the world?",
+    options: [
+      "Gobi",
+      "Sahara",
+      "Kalahari",
+      "Arabian",
+    ],
     answer: 1,
   },
   {
     id: 97,
-    question: "Which is the largest land animal?",
-    options: ["Giraffe", "African Elephant", "Rhino", "Hippopotamus"],
-    answer: 1,
+    question: "Which international organization has its headquarters in New York City?",
+    options: [
+      "UN",
+      "WHO",
+      "WTO",
+      "IMF",
+    ],
+    answer: 0,
   },
   {
     id: 98,
-    question: "Which animal is famous for changing its color?",
-    options: ["Chameleon", "Tiger", "Zebra", "Panda"],
+    question: "What does UNESCO stand for?",
+    options: [
+      "United Nations Educational, Scientific and Cultural Organization",
+      "United Nations Economic and Social Cultural Organization",
+      "Universal Nations Education and Science Council Organization",
+      "United Nations Environment Science Council Organization",
+    ],
     answer: 0,
   },
   {
     id: 99,
-    question: "Which insect produces honey?",
-    options: ["Ant", "Butterfly", "Honeybee", "Mosquito"],
-    answer: 2,
+    question: "Which country was the first to launch an artificial satellite?",
+    options: ["USA", "Russia (USSR)", "China", "Japan"],
+    answer: 1,
   },
   {
     id: 100,
-    question: "Which animal is the fastest in the world?",
-    options: ["Cheetah", "Horse", "Lion", "Wolf"],
-    answer: 0,
+    question: "What was the name of the first artificial satellite launched into space?",
+    options: ["Apollo 1", "Sputnik 1", "Vostok 1", "Explorer 1"],
+    answer: 1,
   },
 ];
-
-/* =========================================================
-   CREATE 100 LEVELS
-   Each level contains 5 questions.
-========================================================= */
-
-function getLevelQuestions(level: number): Question[] {
-  const start = ((level - 1) * QUESTIONS_PER_LEVEL) % gkQuestions.length;
-
-  const result: Question[] = [];
-
-  for (let i = 0; i < QUESTIONS_PER_LEVEL; i++) {
-    const question =
-      gkQuestions[(start + i) % gkQuestions.length];
-
-    result.push({
-      ...question,
-      id: i + 1,
-    });
-  }
-
-  return result;
-}
 
 /* =========================================================
    MAIN PAGE
@@ -787,96 +882,70 @@ function QuizContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
 
-  const requestedLevel = Number(
-    searchParams.get("level") || "1"
-  );
+  const category =
+    searchParams.get("category") || "General Knowledge";
 
-  const [unlockedLevel, setUnlockedLevel] =
-    useState(1);
-
-  const [selectedLevel, setSelectedLevel] =
-    useState(requestedLevel);
-
-  const [quizStarted, setQuizStarted] =
-    useState(false);
-
-  const [currentQuestion, setCurrentQuestion] =
-    useState(0);
-
-  const [answers, setAnswers] =
-    useState<Record<number, number>>({});
-
-  const [timeLeft, setTimeLeft] =
-    useState(TIME_PER_LEVEL);
-
-  const [isSubmitting, setIsSubmitting] =
-    useState(false);
-
-  const [levelComplete, setLevelComplete] =
-    useState(false);
-
-  const [levelResult, setLevelResult] =
-    useState<LevelResult | null>(null);
-
-  /* =========================================================
-     LOAD PROGRESS
-  ========================================================= */
-
-  useEffect(() => {
-    const saved =
-      localStorage.getItem("quizUnlockedLevel");
-
-    if (saved) {
-      const value = Number(saved);
-
-      if (
-        Number.isFinite(value) &&
-        value >= 1 &&
-        value <= TOTAL_LEVELS
-      ) {
-        setUnlockedLevel(value);
-      }
-    }
+  const questions = useMemo(() => {
+    return questionBank;
   }, []);
 
-  /* =========================================================
-     SAVE UNLOCKED LEVEL
-  ========================================================= */
+  const [quizStarted, setQuizStarted] = useState(false);
 
-  useEffect(() => {
-    localStorage.setItem(
-      "quizUnlockedLevel",
-      String(unlockedLevel)
-    );
-  }, [unlockedLevel]);
+  const [currentLevel, setCurrentLevel] = useState(1);
 
-  /* =========================================================
-     CURRENT LEVEL QUESTIONS
-  ========================================================= */
+  const [selectedAnswer, setSelectedAnswer] =
+    useState<number | null>(null);
 
-  const questions = useMemo(
-    () => getLevelQuestions(selectedLevel),
-    [selectedLevel]
-  );
+  const [timeLeft, setTimeLeft] = useState(30);
+
+  const [isAnswering, setIsAnswering] =
+    useState(false);
+
+  const [correctAnswers, setCorrectAnswers] =
+    useState(0);
+
+  const [wrongAnswers, setWrongAnswers] =
+    useState(0);
+
+  const [showCorrect, setShowCorrect] =
+    useState(false);
+
+  const [gameOver, setGameOver] =
+    useState(false);
+
+  const [completed, setCompleted] =
+    useState(false);
 
   const question =
-    questions[currentQuestion];
+    questions[currentLevel - 1];
 
   /* =========================================================
-     START LEVEL
+     LEVEL DIFFICULTY
   ========================================================= */
 
-  function startLevel(level: number) {
-    if (level > unlockedLevel) return;
+  function getDifficulty(level: number) {
+    if (level <= 25) return "EASY";
+    if (level <= 50) return "MEDIUM";
+    if (level <= 75) return "HARD";
+    return "EXPERT";
+  }
 
-    setSelectedLevel(level);
-    setCurrentQuestion(0);
-    setAnswers({});
-    setTimeLeft(TIME_PER_LEVEL);
-    setIsSubmitting(false);
-    setLevelComplete(false);
-    setLevelResult(null);
+  const difficulty = getDifficulty(currentLevel);
+
+  /* =========================================================
+     START GAME
+  ========================================================= */
+
+  function startGame() {
     setQuizStarted(true);
+    setCurrentLevel(1);
+    setSelectedAnswer(null);
+    setTimeLeft(30);
+    setCorrectAnswers(0);
+    setWrongAnswers(0);
+    setShowCorrect(false);
+    setGameOver(false);
+    setCompleted(false);
   }
 
   /* =========================================================
@@ -886,8 +955,10 @@ function QuizContent() {
   useEffect(() => {
     if (
       !quizStarted ||
-      isSubmitting ||
-      levelComplete
+      gameOver ||
+      completed ||
+      isAnswering ||
+      showCorrect
     ) {
       return;
     }
@@ -896,6 +967,25 @@ function QuizContent() {
       setTimeLeft((previous) => {
         if (previous <= 1) {
           window.clearInterval(timer);
+
+          setGameOver(true);
+
+          const result = {
+            category,
+            level: currentLevel,
+            totalLevels: 100,
+            correct: correctAnswers,
+            wrong: wrongAnswers + 1,
+            score: correctAnswers,
+            reason: "Time Up",
+            completedAt: new Date().toISOString(),
+          };
+
+          localStorage.setItem(
+            "quizResult",
+            JSON.stringify(result)
+          );
+
           return 0;
         }
 
@@ -908,152 +998,146 @@ function QuizContent() {
     };
   }, [
     quizStarted,
-    isSubmitting,
-    levelComplete,
+    gameOver,
+    completed,
+    isAnswering,
+    showCorrect,
+    currentLevel,
+    category,
+    correctAnswers,
+    wrongAnswers,
   ]);
-
-  /* =========================================================
-     AUTO SUBMIT
-  ========================================================= */
-
-  useEffect(() => {
-    if (
-      quizStarted &&
-      timeLeft === 0 &&
-      !isSubmitting &&
-      !levelComplete
-    ) {
-      submitQuiz();
-    }
-  }, [
-    timeLeft,
-    quizStarted,
-    isSubmitting,
-    levelComplete,
-  ]);
-
-  /* =========================================================
-     TIMER FORMAT
-  ========================================================= */
-
-  const minutes = Math.floor(
-    timeLeft / 60
-  )
-    .toString()
-    .padStart(2, "0");
-
-  const seconds = (timeLeft % 60)
-    .toString()
-    .padStart(2, "0");
 
   /* =========================================================
      SELECT ANSWER
   ========================================================= */
 
-  function selectAnswer(index: number) {
-    if (!question || isSubmitting) return;
+  function chooseAnswer(index: number) {
+    if (
+      isAnswering ||
+      showCorrect ||
+      gameOver ||
+      completed
+    ) {
+      return;
+    }
 
-    setAnswers((previous) => ({
-      ...previous,
-      [question.id]: index,
-    }));
+    setSelectedAnswer(index);
   }
 
   /* =========================================================
-     NEXT QUESTION
+     CHECK ANSWER
   ========================================================= */
 
-  function nextQuestion() {
+  function checkAnswer() {
     if (
-      currentQuestion <
-      questions.length - 1
+      selectedAnswer === null ||
+      isAnswering ||
+      gameOver ||
+      completed
     ) {
-      setCurrentQuestion(
+      return;
+    }
+
+    setIsAnswering(true);
+
+    const isCorrect =
+      selectedAnswer === question.answer;
+
+    if (isCorrect) {
+      setCorrectAnswers(
         (previous) => previous + 1
       );
+
+      setShowCorrect(true);
+
+      window.setTimeout(() => {
+        if (currentLevel >= 100) {
+          const result = {
+            category,
+            level: 100,
+            totalLevels: 100,
+            correct: correctAnswers + 1,
+            wrong: wrongAnswers,
+            score: 100,
+            reason: "Completed",
+            completedAt:
+              new Date().toISOString(),
+          };
+
+          localStorage.setItem(
+            "quizResult",
+            JSON.stringify(result)
+          );
+
+          setCompleted(true);
+          setIsAnswering(false);
+          setShowCorrect(false);
+          return;
+        }
+
+        setCurrentLevel(
+          (previous) => previous + 1
+        );
+
+        setSelectedAnswer(null);
+        setTimeLeft(30);
+        setShowCorrect(false);
+        setIsAnswering(false);
+      }, 900);
+    } else {
+      setWrongAnswers(
+        (previous) => previous + 1
+      );
+
+      setShowCorrect(true);
+
+      window.setTimeout(() => {
+        const result = {
+          category,
+          level: currentLevel,
+          totalLevels: 100,
+          correct: correctAnswers,
+          wrong: wrongAnswers + 1,
+          score: Math.round(
+            (correctAnswers / currentLevel) *
+              100
+          ),
+          reason: "Wrong Answer",
+          completedAt:
+            new Date().toISOString(),
+        };
+
+        localStorage.setItem(
+          "quizResult",
+          JSON.stringify(result)
+        );
+
+        setGameOver(true);
+        setIsAnswering(false);
+        setShowCorrect(false);
+      }, 1200);
     }
   }
 
   /* =========================================================
-     PREVIOUS QUESTION
+     RESTART
   ========================================================= */
 
-  function previousQuestion() {
-    if (currentQuestion > 0) {
-      setCurrentQuestion(
-        (previous) => previous - 1
-      );
-    }
+  function restartGame() {
+    startGame();
   }
 
   /* =========================================================
-     SUBMIT LEVEL
+     TIMER FORMAT
   ========================================================= */
 
-  function submitQuiz() {
-    if (isSubmitting) return;
-
-    setIsSubmitting(true);
-
-    let correct = 0;
-
-    questions.forEach((item) => {
-      if (
-        answers[item.id] ===
-        item.answer
-      ) {
-        correct++;
-      }
-    });
-
-    const score = Math.round(
-      (correct / questions.length) *
-        100
-    );
-
-    const result: LevelResult = {
-      level: selectedLevel,
-      correct,
-      total: questions.length,
-      score,
-    };
-
-    setLevelResult(result);
-
-    /* Save level result */
-
-    const previousResults =
-      JSON.parse(
-        localStorage.getItem(
-          "quizLevelResults"
-        ) || "{}"
-      );
-
-    previousResults[
-      String(selectedLevel)
-    ] = result;
-
-    localStorage.setItem(
-      "quizLevelResults",
-      JSON.stringify(previousResults)
-    );
-
-    /* Unlock next level */
-
-    if (
-      selectedLevel === unlockedLevel &&
-      selectedLevel < TOTAL_LEVELS
-    ) {
-      setUnlockedLevel(
-        selectedLevel + 1
-      );
-    }
-
-    setLevelComplete(true);
-  }
+  const timerText = `00:${timeLeft
+    .toString()
+    .padStart(2, "0")}`;
 
   /* =========================================================
-     LEVEL SELECT SCREEN
+     START SCREEN
   ========================================================= */
 
   if (!quizStarted) {
@@ -1062,27 +1146,27 @@ function QuizContent() {
         {/* Background */}
 
         <div className="pointer-events-none fixed inset-0 overflow-hidden">
-          <div className="absolute -left-40 -top-40 h-[500px] w-[500px] rounded-full bg-indigo-600/15 blur-[140px]" />
+          <div className="absolute -left-40 -top-40 h-[450px] w-[450px] rounded-full bg-indigo-600/20 blur-[140px]" />
 
-          <div className="absolute -bottom-40 -right-40 h-[500px] w-[500px] rounded-full bg-purple-600/15 blur-[140px]" />
+          <div className="absolute -bottom-40 -right-40 h-[450px] w-[450px] rounded-full bg-purple-600/20 blur-[140px]" />
 
-          <div className="absolute left-1/2 top-1/2 h-[400px] w-[400px] -translate-x-1/2 -translate-y-1/2 rounded-full bg-indigo-500/5 blur-[130px]" />
+          <div className="absolute left-1/2 top-1/2 h-[350px] w-[350px] -translate-x-1/2 -translate-y-1/2 rounded-full bg-blue-500/10 blur-[130px]" />
         </div>
 
         {/* Header */}
 
-        <header className="relative z-20 border-b border-white/10 bg-[#050816]/85 backdrop-blur-xl">
+        <header className="relative z-20 border-b border-white/10 bg-[#050816]/90 backdrop-blur-xl">
           <div className="mx-auto flex h-20 max-w-6xl items-center justify-between px-5">
             <Link
               href="/student/dashboard"
               className="flex items-center gap-3"
             >
-              <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-br from-indigo-500 to-purple-600 shadow-lg shadow-indigo-500/20">
-                <Brain size={21} />
+              <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-gradient-to-br from-indigo-500 to-purple-600 shadow-lg shadow-indigo-500/20">
+                <Brain size={22} />
               </div>
 
               <div>
-                <h1 className="font-black">
+                <h1 className="text-lg font-black">
                   Quiz
                   <span className="text-indigo-400">
                     Master
@@ -1108,313 +1192,307 @@ function QuizContent() {
           </div>
         </header>
 
-        {/* Content */}
+        {/* Start */}
 
-        <div className="relative z-10 mx-auto max-w-6xl px-5 py-10">
-          {/* Hero */}
-
+        <div className="relative z-10 flex min-h-[calc(100vh-80px)] items-center justify-center px-5 py-12">
           <motion.div
             initial={{
               opacity: 0,
-              y: 20,
+              y: 30,
             }}
             animate={{
               opacity: 1,
               y: 0,
             }}
-            className="text-center"
+            transition={{
+              duration: 0.5,
+            }}
+            className="w-full max-w-3xl"
           >
-            <div className="mx-auto flex h-20 w-20 items-center justify-center rounded-3xl bg-gradient-to-br from-indigo-500/20 to-purple-500/20 text-indigo-400 ring-1 ring-indigo-500/20">
-              <Trophy size={38} />
+            {/* Icon */}
+
+            <div className="mx-auto flex h-24 w-24 items-center justify-center rounded-[30px] bg-gradient-to-br from-indigo-500/20 to-purple-500/20 text-indigo-400 ring-1 ring-indigo-500/30 shadow-2xl shadow-indigo-500/10">
+              <Trophy size={44} />
             </div>
 
-            <p className="mt-6 text-sm font-bold uppercase tracking-[0.2em] text-indigo-400">
-              Quiz Challenge
-            </p>
+            {/* Title */}
 
-            <h1 className="mt-3 text-4xl font-black sm:text-5xl">
-              GK
-              <span className="bg-gradient-to-r from-indigo-400 to-purple-400 bg-clip-text text-transparent">
-                Master
-              </span>
-            </h1>
-
-            <p className="mx-auto mt-4 max-w-2xl text-sm leading-6 text-gray-500 sm:text-base">
-              Complete all 100 levels and become
-              the ultimate Quiz Master.
-            </p>
-          </motion.div>
-
-          {/* Stats */}
-
-          <div className="mx-auto mt-8 grid max-w-3xl grid-cols-3 gap-3">
-            <div className="rounded-2xl border border-white/10 bg-white/[0.04] p-4 text-center">
-              <p className="text-2xl font-black text-white">
-                100
+            <div className="mt-7 text-center">
+              <p className="text-sm font-bold uppercase tracking-[0.25em] text-indigo-400">
+                100 Level Challenge
               </p>
-              <p className="mt-1 text-xs text-gray-500">
-                Levels
+
+              <h1 className="mt-3 text-4xl font-black sm:text-6xl">
+                General
+                <span className="block bg-gradient-to-r from-indigo-400 via-purple-400 to-pink-400 bg-clip-text text-transparent">
+                  Knowledge Quiz
+                </span>
+              </h1>
+
+              <p className="mx-auto mt-5 max-w-2xl text-sm leading-7 text-gray-500 sm:text-base">
+                Start from Level 1 and prove your
+                knowledge all the way to Level 100.
+                Questions become harder as you
+                progress.
               </p>
             </div>
 
-            <div className="rounded-2xl border border-white/10 bg-white/[0.04] p-4 text-center">
-              <p className="text-2xl font-black text-white">
-                5
-              </p>
-              <p className="mt-1 text-xs text-gray-500">
-                Questions / Level
-              </p>
-            </div>
+            {/* Main Card */}
 
-            <div className="rounded-2xl border border-white/10 bg-white/[0.04] p-4 text-center">
-              <p className="text-2xl font-black text-white">
-                {unlockedLevel}
-              </p>
-              <p className="mt-1 text-xs text-gray-500">
-                Current Level
-              </p>
-            </div>
-          </div>
+            <div className="mt-10 overflow-hidden rounded-[30px] border border-white/10 bg-white/[0.035] shadow-2xl">
+              {/* Level Preview */}
 
-          {/* Level Grid */}
+              <div className="grid grid-cols-2 border-b border-white/10 sm:grid-cols-4">
+                <div className="border-b border-white/10 p-5 text-center sm:border-b-0 sm:border-r">
+                  <p className="text-2xl font-black text-white">
+                    100
+                  </p>
 
-          <div className="mt-10">
-            <div className="mb-5 flex items-center justify-between">
-              <div>
-                <h2 className="text-xl font-black">
-                  Choose Level
+                  <p className="mt-1 text-xs text-gray-600">
+                    Levels
+                  </p>
+                </div>
+
+                <div className="border-b border-white/10 p-5 text-center sm:border-b-0 sm:border-r">
+                  <p className="text-2xl font-black text-green-400">
+                    1
+                  </p>
+
+                  <p className="mt-1 text-xs text-gray-600">
+                    Start Level
+                  </p>
+                </div>
+
+                <div className="border-r border-white/10 p-5 text-center">
+                  <p className="text-2xl font-black text-yellow-400">
+                    30s
+                  </p>
+
+                  <p className="mt-1 text-xs text-gray-600">
+                    Per Question
+                  </p>
+                </div>
+
+                <div className="p-5 text-center">
+                  <p className="text-2xl font-black text-purple-400">
+                    100
+                  </p>
+
+                  <p className="mt-1 text-xs text-gray-600">
+                    Max Score
+                  </p>
+                </div>
+              </div>
+
+              {/* Difficulty */}
+
+              <div className="p-6 sm:p-8">
+                <h2 className="font-bold">
+                  Your Journey
                 </h2>
 
-                <p className="mt-1 text-xs text-gray-600">
-                  Complete a level to unlock
-                  the next one.
+                <div className="mt-5 grid gap-3 sm:grid-cols-4">
+                  <div className="rounded-2xl border border-green-500/20 bg-green-500/[0.06] p-4">
+                    <p className="text-xs font-bold text-green-400">
+                      LEVEL 1–25
+                    </p>
+
+                    <p className="mt-1 font-bold">
+                      Easy
+                    </p>
+
+                    <p className="mt-1 text-xs text-gray-600">
+                      Warm up
+                    </p>
+                  </div>
+
+                  <div className="rounded-2xl border border-blue-500/20 bg-blue-500/[0.06] p-4">
+                    <p className="text-xs font-bold text-blue-400">
+                      LEVEL 26–50
+                    </p>
+
+                    <p className="mt-1 font-bold">
+                      Medium
+                    </p>
+
+                    <p className="mt-1 text-xs text-gray-600">
+                      Challenge begins
+                    </p>
+                  </div>
+
+                  <div className="rounded-2xl border border-orange-500/20 bg-orange-500/[0.06] p-4">
+                    <p className="text-xs font-bold text-orange-400">
+                      LEVEL 51–75
+                    </p>
+
+                    <p className="mt-1 font-bold">
+                      Hard
+                    </p>
+
+                    <p className="mt-1 text-xs text-gray-600">
+                      Think carefully
+                    </p>
+                  </div>
+
+                  <div className="rounded-2xl border border-purple-500/20 bg-purple-500/[0.06] p-4">
+                    <p className="text-xs font-bold text-purple-400">
+                      LEVEL 76–100
+                    </p>
+
+                    <p className="mt-1 font-bold">
+                      Expert
+                    </p>
+
+                    <p className="mt-1 text-xs text-gray-600">
+                      Master level
+                    </p>
+                  </div>
+                </div>
+
+                {/* Rules */}
+
+                <div className="mt-7 grid gap-3 sm:grid-cols-2">
+                  <div className="flex items-center gap-3 rounded-2xl bg-white/[0.03] p-4">
+                    <Clock3
+                      size={19}
+                      className="text-indigo-400"
+                    />
+
+                    <div>
+                      <p className="text-sm font-semibold">
+                        30 seconds
+                      </p>
+
+                      <p className="text-xs text-gray-600">
+                        Every level has a timer
+                      </p>
+                    </div>
+                  </div>
+
+                  <div className="flex items-center gap-3 rounded-2xl bg-white/[0.03] p-4">
+                    <Zap
+                      size={19}
+                      className="text-yellow-400"
+                    />
+
+                    <div>
+                      <p className="text-sm font-semibold">
+                        One chance
+                      </p>
+
+                      <p className="text-xs text-gray-600">
+                        Wrong answer ends game
+                      </p>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Start Button */}
+
+                <button
+                  type="button"
+                  onClick={startGame}
+                  className="group mt-8 flex w-full items-center justify-center gap-3 rounded-2xl bg-gradient-to-r from-indigo-600 to-purple-600 px-6 py-4 text-base font-black text-white shadow-xl shadow-indigo-600/20 transition duration-300 hover:scale-[1.01] hover:shadow-indigo-600/40"
+                >
+                  Start Quiz Game
+
+                  <ArrowRight
+                    size={21}
+                    className="transition-transform duration-300 group-hover:translate-x-1"
+                  />
+                </button>
+
+                <p className="mt-3 text-center text-xs text-gray-600">
+                  Your journey starts at Level 1
                 </p>
               </div>
-
-              <div className="rounded-xl border border-green-500/20 bg-green-500/10 px-3 py-2 text-xs font-bold text-green-400">
-                {unlockedLevel - 1} Completed
-              </div>
             </div>
-
-            <div className="grid grid-cols-4 gap-3 sm:grid-cols-5 md:grid-cols-8 lg:grid-cols-10">
-              {Array.from(
-                { length: TOTAL_LEVELS },
-                (_, index) => {
-                  const level =
-                    index + 1;
-
-                  const locked =
-                    level >
-                    unlockedLevel;
-
-                  const completed =
-                    level <
-                    unlockedLevel;
-
-                  return (
-                    <motion.button
-                      key={level}
-                      whileHover={
-                        !locked
-                          ? {
-                              scale: 1.05,
-                            }
-                          : undefined
-                      }
-                      whileTap={
-                        !locked
-                          ? {
-                              scale: 0.95,
-                            }
-                          : undefined
-                      }
-                      type="button"
-                      disabled={locked}
-                      onClick={() =>
-                        startLevel(level)
-                      }
-                      className={`relative flex aspect-square flex-col items-center justify-center rounded-2xl border text-sm font-black transition ${
-                        locked
-                          ? "cursor-not-allowed border-white/5 bg-white/[0.02] text-gray-700"
-                          : completed
-                          ? "border-green-500/20 bg-green-500/10 text-green-400 hover:bg-green-500/20"
-                          : "border-indigo-500/40 bg-gradient-to-br from-indigo-600/20 to-purple-600/20 text-white shadow-lg shadow-indigo-500/5"
-                      }`}
-                    >
-                      {locked ? (
-                        <Lock size={16} />
-                      ) : completed ? (
-                        <CheckCircle2
-                          size={16}
-                        />
-                      ) : (
-                        <Star
-                          size={16}
-                          className="text-indigo-400"
-                        />
-                      )}
-
-                      <span className="mt-1">
-                        {level}
-                      </span>
-                    </motion.button>
-                  );
-                }
-              )}
-            </div>
-          </div>
+          </motion.div>
         </div>
       </main>
     );
   }
 
   /* =========================================================
-     LEVEL COMPLETE SCREEN
+     GAME OVER
   ========================================================= */
 
-  if (levelComplete && levelResult) {
-    const passed =
-      levelResult.score >= 60;
-
-    const hasNextLevel =
-      selectedLevel <
-      TOTAL_LEVELS;
-
+  if (gameOver) {
     return (
       <main className="min-h-screen bg-[#050816] text-white">
         <div className="pointer-events-none fixed inset-0 overflow-hidden">
-          <div className="absolute left-1/2 top-1/3 h-[450px] w-[450px] -translate-x-1/2 rounded-full bg-indigo-600/15 blur-[140px]" />
+          <div className="absolute left-1/2 top-1/2 h-[450px] w-[450px] -translate-x-1/2 -translate-y-1/2 rounded-full bg-red-500/10 blur-[150px]" />
         </div>
 
-        <div className="relative z-10 flex min-h-screen items-center justify-center px-5 py-10">
+        <div className="relative z-10 flex min-h-screen items-center justify-center px-5">
           <motion.div
             initial={{
               opacity: 0,
-              scale: 0.92,
-              y: 20,
+              scale: 0.95,
             }}
             animate={{
               opacity: 1,
               scale: 1,
-              y: 0,
             }}
-            className="w-full max-w-xl rounded-3xl border border-white/10 bg-white/[0.04] p-7 text-center shadow-2xl sm:p-10"
+            className="w-full max-w-xl rounded-[30px] border border-white/10 bg-white/[0.04] p-8 text-center shadow-2xl sm:p-10"
           >
-            <div className="mx-auto flex h-24 w-24 items-center justify-center rounded-full bg-gradient-to-br from-yellow-400/20 to-orange-500/20 text-yellow-400 ring-1 ring-yellow-400/20">
-              {selectedLevel ===
-              TOTAL_LEVELS ? (
-                <Crown size={48} />
-              ) : (
-                <Trophy size={45} />
-              )}
+            <div className="mx-auto flex h-20 w-20 items-center justify-center rounded-3xl bg-red-500/10 text-red-400 ring-1 ring-red-500/20">
+              <XCircle size={42} />
             </div>
 
-            <p className="mt-7 text-sm font-bold uppercase tracking-[0.2em] text-indigo-400">
-              {selectedLevel ===
-              TOTAL_LEVELS
-                ? "Quiz Master"
-                : "Level Complete"}
+            <p className="mt-7 text-sm font-bold uppercase tracking-[0.2em] text-red-400">
+              Game Over
             </p>
 
-            <h1 className="mt-3 text-3xl font-black sm:text-4xl">
-              Level {selectedLevel}
+            <h1 className="mt-2 text-4xl font-black">
+              Better Luck Next Time
             </h1>
 
-            <p className="mt-2 text-gray-500">
-              {selectedLevel ===
-              TOTAL_LEVELS
-                ? "Amazing! You completed all 100 levels."
-                : passed
-                ? "Excellent! The next level is unlocked."
-                : "Level completed. Keep improving your score!"}
+            <p className="mt-4 text-gray-500">
+              You reached Level{" "}
+              <span className="font-bold text-white">
+                {currentLevel}
+              </span>
+              .
             </p>
 
-            {/* Score */}
+            <div className="mt-8 grid grid-cols-2 gap-3">
+              <div className="rounded-2xl bg-white/[0.04] p-5">
+                <p className="text-3xl font-black text-green-400">
+                  {correctAnswers}
+                </p>
 
-            <div className="mt-8 rounded-2xl border border-white/10 bg-black/20 p-6">
-              <p className="text-5xl font-black">
-                {levelResult.score}%
-              </p>
-
-              <p className="mt-2 text-sm text-gray-500">
-                Your Score
-              </p>
-
-              <div className="mt-6 grid grid-cols-2 gap-3">
-                <div className="rounded-xl bg-green-500/10 p-4">
-                  <p className="text-2xl font-black text-green-400">
-                    {levelResult.correct}
-                  </p>
-
-                  <p className="mt-1 text-xs text-gray-600">
-                    Correct
-                  </p>
-                </div>
-
-                <div className="rounded-xl bg-red-500/10 p-4">
-                  <p className="text-2xl font-black text-red-400">
-                    {levelResult.total -
-                      levelResult.correct}
-                  </p>
-
-                  <p className="mt-1 text-xs text-gray-600">
-                    Wrong
-                  </p>
-                </div>
+                <p className="mt-1 text-xs text-gray-600">
+                  Correct
+                </p>
               </div>
-            </div>
 
-            {/* Buttons */}
+              <div className="rounded-2xl bg-white/[0.04] p-5">
+                <p className="text-3xl font-black text-red-400">
+                  {wrongAnswers}
+                </p>
 
-            <div className="mt-7 grid gap-3 sm:grid-cols-2">
-              <button
-                type="button"
-                onClick={() =>
-                  startLevel(
-                    selectedLevel
-                  )
-                }
-                className="flex items-center justify-center gap-2 rounded-xl border border-white/10 bg-white/[0.05] px-5 py-3 font-bold text-gray-300 transition hover:bg-white/10 hover:text-white"
-              >
-                <RotateCcw size={17} />
-                Play Again
-              </button>
-
-              {hasNextLevel ? (
-                <button
-                  type="button"
-                  onClick={() =>
-                    startLevel(
-                      selectedLevel + 1
-                    )
-                  }
-                  className="flex items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-indigo-600 to-purple-600 px-5 py-3 font-bold text-white transition hover:scale-[1.01]"
-                >
-                  Level{" "}
-                  {selectedLevel + 1}
-                  <ArrowRight size={17} />
-                </button>
-              ) : (
-                <Link
-                  href="/student/dashboard"
-                  className="flex items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-yellow-500 to-orange-500 px-5 py-3 font-bold text-white"
-                >
-                  <Crown size={17} />
-                  Finish
-                </Link>
-              )}
+                <p className="mt-1 text-xs text-gray-600">
+                  Wrong
+                </p>
+              </div>
             </div>
 
             <button
               type="button"
-              onClick={() => {
-                setQuizStarted(false);
-                setLevelComplete(false);
-              }}
-              className="mt-5 text-xs font-semibold text-gray-600 transition hover:text-gray-300"
+              onClick={restartGame}
+              className="mt-7 flex w-full items-center justify-center gap-2 rounded-2xl bg-gradient-to-r from-indigo-600 to-purple-600 px-6 py-4 font-bold transition hover:scale-[1.01]"
             >
-              Back to Levels
+              Play Again
+              <ArrowRight size={19} />
             </button>
+
+            <Link
+              href="/student/dashboard"
+              className="mt-3 flex w-full items-center justify-center rounded-2xl border border-white/10 px-6 py-4 text-sm font-semibold text-gray-400 transition hover:bg-white/[0.05] hover:text-white"
+            >
+              Back to Dashboard
+            </Link>
           </motion.div>
         </div>
       </main>
@@ -1422,21 +1500,78 @@ function QuizContent() {
   }
 
   /* =========================================================
-     QUIZ SCREEN
+     COMPLETED
   ========================================================= */
 
-  const answeredCount =
-    Object.keys(answers).length;
+  if (completed) {
+    return (
+      <main className="min-h-screen bg-[#050816] text-white">
+        <div className="pointer-events-none fixed inset-0 overflow-hidden">
+          <div className="absolute left-1/2 top-1/2 h-[500px] w-[500px] -translate-x-1/2 -translate-y-1/2 rounded-full bg-yellow-500/10 blur-[150px]" />
+        </div>
+
+        <div className="relative z-10 flex min-h-screen items-center justify-center px-5">
+          <motion.div
+            initial={{
+              opacity: 0,
+              y: 30,
+            }}
+            animate={{
+              opacity: 1,
+              y: 0,
+            }}
+            className="w-full max-w-xl rounded-[30px] border border-yellow-500/20 bg-white/[0.04] p-8 text-center shadow-2xl sm:p-10"
+          >
+            <div className="mx-auto flex h-24 w-24 items-center justify-center rounded-[30px] bg-yellow-500/10 text-yellow-400 ring-1 ring-yellow-500/30">
+              <Trophy size={50} />
+            </div>
+
+            <p className="mt-7 text-sm font-bold uppercase tracking-[0.2em] text-yellow-400">
+              Quiz Master
+            </p>
+
+            <h1 className="mt-2 text-4xl font-black sm:text-5xl">
+              You Did It!
+            </h1>
+
+            <p className="mt-4 text-gray-500">
+              Congratulations! You completed all
+              <span className="font-bold text-white">
+                {" "}
+                100 Levels
+              </span>
+              .
+            </p>
+
+            <div className="mt-8 rounded-2xl border border-yellow-500/10 bg-yellow-500/[0.04] p-6">
+              <p className="text-5xl font-black text-yellow-400">
+                {correctAnswers}/100
+              </p>
+
+              <p className="mt-2 text-sm text-gray-500">
+                Final Score
+              </p>
+            </div>
+
+            <Link
+              href="/student/dashboard"
+              className="mt-7 flex w-full items-center justify-center gap-2 rounded-2xl bg-gradient-to-r from-indigo-600 to-purple-600 px-6 py-4 font-bold transition hover:scale-[1.01]"
+            >
+              Back to Dashboard
+              <ArrowRight size={19} />
+            </Link>
+          </motion.div>
+        </div>
+      </main>
+    );
+  }
+
+  /* =========================================================
+     ACTIVE QUIZ
+  ========================================================= */
 
   const progress =
-    ((currentQuestion + 1) /
-      questions.length) *
-    100;
-
-  const selectedAnswer =
-    question
-      ? answers[question.id]
-      : undefined;
+    (currentLevel / 100) * 100;
 
   return (
     <main className="min-h-screen bg-[#050816] text-white">
@@ -1452,43 +1587,41 @@ function QuizContent() {
 
       <header className="sticky top-0 z-50 border-b border-white/10 bg-[#050816]/90 backdrop-blur-xl">
         <div className="mx-auto flex h-20 max-w-6xl items-center justify-between px-5">
-          <div className="flex items-center gap-3">
-            <button
-              type="button"
-              onClick={() => {
-                setQuizStarted(false);
-              }}
-              className="flex h-10 w-10 items-center justify-center rounded-xl border border-white/10 bg-white/[0.04] text-gray-400 transition hover:bg-white/10 hover:text-white"
-            >
-              <ArrowLeft size={18} />
-            </button>
+          <Link
+            href="/student/dashboard"
+            className="flex items-center gap-3"
+          >
+            <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-br from-indigo-500 to-purple-600">
+              <Brain size={21} />
+            </div>
 
             <div>
-              <p className="text-xs text-indigo-400">
-                GK MASTER
-              </p>
-
               <h1 className="font-black">
-                Level {selectedLevel}
+                Quiz
+                <span className="text-indigo-400">
+                  Master
+                </span>
               </h1>
+
+              <p className="hidden text-[9px] tracking-[0.2em] text-gray-600 sm:block">
+                LEVEL 1 — 100
+              </p>
             </div>
-          </div>
+          </Link>
 
           {/* Timer */}
 
           <div
             className={`flex items-center gap-2 rounded-xl border px-4 py-2.5 ${
-              timeLeft <= 30
+              timeLeft <= 10
                 ? "border-red-500/30 bg-red-500/10 text-red-400"
-                : timeLeft <= 60
-                ? "border-yellow-500/30 bg-yellow-500/10 text-yellow-400"
                 : "border-white/10 bg-white/[0.04] text-gray-300"
             }`}
           >
             <Clock3 size={18} />
 
             <span className="font-mono font-bold">
-              {minutes}:{seconds}
+              {timerText}
             </span>
           </div>
         </div>
@@ -1497,25 +1630,38 @@ function QuizContent() {
       {/* Content */}
 
       <div className="relative z-10 mx-auto max-w-5xl px-5 py-8">
-        {/* Level Info */}
+        {/* Level Header */}
 
         <div className="mb-7">
-          <div className="mb-3 flex flex-col justify-between gap-3 sm:flex-row sm:items-center">
+          <div className="mb-4 flex flex-col justify-between gap-4 sm:flex-row sm:items-end">
             <div>
-              <p className="text-sm font-semibold text-indigo-400">
-                Level {selectedLevel}
-              </p>
+              <div className="flex items-center gap-3">
+                <span className="rounded-lg bg-indigo-500/10 px-3 py-1.5 text-xs font-bold text-indigo-400">
+                  {difficulty}
+                </span>
 
-              <h2 className="mt-1 text-2xl font-black sm:text-3xl">
-                GK Challenge
+                <span className="text-xs text-gray-600">
+                  {category}
+                </span>
+              </div>
+
+              <h2 className="mt-3 text-3xl font-black sm:text-4xl">
+                Level {currentLevel}
+                <span className="text-gray-700">
+                  {" "}
+                  / 100
+                </span>
               </h2>
             </div>
 
-            <div className="rounded-xl border border-white/10 bg-white/[0.04] px-4 py-2 text-sm text-gray-400">
-              <span className="font-bold text-white">
-                {answeredCount}
-              </span>{" "}
-              / {questions.length} answered
+            <div className="rounded-xl border border-white/10 bg-white/[0.04] px-4 py-2.5">
+              <span className="text-sm text-gray-500">
+                Score
+              </span>
+
+              <span className="ml-2 font-black text-green-400">
+                {correctAnswers}
+              </span>
             </div>
           </div>
 
@@ -1527,235 +1673,261 @@ function QuizContent() {
                 width: `${progress}%`,
               }}
               transition={{
-                duration: 0.25,
+                duration: 0.3,
               }}
-              className="h-full rounded-full bg-gradient-to-r from-indigo-500 to-purple-500"
+              className="h-full rounded-full bg-gradient-to-r from-indigo-500 via-purple-500 to-pink-500"
             />
+          </div>
+
+          <div className="mt-2 flex justify-between text-[10px] font-bold text-gray-600">
+            <span>LEVEL 1</span>
+            <span>
+              {currentLevel}% COMPLETE
+            </span>
+            <span>LEVEL 100</span>
           </div>
         </div>
 
         {/* Question Card */}
 
-        {question && (
-          <motion.div
-            key={`${selectedLevel}-${question.id}`}
-            initial={{
-              opacity: 0,
-              x: 20,
-            }}
-            animate={{
-              opacity: 1,
-              x: 0,
-            }}
-            transition={{
-              duration: 0.25,
-            }}
-            className="rounded-3xl border border-white/10 bg-white/[0.04] p-6 shadow-2xl sm:p-8"
-          >
-            {/* Question Number */}
+        <motion.div
+          key={currentLevel}
+          initial={{
+            opacity: 0,
+            x: 30,
+          }}
+          animate={{
+            opacity: 1,
+            x: 0,
+          }}
+          transition={{
+            duration: 0.25,
+          }}
+          className="rounded-[30px] border border-white/10 bg-white/[0.04] p-6 shadow-2xl sm:p-9"
+        >
+          {/* Question Top */}
 
-            <div className="mb-7 flex items-center justify-between">
-              <div className="flex items-center gap-3">
-                <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-indigo-500/10 text-sm font-black text-indigo-400">
-                  {currentQuestion +
-                    1}
-                </div>
-
-                <div>
-                  <p className="text-xs uppercase tracking-wider text-gray-600">
-                    Question
-                  </p>
-
-                  <p className="text-sm font-semibold text-gray-400">
-                    {currentQuestion +
-                      1}{" "}
-                    of{" "}
-                    {questions.length}
-                  </p>
-                </div>
+          <div className="mb-8 flex items-center justify-between">
+            <div className="flex items-center gap-3">
+              <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-indigo-500/10 text-sm font-black text-indigo-400">
+                {currentLevel}
               </div>
 
-              <div className="rounded-lg bg-indigo-500/10 px-3 py-2 text-xs font-bold text-indigo-400">
-                Level{" "}
-                {selectedLevel}
+              <div>
+                <p className="text-xs uppercase tracking-wider text-gray-600">
+                  Question
+                </p>
+
+                <p className="text-sm font-semibold text-gray-400">
+                  Level {currentLevel} of 100
+                </p>
               </div>
             </div>
 
-            {/* Question */}
+            <button
+              type="button"
+              className="flex items-center gap-2 rounded-lg px-3 py-2 text-xs font-semibold text-gray-500 transition hover:bg-white/5 hover:text-gray-300"
+            >
+              <Flag size={15} />
+              Report
+            </button>
+          </div>
 
-            <h3 className="max-w-3xl text-xl font-bold leading-8 sm:text-2xl">
-              {question.question}
-            </h3>
+          {/* Question */}
 
-            {/* Options */}
+          <h3 className="max-w-4xl text-xl font-bold leading-8 sm:text-2xl">
+            {question.question}
+          </h3>
 
-            <div className="mt-8 grid gap-3">
-              {question.options.map(
-                (
-                  option,
-                  index
-                ) => {
-                  const selected =
-                    selectedAnswer ===
-                    index;
+          {/* Options */}
 
-                  return (
-                    <button
-                      key={option}
-                      type="button"
-                      onClick={() =>
-                        selectAnswer(
-                          index
-                        )
-                      }
-                      className={`group flex w-full items-center gap-4 rounded-2xl border p-4 text-left transition ${
-                        selected
-                          ? "border-indigo-500 bg-indigo-500/10 shadow-lg shadow-indigo-500/5"
-                          : "border-white/10 bg-white/[0.02] hover:border-white/20 hover:bg-white/[0.05]"
+          <div className="mt-8 grid gap-3">
+            {question.options.map(
+              (option, index) => {
+                const selected =
+                  selectedAnswer === index;
+
+                const correct =
+                  index === question.answer;
+
+                let optionClass =
+                  "border-white/10 bg-white/[0.02] hover:border-white/20 hover:bg-white/[0.05]";
+
+                if (showCorrect && correct) {
+                  optionClass =
+                    "border-green-500/40 bg-green-500/10";
+                } else if (
+                  showCorrect &&
+                  selected &&
+                  !correct
+                ) {
+                  optionClass =
+                    "border-red-500/40 bg-red-500/10";
+                } else if (selected) {
+                  optionClass =
+                    "border-indigo-500 bg-indigo-500/10 shadow-lg shadow-indigo-500/5";
+                }
+
+                return (
+                  <button
+                    key={option}
+                    type="button"
+                    onClick={() =>
+                      chooseAnswer(index)
+                    }
+                    disabled={
+                      showCorrect ||
+                      isAnswering
+                    }
+                    className={`group flex w-full items-center gap-4 rounded-2xl border p-4 text-left transition ${optionClass}`}
+                  >
+                    <div
+                      className={`flex h-11 w-11 shrink-0 items-center justify-center rounded-xl border text-sm font-bold ${
+                        showCorrect && correct
+                          ? "border-green-500 bg-green-500 text-white"
+                          : showCorrect &&
+                            selected &&
+                            !correct
+                          ? "border-red-500 bg-red-500 text-white"
+                          : selected
+                          ? "border-indigo-500 bg-indigo-500 text-white"
+                          : "border-white/10 bg-white/[0.03] text-gray-500"
                       }`}
                     >
-                      <div
-                        className={`flex h-11 w-11 shrink-0 items-center justify-center rounded-xl border text-sm font-bold ${
-                          selected
-                            ? "border-indigo-500 bg-indigo-500 text-white"
-                            : "border-white/10 bg-white/[0.03] text-gray-500"
-                        }`}
-                      >
-                        {String.fromCharCode(
-                          65 +
-                            index
-                        )}
-                      </div>
+                      {String.fromCharCode(
+                        65 + index
+                      )}
+                    </div>
 
-                      <span
-                        className={`font-medium ${
-                          selected
-                            ? "text-white"
-                            : "text-gray-400"
-                        }`}
-                      >
-                        {
-                          option
-                        }
-                      </span>
+                    <span
+                      className={`font-medium ${
+                        selected
+                          ? "text-white"
+                          : "text-gray-400"
+                      }`}
+                    >
+                      {option}
+                    </span>
 
-                      {selected && (
+                    {showCorrect &&
+                      correct && (
                         <CheckCircle2
-                          size={
-                            20
-                          }
-                          className="ml-auto text-indigo-400"
+                          size={20}
+                          className="ml-auto text-green-400"
                         />
                       )}
-                    </button>
-                  );
-                }
-              )}
-            </div>
 
-            {/* Navigation */}
+                    {showCorrect &&
+                      selected &&
+                      !correct && (
+                        <XCircle
+                          size={20}
+                          className="ml-auto text-red-400"
+                        />
+                      )}
+                  </button>
+                );
+              }
+            )}
+          </div>
 
-            <div className="mt-8 flex flex-col-reverse justify-between gap-3 border-t border-white/10 pt-6 sm:flex-row">
-              <button
-                type="button"
-                onClick={
-                  previousQuestion
-                }
-                disabled={
-                  currentQuestion ===
-                  0
-                }
-                className="flex items-center justify-center gap-2 rounded-xl border border-white/10 px-5 py-3 text-sm font-semibold text-gray-400 transition hover:bg-white/5 hover:text-white disabled:cursor-not-allowed disabled:opacity-30"
-              >
-                <ArrowLeft
-                  size={17}
-                />
-                Previous
-              </button>
+          {/* Check Answer */}
 
-              {currentQuestion ===
-              questions.length -
-                1 ? (
-                <button
-                  type="button"
-                  onClick={
-                    submitQuiz
-                  }
-                  disabled={
-                    isSubmitting
-                  }
-                  className="flex items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-green-600 to-emerald-600 px-6 py-3 text-sm font-bold text-white transition hover:scale-[1.01] disabled:cursor-not-allowed disabled:opacity-60"
-                >
-                  <Trophy
-                    size={17}
-                  />
+          <div className="mt-8 border-t border-white/10 pt-6">
+            <button
+              type="button"
+              onClick={checkAnswer}
+              disabled={
+                selectedAnswer === null ||
+                isAnswering ||
+                showCorrect
+              }
+              className="flex w-full items-center justify-center gap-3 rounded-2xl bg-gradient-to-r from-indigo-600 to-purple-600 px-6 py-4 font-bold text-white shadow-xl shadow-indigo-600/20 transition hover:scale-[1.01] disabled:cursor-not-allowed disabled:opacity-40"
+            >
+              {currentLevel === 100
+                ? "Finish Quiz"
+                : "Lock Answer"}
 
-                  {isSubmitting
-                    ? "Checking..."
-                    : "Complete Level"}
-                </button>
-              ) : (
-                <button
-                  type="button"
-                  onClick={
-                    nextQuestion
-                  }
-                  className="flex items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-indigo-600 to-purple-600 px-6 py-3 text-sm font-bold text-white transition hover:scale-[1.01]"
-                >
-                  Next Question
-                  <ArrowRight
-                    size={17}
-                  />
-                </button>
-              )}
-            </div>
-          </motion.div>
-        )}
+              <ArrowRight size={19} />
+            </button>
+          </div>
+        </motion.div>
 
-        {/* Question Navigator */}
+        {/* Bottom Stats */}
+
+        <div className="mt-6 grid grid-cols-3 gap-3">
+          <div className="rounded-2xl border border-white/10 bg-white/[0.03] p-4 text-center">
+            <p className="text-xl font-black text-green-400">
+              {correctAnswers}
+            </p>
+
+            <p className="mt-1 text-[10px] uppercase tracking-wider text-gray-600">
+              Correct
+            </p>
+          </div>
+
+          <div className="rounded-2xl border border-white/10 bg-white/[0.03] p-4 text-center">
+            <p className="text-xl font-black text-red-400">
+              {wrongAnswers}
+            </p>
+
+            <p className="mt-1 text-[10px] uppercase tracking-wider text-gray-600">
+              Wrong
+            </p>
+          </div>
+
+          <div className="rounded-2xl border border-white/10 bg-white/[0.03] p-4 text-center">
+            <p className="text-xl font-black text-indigo-400">
+              {currentLevel}
+            </p>
+
+            <p className="mt-1 text-[10px] uppercase tracking-wider text-gray-600">
+              Current Level
+            </p>
+          </div>
+        </div>
+
+        {/* Level Roadmap */}
 
         <div className="mt-6 rounded-2xl border border-white/10 bg-white/[0.03] p-5">
           <div className="mb-4 flex items-center justify-between">
             <h4 className="font-bold">
-              Level Questions
+              Level Roadmap
             </h4>
 
-            <p className="text-xs text-gray-500">
-              {answeredCount} answered
-            </p>
+            <span className="text-xs text-gray-600">
+              {currentLevel} / 100
+            </span>
           </div>
 
-          <div className="flex flex-wrap gap-2">
-            {questions.map(
-              (item, index) => {
-                const answered =
-                  answers[
-                    item.id
-                  ] !== undefined;
+          <div className="grid grid-cols-5 gap-2 sm:grid-cols-10">
+            {Array.from(
+              { length: 100 },
+              (_, index) => {
+                const level = index + 1;
 
                 const active =
-                  currentQuestion ===
-                  index;
+                  level === currentLevel;
+
+                const passed =
+                  level < currentLevel;
 
                 return (
-                  <button
-                    key={item.id}
-                    type="button"
-                    onClick={() =>
-                      setCurrentQuestion(
-                        index
-                      )
-                    }
-                    className={`flex h-10 w-10 items-center justify-center rounded-lg text-xs font-bold transition ${
+                  <div
+                    key={level}
+                    className={`flex h-8 items-center justify-center rounded-lg text-[10px] font-bold ${
                       active
-                        ? "bg-indigo-600 text-white shadow-lg shadow-indigo-600/20"
-                        : answered
+                        ? "bg-indigo-600 text-white shadow-lg shadow-indigo-600/30"
+                        : passed
                         ? "bg-green-500/15 text-green-400"
-                        : "bg-white/[0.05] text-gray-500 hover:bg-white/10"
+                        : level >
+                          currentLevel
+                        ? "bg-white/[0.04] text-gray-700"
+                        : "bg-white/[0.04] text-gray-600"
                     }`}
                   >
-                    {index + 1}
-                  </button>
+                    {level}
+                  </div>
                 );
               }
             )}
@@ -1771,10 +1943,9 @@ function QuizContent() {
           />
 
           <p>
-            This level has a 5-minute
-            timer. When the timer reaches
-            zero, the level will be
-            submitted automatically.
+            Choose your answer carefully. You
+            have 30 seconds for each level.
+            One wrong answer ends the game.
           </p>
         </div>
       </div>
@@ -1783,19 +1954,19 @@ function QuizContent() {
 }
 
 /* =========================================================
-   LOADING SCREEN
+   LOADING
 ========================================================= */
 
 function QuizLoading() {
   return (
     <main className="flex min-h-screen items-center justify-center bg-[#050816] text-white">
       <div className="text-center">
-        <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-2xl bg-gradient-to-br from-indigo-500 to-purple-600">
+        <div className="mx-auto flex h-14 w-14 animate-pulse items-center justify-center rounded-2xl bg-gradient-to-br from-indigo-500 to-purple-600">
           <Brain size={25} />
         </div>
 
         <p className="mt-4 text-sm font-semibold text-gray-500">
-          Loading Quiz Master...
+          Loading Quiz...
         </p>
       </div>
     </main>
