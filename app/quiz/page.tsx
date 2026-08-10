@@ -1,7 +1,6 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
-import { useRouter } from "next/navigation";
 import Link from "next/link";
 import {
   ArrowLeft,
@@ -26,10 +25,13 @@ type Question = {
   answer: number;
 };
 
+type Difficulty = "Easy" | "Medium" | "Hard" | "Expert";
+
 type Level = {
   level: number;
-  difficulty: "Easy" | "Medium" | "Hard" | "Expert";
+  difficulty: Difficulty;
   questions: Question[];
+  timeMinutes: number;
 };
 
 type QuizResult = {
@@ -44,7 +46,6 @@ type QuizResult = {
 
 /* =========================================================
    QUESTION BANK
-   100 LEVELS
 ========================================================= */
 
 const easyQuestions: Question[] = [
@@ -101,6 +102,31 @@ const easyQuestions: Question[] = [
   {
     question: "What is H2O commonly known as?",
     options: ["Oxygen", "Water", "Hydrogen", "Salt"],
+    answer: 1,
+  },
+  {
+    question: "Which is the smallest prime number?",
+    options: ["0", "1", "2", "3"],
+    answer: 2,
+  },
+  {
+    question: "Which color is made by mixing red and white?",
+    options: ["Pink", "Green", "Purple", "Orange"],
+    answer: 0,
+  },
+  {
+    question: "How many hours are there in one day?",
+    options: ["12", "18", "24", "36"],
+    answer: 2,
+  },
+  {
+    question: "Which bird is known for its beautiful colorful feathers?",
+    options: ["Crow", "Peacock", "Sparrow", "Eagle"],
+    answer: 1,
+  },
+  {
+    question: "Which month comes after March?",
+    options: ["May", "April", "June", "February"],
     answer: 1,
   },
 ];
@@ -176,6 +202,36 @@ const mediumQuestions: Question[] = [
     options: ["26", "27", "28", "29"],
     answer: 2,
   },
+  {
+    question: "Which planet is closest to the Sun?",
+    options: ["Earth", "Venus", "Mercury", "Mars"],
+    answer: 2,
+  },
+  {
+    question: "Who was the first Prime Minister of India?",
+    options: [
+      "Mahatma Gandhi",
+      "Jawaharlal Nehru",
+      "Sardar Patel",
+      "Rajendra Prasad",
+    ],
+    answer: 1,
+  },
+  {
+    question: "Which is the largest state of India by area?",
+    options: ["Maharashtra", "Rajasthan", "Madhya Pradesh", "Gujarat"],
+    answer: 1,
+  },
+  {
+    question: "Which instrument is used to measure temperature?",
+    options: ["Barometer", "Thermometer", "Hygrometer", "Altimeter"],
+    answer: 1,
+  },
+  {
+    question: "Which country is known as the Land of the Rising Sun?",
+    options: ["China", "Japan", "Thailand", "Korea"],
+    answer: 1,
+  },
 ];
 
 const hardQuestions: Question[] = [
@@ -190,7 +246,8 @@ const hardQuestions: Question[] = [
     answer: 1,
   },
   {
-    question: "Which Article of the Indian Constitution deals with equality before law?",
+    question:
+      "Which Article of the Indian Constitution deals with equality before law?",
     options: ["Article 12", "Article 14", "Article 19", "Article 21"],
     answer: 1,
   },
@@ -250,15 +307,57 @@ const hardQuestions: Question[] = [
     answer: 1,
   },
   {
-    question: "Which vitamin is produced in the human body through sunlight?",
+    question:
+      "Which vitamin is produced in the human body through sunlight?",
     options: ["Vitamin A", "Vitamin B", "Vitamin C", "Vitamin D"],
+    answer: 3,
+  },
+  {
+    question: "Who was the founder of the Gupta Empire?",
+    options: [
+      "Sri Gupta",
+      "Chandragupta I",
+      "Samudragupta",
+      "Skandagupta",
+    ],
+    answer: 0,
+  },
+  {
+    question: "Which Indian river is known as the Sorrow of Bihar?",
+    options: ["Ganga", "Kosi", "Yamuna", "Godavari"],
+    answer: 1,
+  },
+  {
+    question: "Which metal is liquid at room temperature?",
+    options: ["Iron", "Mercury", "Copper", "Aluminium"],
+    answer: 1,
+  },
+  {
+    question: "Who wrote the book 'Discovery of India'?",
+    options: [
+      "Mahatma Gandhi",
+      "Jawaharlal Nehru",
+      "B. R. Ambedkar",
+      "Sardar Patel",
+    ],
+    answer: 1,
+  },
+  {
+    question: "Which is the highest civilian award in India?",
+    options: [
+      "Padma Shri",
+      "Padma Bhushan",
+      "Padma Vibhushan",
+      "Bharat Ratna",
+    ],
     answer: 3,
   },
 ];
 
 const expertQuestions: Question[] = [
   {
-    question: "Which constitutional amendment lowered the voting age in India from 21 to 18?",
+    question:
+      "Which constitutional amendment lowered the voting age in India from 21 to 18?",
     options: [
       "42nd Amendment",
       "44th Amendment",
@@ -268,7 +367,8 @@ const expertQuestions: Question[] = [
     answer: 2,
   },
   {
-    question: "Who was the first Indian Governor-General of independent India?",
+    question:
+      "Who was the first Indian Governor-General of independent India?",
     options: [
       "Lord Mountbatten",
       "C. Rajagopalachari",
@@ -278,7 +378,8 @@ const expertQuestions: Question[] = [
     answer: 1,
   },
   {
-    question: "The term 'Blue Revolution' is associated with which sector?",
+    question:
+      "The term 'Blue Revolution' is associated with which sector?",
     options: [
       "Agriculture",
       "Milk production",
@@ -298,7 +399,8 @@ const expertQuestions: Question[] = [
     answer: 1,
   },
   {
-    question: "Which Indian scientist discovered the Raman Effect?",
+    question:
+      "Which Indian scientist discovered the Raman Effect?",
     options: [
       "Homi Bhabha",
       "C. V. Raman",
@@ -308,7 +410,8 @@ const expertQuestions: Question[] = [
     answer: 1,
   },
   {
-    question: "Which planet has the shortest day in the solar system?",
+    question:
+      "Which planet has the shortest day in the solar system?",
     options: ["Earth", "Mars", "Jupiter", "Saturn"],
     answer: 2,
   },
@@ -323,7 +426,8 @@ const expertQuestions: Question[] = [
     answer: 0,
   },
   {
-    question: "Which schedule of the Indian Constitution contains the list of recognized languages?",
+    question:
+      "Which schedule of the Indian Constitution contains the list of recognized languages?",
     options: [
       "Fifth Schedule",
       "Sixth Schedule",
@@ -333,12 +437,19 @@ const expertQuestions: Question[] = [
     answer: 2,
   },
   {
-    question: "Which ancient university was located in present-day Bihar?",
-    options: ["Nalanda", "Taxila", "Vikramashila", "Both A and C"],
-    answer: 3,
+    question:
+      "Which ancient university was located in present-day Bihar?",
+    options: [
+      "Nalanda",
+      "Taxila",
+      "Vikramashila",
+      "Both A and C",
+    ],
+    answer: 0,
   },
   {
-    question: "Who was the first Indian woman to win an Olympic medal?",
+    question:
+      "Who was the first Indian woman to win an Olympic medal?",
     options: [
       "P. T. Usha",
       "Karnam Malleswari",
@@ -347,7 +458,85 @@ const expertQuestions: Question[] = [
     ],
     answer: 1,
   },
+  {
+    question:
+      "Which is the largest gland in the human body?",
+    options: ["Heart", "Liver", "Pancreas", "Kidney"],
+    answer: 1,
+  },
+  {
+    question:
+      "Which Indian classical dance originated in Kerala?",
+    options: ["Kathak", "Kathakali", "Bharatanatyam", "Odissi"],
+    answer: 1,
+  },
+  {
+    question:
+      "Which treaty ended the First World War?",
+    options: [
+      "Treaty of Paris",
+      "Treaty of Versailles",
+      "Treaty of Rome",
+      "Treaty of Vienna",
+    ],
+    answer: 1,
+  },
+  {
+    question:
+      "Who was the first woman President of the Indian National Congress?",
+    options: [
+      "Sarojini Naidu",
+      "Annie Besant",
+      "Indira Gandhi",
+      "Vijaya Lakshmi Pandit",
+    ],
+    answer: 1,
+  },
+  {
+    question:
+      "Which element has the atomic number 79?",
+    options: ["Silver", "Gold", "Platinum", "Copper"],
+    answer: 1,
+  },
 ];
+
+/* =========================================================
+   GET DIFFICULTY
+========================================================= */
+
+function getDifficulty(level: number): Difficulty {
+  if (level <= 25) return "Easy";
+  if (level <= 50) return "Medium";
+  if (level <= 75) return "Hard";
+  return "Expert";
+}
+
+/* =========================================================
+   QUESTIONS PER LEVEL
+   Level 1 = 4
+   Level 2 = 5
+   ...
+   Level 12+ = 15
+========================================================= */
+
+function getQuestionCount(level: number) {
+  return Math.min(3 + level, 15);
+}
+
+/* =========================================================
+   TIMER PER LEVEL
+   Level 1 = 5 minutes
+   Gradually increases
+   Maximum = 15 minutes
+========================================================= */
+
+function getTimeMinutes(level: number) {
+  if (level <= 1) return 5;
+
+  const minutes = 5 + Math.ceil((level - 1) / 2);
+
+  return Math.min(minutes, 15);
+}
 
 /* =========================================================
    CREATE 100 LEVELS
@@ -357,18 +546,7 @@ const levels: Level[] = Array.from(
   { length: 100 },
   (_, index) => {
     const level = index + 1;
-
-    let difficulty: Level["difficulty"];
-
-    if (level <= 25) {
-      difficulty = "Easy";
-    } else if (level <= 50) {
-      difficulty = "Medium";
-    } else if (level <= 75) {
-      difficulty = "Hard";
-    } else {
-      difficulty = "Expert";
-    }
+    const difficulty = getDifficulty(level);
 
     let source: Question[];
 
@@ -382,22 +560,25 @@ const levels: Level[] = Array.from(
       source = expertQuestions;
     }
 
-    /*
-      प्रत्येक level ला वेगळे questions दिसावेत म्हणून
-      question bank rotate केला आहे.
-    */
+    const questionCount = getQuestionCount(level);
+
     const questions = Array.from(
-      { length: 10 },
-      (_, questionIndex) =>
-        source[
-          (questionIndex + index) % source.length
-        ]
+      { length: questionCount },
+      (_, questionIndex) => {
+        const sourceQuestion =
+          source[(questionIndex + index) % source.length];
+
+        return {
+          ...sourceQuestion,
+        };
+      }
     );
 
     return {
       level,
       difficulty,
       questions,
+      timeMinutes: getTimeMinutes(level),
     };
   }
 );
@@ -407,68 +588,56 @@ const levels: Level[] = Array.from(
 ========================================================= */
 
 export default function QuizPage() {
-  const router = useRouter();
-
   const [screen, setScreen] = useState<
     "start" | "levels" | "quiz" | "result"
   >("start");
 
   const [currentLevel, setCurrentLevel] = useState(1);
 
-  const [completedLevels, setCompletedLevels] =
-    useState<number[]>([]);
+  const [completedLevels, setCompletedLevels] = useState<number[]>([]);
 
-  const [currentQuestion, setCurrentQuestion] =
-    useState(0);
+  const [currentQuestion, setCurrentQuestion] = useState(0);
 
-  const [answers, setAnswers] = useState<
-    Record<number, number>
-  >({});
+  const [answers, setAnswers] = useState<Record<number, number>>({});
 
-  const [timeLeft, setTimeLeft] = useState(15 * 60);
+  const [timeLeft, setTimeLeft] = useState(5 * 60);
 
-  const [result, setResult] =
-    useState<QuizResult | null>(null);
+  const [result, setResult] = useState<QuizResult | null>(null);
 
-  const [isSubmitting, setIsSubmitting] =
-    useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   /* =======================================================
-     LOAD PROGRESS
+     LOAD SAVED PROGRESS
   ======================================================= */
 
   useEffect(() => {
-    if (typeof window === "undefined") return;
+    try {
+      const saved = localStorage.getItem("quizProgress");
 
-    const saved =
-      localStorage.getItem("quizProgress");
+      if (!saved) return;
 
-    if (saved) {
-      try {
-        const parsed = JSON.parse(saved);
+      const parsed = JSON.parse(saved);
 
-        if (Array.isArray(parsed)) {
-          setCompletedLevels(parsed);
-        }
-      } catch {
-        localStorage.removeItem("quizProgress");
+      if (Array.isArray(parsed)) {
+        setCompletedLevels(parsed);
       }
+    } catch {
+      localStorage.removeItem("quizProgress");
     }
   }, []);
 
   /* =======================================================
-     CURRENT LEVEL
+     CURRENT LEVEL DATA
   ======================================================= */
 
   const levelData = useMemo(() => {
     return levels[currentLevel - 1];
   }, [currentLevel]);
 
-  const question =
-    levelData?.questions[currentQuestion];
+  const question = levelData?.questions[currentQuestion];
 
   /* =======================================================
-     START
+     START GAME
   ======================================================= */
 
   function startGame() {
@@ -484,12 +653,14 @@ export default function QuizPage() {
       return;
     }
 
+    const selectedLevel = levels[level - 1];
+
     setCurrentLevel(level);
     setCurrentQuestion(0);
     setAnswers({});
-    setTimeLeft(15 * 60);
     setResult(null);
     setIsSubmitting(false);
+    setTimeLeft(selectedLevel.timeMinutes * 60);
     setScreen("quiz");
   }
 
@@ -534,6 +705,7 @@ export default function QuizPage() {
 
   /* =======================================================
      SELECT ANSWER
+     Answer select केल्यावर लगेच next question
   ======================================================= */
 
   function selectAnswer(index: number) {
@@ -543,32 +715,37 @@ export default function QuizPage() {
       ...previous,
       [currentQuestion]: index,
     }));
-  }
 
-  /* =======================================================
-     NEXT QUESTION
-  ======================================================= */
+    /*
+      Last question असेल तर result.
+      नाहीतर 350ms नंतर next question.
+    */
 
-  function nextQuestion() {
     if (
-      currentQuestion <
+      currentQuestion ===
       levelData.questions.length - 1
     ) {
-      setCurrentQuestion(
-        (previous) => previous + 1
-      );
+      window.setTimeout(() => {
+        submitQuiz({
+          selectedIndex: index,
+        });
+      }, 350);
+
+      return;
     }
+
+    window.setTimeout(() => {
+      setCurrentQuestion((previous) => previous + 1);
+    }, 350);
   }
 
   /* =======================================================
-     PREVIOUS QUESTION
+     PREVIOUS
   ======================================================= */
 
   function previousQuestion() {
-    if (currentQuestion > 0) {
-      setCurrentQuestion(
-        (previous) => previous - 1
-      );
+    if (currentQuestion > 0 && !isSubmitting) {
+      setCurrentQuestion((previous) => previous - 1);
     }
   }
 
@@ -576,35 +753,46 @@ export default function QuizPage() {
      SUBMIT QUIZ
   ======================================================= */
 
-  function submitQuiz() {
+  function submitQuiz(
+    options?: {
+      selectedIndex?: number;
+    }
+  ) {
     if (isSubmitting) return;
 
     setIsSubmitting(true);
 
     let correct = 0;
 
-    levelData.questions.forEach(
-      (item, index) => {
-        if (
-          answers[index] === item.answer
-        ) {
-          correct++;
-        }
+    levelData.questions.forEach((item, index) => {
+      let selected = answers[index];
+
+      /*
+        Last question select केल्यावर
+        state लगेच update झालेला नसू शकतो.
+        म्हणून selectedIndex direct वापरतो.
+      */
+
+      if (
+        index === currentQuestion &&
+        options?.selectedIndex !== undefined
+      ) {
+        selected = options.selectedIndex;
       }
-    );
 
-    const total =
-      levelData.questions.length;
+      if (selected === item.answer) {
+        correct++;
+      }
+    });
 
+    const total = levelData.questions.length;
     const wrong = total - correct;
 
-    const score = Math.round(
-      (correct / total) * 100
-    );
+    const score =
+      total > 0
+        ? Math.round((correct / total) * 100)
+        : 0;
 
-    /*
-      60% or more = level passed
-    */
     const passed = score >= 60;
 
     const newResult: QuizResult = {
@@ -619,14 +807,9 @@ export default function QuizPage() {
 
     setResult(newResult);
 
-    /*
-      Level complete असल्यास पुढचा level unlock
-    */
     if (passed) {
       setCompletedLevels((previous) => {
-        const updated = previous.includes(
-          currentLevel
-        )
+        const updated = previous.includes(currentLevel)
           ? previous
           : [...previous, currentLevel];
 
@@ -652,26 +835,22 @@ export default function QuizPage() {
   ======================================================= */
 
   function nextLevel() {
-    if (currentLevel >= 100) {
+    if (!result || result.level >= 100) {
       return;
     }
 
-    const next = currentLevel + 1;
-
-    if (!completedLevels.includes(currentLevel)) {
+    if (!completedLevels.includes(result.level)) {
       return;
     }
 
-    startLevel(next);
+    startLevel(result.level + 1);
   }
 
   /* =======================================================
      TIMER FORMAT
   ======================================================= */
 
-  const minutes = Math.floor(
-    timeLeft / 60
-  )
+  const minutes = Math.floor(timeLeft / 60)
     .toString()
     .padStart(2, "0");
 
@@ -685,7 +864,7 @@ export default function QuizPage() {
 
   if (screen === "start") {
     return (
-      <main className="min-h-screen bg-[#050816] text-white">
+      <main className="relative min-h-screen overflow-hidden bg-[#050816] text-white">
         <Background />
 
         <header className="relative z-10 border-b border-white/10 bg-[#050816]/90 backdrop-blur-xl">
@@ -697,6 +876,7 @@ export default function QuizPage() {
               className="flex items-center gap-2 rounded-xl border border-white/10 bg-white/[0.04] px-4 py-2.5 text-sm font-semibold text-gray-400 transition hover:bg-white/[0.08] hover:text-white"
             >
               <ArrowLeft size={16} />
+
               <span className="hidden sm:block">
                 Dashboard
               </span>
@@ -708,6 +888,7 @@ export default function QuizPage() {
           <motion.div
             initial={{ opacity: 0, y: 25 }}
             animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.5 }}
             className="w-full max-w-2xl text-center"
           >
             <div className="mx-auto flex h-24 w-24 items-center justify-center rounded-[30px] bg-gradient-to-br from-indigo-500/20 to-purple-500/20 text-indigo-400 ring-1 ring-indigo-500/20">
@@ -726,9 +907,9 @@ export default function QuizPage() {
             </h1>
 
             <p className="mx-auto mt-5 max-w-xl text-sm leading-7 text-gray-500 sm:text-base">
-              Complete 100 levels from Easy to
-              Expert. Pass each level to unlock
-              the next challenge.
+              Complete 100 levels from Easy to Expert.
+              Each level becomes more challenging with
+              more questions and more time.
             </p>
 
             <div className="mt-10 grid grid-cols-2 gap-3 sm:grid-cols-4">
@@ -745,6 +926,7 @@ export default function QuizPage() {
                   <p className="text-lg font-black text-white">
                     {range}
                   </p>
+
                   <p className="mt-1 text-xs text-gray-500">
                     {title}
                   </p>
@@ -755,12 +937,13 @@ export default function QuizPage() {
             <button
               type="button"
               onClick={startGame}
-              className="group mt-10 flex w-full items-center justify-center gap-3 rounded-2xl bg-gradient-to-r from-indigo-600 to-purple-600 px-6 py-4 text-base font-bold text-white shadow-xl shadow-indigo-600/20 transition hover:scale-[1.01]"
+              className="group mt-10 flex w-full items-center justify-center gap-3 rounded-2xl bg-gradient-to-r from-indigo-600 to-purple-600 px-6 py-4 text-base font-bold text-white shadow-xl shadow-indigo-600/20 transition duration-300 hover:scale-[1.01]"
             >
               Start Quiz
+
               <ArrowRight
                 size={20}
-                className="transition group-hover:translate-x-1"
+                className="transition-transform group-hover:translate-x-1"
               />
             </button>
           </motion.div>
@@ -775,7 +958,7 @@ export default function QuizPage() {
 
   if (screen === "levels") {
     return (
-      <main className="min-h-screen bg-[#050816] text-white">
+      <main className="relative min-h-screen overflow-hidden bg-[#050816] text-white">
         <Background />
 
         <header className="sticky top-0 z-20 border-b border-white/10 bg-[#050816]/90 backdrop-blur-xl">
@@ -784,14 +967,14 @@ export default function QuizPage() {
 
             <Link
               href="/student/dashboard"
-              className="rounded-xl border border-white/10 bg-white/[0.04] px-4 py-2 text-sm text-gray-400 hover:text-white"
+              className="rounded-xl border border-white/10 bg-white/[0.04] px-4 py-2 text-sm text-gray-400 transition hover:text-white"
             >
               Dashboard
             </Link>
           </div>
         </header>
 
-        <div className="relative z-10 mx-auto max-w-5xl px-5 py-10">
+        <div className="relative z-10 mx-auto max-w-6xl px-5 py-10">
           <div className="text-center">
             <p className="text-sm font-bold uppercase tracking-[0.2em] text-indigo-400">
               Choose Your Challenge
@@ -802,12 +985,12 @@ export default function QuizPage() {
             </h1>
 
             <p className="mt-3 text-sm text-gray-500">
-              Complete a level with 60% or more
-              to unlock the next one.
+              Pass each level with 60% or more to
+              unlock the next level.
             </p>
           </div>
 
-          <div className="mt-10 grid grid-cols-2 gap-3 sm:grid-cols-3 md:grid-cols-5">
+          <div className="mt-10 grid grid-cols-2 gap-3 sm:grid-cols-3 md:grid-cols-5 lg:grid-cols-8">
             {levels.map((level) => {
               const unlocked =
                 level.level === 1 ||
@@ -816,24 +999,20 @@ export default function QuizPage() {
                 );
 
               const completed =
-                completedLevels.includes(
-                  level.level
-                );
+                completedLevels.includes(level.level);
 
               return (
                 <motion.button
                   key={level.level}
                   type="button"
                   whileHover={
-                    unlocked
-                      ? { scale: 1.03 }
-                      : {}
+                    unlocked ? { scale: 1.03 } : {}
                   }
                   onClick={() =>
                     startLevel(level.level)
                   }
                   disabled={!unlocked}
-                  className={`relative min-h-[135px] overflow-hidden rounded-2xl border p-4 text-left transition ${
+                  className={`relative min-h-[150px] overflow-hidden rounded-2xl border p-4 text-left transition ${
                     unlocked
                       ? completed
                         ? "border-green-500/30 bg-green-500/[0.08]"
@@ -869,19 +1048,24 @@ export default function QuizPage() {
 
                   <p
                     className={`mt-1 text-[10px] font-bold uppercase tracking-wider ${
-                      level.difficulty ===
-                      "Easy"
+                      level.difficulty === "Easy"
                         ? "text-green-400"
-                        : level.difficulty ===
-                          "Medium"
+                        : level.difficulty === "Medium"
                         ? "text-yellow-400"
-                        : level.difficulty ===
-                          "Hard"
+                        : level.difficulty === "Hard"
                         ? "text-orange-400"
                         : "text-red-400"
                     }`}
                   >
                     {level.difficulty}
+                  </p>
+
+                  <p className="mt-2 text-[10px] text-gray-600">
+                    {level.questions.length} Questions
+                  </p>
+
+                  <p className="text-[10px] text-gray-600">
+                    {level.timeMinutes} Minutes
                   </p>
                 </motion.button>
               );
@@ -898,7 +1082,7 @@ export default function QuizPage() {
 
   if (screen === "result" && result) {
     return (
-      <main className="min-h-screen bg-[#050816] text-white">
+      <main className="relative min-h-screen overflow-hidden bg-[#050816] text-white">
         <Background />
 
         <header className="relative z-10 border-b border-white/10 bg-[#050816]/90 backdrop-blur-xl">
@@ -907,10 +1091,8 @@ export default function QuizPage() {
 
             <button
               type="button"
-              onClick={() =>
-                setScreen("levels")
-              }
-              className="rounded-xl border border-white/10 bg-white/[0.04] px-4 py-2 text-sm text-gray-400 hover:text-white"
+              onClick={() => setScreen("levels")}
+              className="rounded-xl border border-white/10 bg-white/[0.04] px-4 py-2 text-sm text-gray-400 transition hover:text-white"
             >
               All Levels
             </button>
@@ -978,10 +1160,10 @@ export default function QuizPage() {
               <div className="mt-8 rounded-2xl border border-green-500/20 bg-green-500/[0.06] p-4">
                 <div className="flex items-center justify-center gap-2 text-sm font-bold text-green-400">
                   <Star size={17} />
-                  Level {result.level + 1 <= 100
-                    ? result.level + 1
-                    : "100+"}{" "}
-                  Unlocked
+
+                  {result.level < 100
+                    ? `Level ${result.level + 1} Unlocked`
+                    : "All Levels Completed!"}
                 </div>
               </div>
             ) : (
@@ -1003,6 +1185,7 @@ export default function QuizPage() {
                   className="flex items-center justify-center gap-2 rounded-2xl bg-gradient-to-r from-indigo-600 to-purple-600 px-6 py-4 font-bold text-white transition hover:scale-[1.01]"
                 >
                   Next Level
+
                   <ArrowRight size={19} />
                 </button>
               ) : result.level === 100 &&
@@ -1020,15 +1203,14 @@ export default function QuizPage() {
                   className="flex items-center justify-center gap-2 rounded-2xl bg-gradient-to-r from-indigo-600 to-purple-600 px-6 py-4 font-bold text-white"
                 >
                   <RotateCcw size={18} />
+
                   Try Again
                 </button>
               )}
 
               <button
                 type="button"
-                onClick={() =>
-                  setScreen("levels")
-                }
+                onClick={() => setScreen("levels")}
                 className="rounded-2xl border border-white/10 px-6 py-4 text-sm font-semibold text-gray-400 transition hover:bg-white/5 hover:text-white"
               >
                 View All Levels
@@ -1044,8 +1226,27 @@ export default function QuizPage() {
      QUIZ SCREEN
   ======================================================= */
 
-  const selectedAnswer =
-    answers[currentQuestion];
+  if (!question || !levelData) {
+    return (
+      <main className="flex min-h-screen items-center justify-center bg-[#050816] text-white">
+        <div className="text-center">
+          <p className="text-xl font-bold">
+            Loading Quiz...
+          </p>
+
+          <button
+            type="button"
+            onClick={() => setScreen("levels")}
+            className="mt-5 rounded-xl bg-indigo-600 px-5 py-3 font-bold"
+          >
+            Back to Levels
+          </button>
+        </div>
+      </main>
+    );
+  }
+
+  const selectedAnswer = answers[currentQuestion];
 
   const answeredCount =
     Object.keys(answers).length;
@@ -1056,7 +1257,7 @@ export default function QuizPage() {
     100;
 
   return (
-    <main className="min-h-screen bg-[#050816] text-white">
+    <main className="relative min-h-screen overflow-hidden bg-[#050816] text-white">
       <Background />
 
       <header className="sticky top-0 z-50 border-b border-white/10 bg-[#050816]/90 backdrop-blur-xl">
@@ -1080,6 +1281,8 @@ export default function QuizPage() {
       </header>
 
       <div className="relative z-10 mx-auto max-w-4xl px-5 py-8">
+        {/* QUIZ INFO */}
+
         <div className="mb-7">
           <div className="flex flex-col justify-between gap-4 sm:flex-row sm:items-center">
             <div>
@@ -1096,8 +1299,7 @@ export default function QuizPage() {
               <span className="font-bold text-white">
                 {answeredCount}
               </span>{" "}
-              / {levelData.questions.length}{" "}
-              answered
+              / {levelData.questions.length} answered
             </div>
           </div>
 
@@ -1106,23 +1308,33 @@ export default function QuizPage() {
               animate={{
                 width: `${progress}%`,
               }}
+              transition={{
+                duration: 0.25,
+              }}
               className="h-full rounded-full bg-gradient-to-r from-indigo-500 to-purple-500"
             />
           </div>
         </div>
 
+        {/* QUESTION CARD */}
+
         <motion.div
-          key={currentQuestion}
+          key={`${currentLevel}-${currentQuestion}`}
           initial={{
             opacity: 0,
-            x: 20,
+            x: 25,
           }}
           animate={{
             opacity: 1,
             x: 0,
           }}
+          transition={{
+            duration: 0.25,
+          }}
           className="rounded-3xl border border-white/10 bg-white/[0.04] p-6 shadow-2xl sm:p-8"
         >
+          {/* QUESTION HEADER */}
+
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-3">
               <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-indigo-500/10 font-black text-indigo-400">
@@ -1146,9 +1358,13 @@ export default function QuizPage() {
             </div>
           </div>
 
+          {/* QUESTION */}
+
           <h2 className="mt-8 text-xl font-bold leading-8 sm:text-2xl">
             {question.question}
           </h2>
+
+          {/* OPTIONS */}
 
           <div className="mt-8 grid gap-3">
             {question.options.map(
@@ -1160,6 +1376,7 @@ export default function QuizPage() {
                   <button
                     key={`${option}-${index}`}
                     type="button"
+                    disabled={isSubmitting}
                     onClick={() =>
                       selectAnswer(index)
                     }
@@ -1167,7 +1384,7 @@ export default function QuizPage() {
                       selected
                         ? "border-indigo-500 bg-indigo-500/10 shadow-lg shadow-indigo-500/5"
                         : "border-white/10 bg-white/[0.02] hover:border-white/20 hover:bg-white/[0.05]"
-                    }`}
+                    } disabled:cursor-not-allowed`}
                   >
                     <div
                       className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border text-sm font-bold ${
@@ -1203,46 +1420,29 @@ export default function QuizPage() {
             )}
           </div>
 
+          {/* NAVIGATION */}
+
           <div className="mt-8 flex flex-col-reverse justify-between gap-3 border-t border-white/10 pt-6 sm:flex-row">
             <button
               type="button"
               onClick={previousQuestion}
-              disabled={currentQuestion === 0}
+              disabled={
+                currentQuestion === 0 ||
+                isSubmitting
+              }
               className="flex items-center justify-center gap-2 rounded-xl border border-white/10 px-5 py-3 text-sm font-semibold text-gray-400 transition hover:bg-white/5 hover:text-white disabled:cursor-not-allowed disabled:opacity-30"
             >
               <ArrowLeft size={17} />
               Previous
             </button>
 
-            {currentQuestion ===
-            levelData.questions.length - 1 ? (
-              <button
-                type="button"
-                onClick={submitQuiz}
-                disabled={
-                  isSubmitting ||
-                  selectedAnswer === undefined
-                }
-                className="flex items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-green-600 to-emerald-600 px-6 py-3 text-sm font-bold text-white transition hover:scale-[1.01] disabled:cursor-not-allowed disabled:opacity-40"
-              >
-                <Trophy size={17} />
-                Submit Level
-              </button>
-            ) : (
-              <button
-                type="button"
-                onClick={nextQuestion}
-                disabled={
-                  selectedAnswer === undefined
-                }
-                className="flex items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-indigo-600 to-purple-600 px-6 py-3 text-sm font-bold text-white transition hover:scale-[1.01] disabled:cursor-not-allowed disabled:opacity-40"
-              >
-                Next Question
-                <ArrowRight size={17} />
-              </button>
-            )}
+            <div className="flex items-center justify-center rounded-xl bg-white/[0.03] px-5 py-3 text-xs text-gray-600">
+              Select an answer to continue
+            </div>
           </div>
         </motion.div>
+
+        {/* QUESTION NAVIGATOR */}
 
         <div className="mt-6 rounded-2xl border border-white/10 bg-white/[0.03] p-5">
           <div className="mb-4 flex items-center justify-between">
@@ -1268,10 +1468,9 @@ export default function QuizPage() {
                   <button
                     key={index}
                     type="button"
+                    disabled={isSubmitting}
                     onClick={() =>
-                      setCurrentQuestion(
-                        index
-                      )
+                      setCurrentQuestion(index)
                     }
                     className={`flex h-9 w-9 items-center justify-center rounded-lg text-xs font-bold transition ${
                       active
@@ -1289,6 +1488,8 @@ export default function QuizPage() {
           </div>
         </div>
 
+        {/* TIMER INFO */}
+
         <div className="mt-5 flex items-start gap-3 rounded-xl border border-yellow-500/10 bg-yellow-500/[0.04] p-4 text-xs leading-5 text-gray-500">
           <Clock3
             size={16}
@@ -1296,10 +1497,15 @@ export default function QuizPage() {
           />
 
           <p>
-            You have 15 minutes to complete
-            this level. The quiz will be
-            automatically submitted when the
-            timer reaches zero.
+            Level {currentLevel} has{" "}
+            <span className="font-bold text-gray-300">
+              {levelData.questions.length}
+            </span>{" "}
+            questions and{" "}
+            <span className="font-bold text-gray-300">
+              {levelData.timeMinutes} minutes
+            </span>{" "}
+            to complete.
           </p>
         </div>
       </div>
