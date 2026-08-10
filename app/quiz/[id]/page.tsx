@@ -22,12 +22,11 @@ type Answers = Record<number, number>;
 export default function QuizAttemptPage() {
   const params = useParams();
 
-  const quizId = Array.isArray(params.id)
-    ? params.id[0]
-    : params.id;
+const quizId = Array.isArray(params.id)
+  ? params.id[0]
+  : params.id;
 
-  const quiz = getQuizById(quizId);
-
+const quiz = quizId ? getQuizById(quizId) : undefined;
   /* =====================================================
      LEVEL SETTINGS
   ===================================================== */
