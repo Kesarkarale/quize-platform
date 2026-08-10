@@ -42,7 +42,7 @@ import { toast } from "sonner";
 import { createClient } from "@/lib/supabase/client";
 
 /* =========================================================
-   SUPABASE CLIENT
+   SUPABASE
 ========================================================= */
 
 const supabase = createClient();
@@ -183,15 +183,12 @@ export default function StudentDashboard() {
   const router = useRouter();
 
   const [profile, setProfile] = useState<Profile | null>(null);
-
   const [loading, setLoading] = useState(true);
 
   const [darkMode, setDarkMode] = useState(false);
-
   const [sidebarOpen, setSidebarOpen] = useState(false);
 
   const [search, setSearch] = useState("");
-
   const [category, setCategory] = useState("All");
 
   const [activeMenu, setActiveMenu] = useState("Dashboard");
@@ -328,7 +325,7 @@ export default function StudentDashboard() {
   };
 
   /* =======================================================
-     NAVIGATION HELPER
+     NAVIGATION
   ======================================================= */
 
   const navigateTo = (menu: string, path: string) => {
@@ -370,16 +367,16 @@ export default function StudentDashboard() {
   }, [search, category]);
 
   /* =======================================================
-     LOADING SCREEN
+     LOADING
   ======================================================= */
 
   if (loading) {
     return (
-      <div className="flex min-h-screen items-center justify-center bg-[#f6f7fb] dark:bg-[#08090b]">
-        <div className="flex flex-col items-center gap-4">
-          <div className="h-12 w-12 animate-spin rounded-full border-4 border-indigo-500/20 border-t-indigo-600" />
+      <div className="flex min-h-screen items-center justify-center bg-gray-50 dark:bg-[#08090b]">
+        <div className="text-center">
+          <div className="mx-auto h-10 w-10 animate-spin rounded-full border-4 border-indigo-100 border-t-indigo-600" />
 
-          <p className="text-sm font-semibold text-gray-500 dark:text-gray-400">
+          <p className="mt-4 text-sm font-semibold text-gray-500 dark:text-gray-400">
             Loading dashboard...
           </p>
         </div>
@@ -387,11 +384,11 @@ export default function StudentDashboard() {
     );
   }
 
-  const firstName =
-    profile?.name?.split(" ")[0] || "Student";
+  const firstName = profile?.name?.split(" ")[0] || "Student";
 
   return (
-    <div className="min-h-screen bg-[#f6f7fb] text-gray-900 transition-colors duration-300 dark:bg-[#08090b] dark:text-white">
+    <div className="min-h-screen bg-gray-50 text-gray-900 transition-colors duration-300 dark:bg-[#08090b] dark:text-white">
+
       {/* =====================================================
           MOBILE OVERLAY
       ===================================================== */}
@@ -585,11 +582,14 @@ export default function StudentDashboard() {
       ===================================================== */}
 
       <main className="lg:ml-[270px]">
+
         {/* HEADER */}
 
         <header className="sticky top-0 z-30 border-b border-gray-200/80 bg-white/80 px-4 py-4 backdrop-blur-xl dark:border-white/10 dark:bg-[#08090b]/80 sm:px-6 lg:px-8">
           <div className="flex items-center justify-between gap-4">
+
             <div className="flex items-center gap-3">
+
               <button
                 type="button"
                 onClick={() => setSidebarOpen(true)}
@@ -610,6 +610,7 @@ export default function StudentDashboard() {
             </div>
 
             <div className="flex items-center gap-3">
+
               {/* SEARCH */}
 
               <div className="hidden w-[250px] items-center gap-2 rounded-xl border border-gray-200 bg-gray-50 px-3 py-2.5 md:flex dark:border-white/10 dark:bg-white/5">
@@ -677,14 +678,17 @@ export default function StudentDashboard() {
         =================================================== */}
 
         <div className="mx-auto max-w-[1500px] px-4 py-6 sm:px-6 lg:px-8 lg:py-8">
+
           {/* WELCOME */}
 
           <section className="relative overflow-hidden rounded-[28px] bg-gradient-to-br from-indigo-600 via-indigo-700 to-purple-700 p-6 text-white shadow-2xl shadow-indigo-500/10 sm:p-8">
+
             <div className="absolute -right-20 -top-20 h-64 w-64 rounded-full bg-white/10 blur-3xl" />
 
             <div className="absolute -bottom-24 left-1/3 h-64 w-64 rounded-full bg-purple-300/10 blur-3xl" />
 
             <div className="relative z-10 flex flex-col justify-between gap-6 md:flex-row md:items-center">
+
               <div>
                 <div className="mb-3 flex items-center gap-2 text-indigo-100">
                   <Sparkles size={16} />
@@ -712,7 +716,6 @@ export default function StudentDashboard() {
                   className="mt-6 inline-flex items-center gap-2 rounded-xl bg-white px-5 py-3 text-sm font-bold text-indigo-700 shadow-xl transition hover:-translate-y-0.5 hover:shadow-2xl"
                 >
                   Explore Quizzes
-
                   <ChevronRight size={17} />
                 </button>
               </div>
@@ -732,6 +735,7 @@ export default function StudentDashboard() {
           ================================================= */}
 
           <section className="mt-6 grid grid-cols-2 gap-4 lg:grid-cols-4">
+
             <StatCard
               icon={<BookOpen size={21} />}
               title="Quizzes Attempted"
@@ -763,6 +767,7 @@ export default function StudentDashboard() {
               description="Personal best"
               iconClass="bg-amber-100 text-amber-600 dark:bg-amber-500/10 dark:text-amber-400"
             />
+
           </section>
 
           {/* =================================================
@@ -770,30 +775,37 @@ export default function StudentDashboard() {
           ================================================= */}
 
           <section className="mt-6 grid gap-6 xl:grid-cols-[1fr_330px]">
+
+            {/* CHART */}
+
             <div className="rounded-[24px] border border-gray-200 bg-white p-5 shadow-sm dark:border-white/10 dark:bg-[#101114] sm:p-6">
+
               <div className="flex items-center justify-between">
+
                 <div>
                   <h3 className="font-bold">
                     Performance Overview
                   </h3>
 
                   <p className="mt-1 text-xs text-gray-400">
-                    Your score progress over the last
-                    7 days
+                    Your score progress over the last 7 days
                   </p>
                 </div>
 
                 <div className="rounded-xl bg-indigo-50 px-3 py-2 text-xs font-bold text-indigo-600 dark:bg-indigo-500/10 dark:text-indigo-400">
                   This Week
                 </div>
+
               </div>
 
               <div className="mt-6 h-[280px] w-full">
+
                 <ResponsiveContainer
                   width="100%"
                   height="100%"
                 >
                   <AreaChart data={performanceData}>
+
                     <defs>
                       <linearGradient
                         id="scoreGradient"
@@ -872,15 +884,19 @@ export default function StudentDashboard() {
                       strokeWidth={3}
                       fill="url(#scoreGradient)"
                     />
+
                   </AreaChart>
                 </ResponsiveContainer>
+
               </div>
             </div>
 
             {/* PROGRESS */}
 
             <div className="rounded-[24px] border border-gray-200 bg-white p-5 shadow-sm dark:border-white/10 dark:bg-[#101114] sm:p-6">
+
               <div className="flex items-center justify-between">
+
                 <div>
                   <h3 className="font-bold">
                     Your Progress
@@ -895,10 +911,13 @@ export default function StudentDashboard() {
                   size={22}
                   className="text-orange-500"
                 />
+
               </div>
 
               <div className="mt-6 flex items-center justify-center">
+
                 <div className="relative flex h-44 w-44 items-center justify-center rounded-full border-[14px] border-indigo-100 dark:border-indigo-500/10">
+
                   <div className="absolute inset-0 rotate-45 rounded-full border-[14px] border-transparent border-r-indigo-600 border-t-indigo-600" />
 
                   <div className="text-center">
@@ -910,10 +929,13 @@ export default function StudentDashboard() {
                       Average
                     </p>
                   </div>
+
                 </div>
+
               </div>
 
               <div className="mt-6 space-y-4">
+
                 <ProgressRow
                   label="Passed"
                   value="18"
@@ -927,8 +949,11 @@ export default function StudentDashboard() {
                   percent="25%"
                   icon={<XCircle size={16} />}
                 />
+
               </div>
+
             </div>
+
           </section>
 
           {/* =================================================
@@ -936,7 +961,9 @@ export default function StudentDashboard() {
           ================================================= */}
 
           <section className="mt-6">
+
             <div className="mb-4 flex flex-col justify-between gap-3 sm:flex-row sm:items-center">
+
               <div>
                 <h3 className="text-lg font-black">
                   Explore Quizzes
@@ -957,11 +984,13 @@ export default function StudentDashboard() {
                 View all
                 <ChevronRight size={16} />
               </button>
+
             </div>
 
             {/* CATEGORY FILTER */}
 
             <div className="mb-5 flex gap-2 overflow-x-auto pb-1">
+
               {categories.map((item) => (
                 <button
                   type="button"
@@ -976,21 +1005,25 @@ export default function StudentDashboard() {
                   {item}
                 </button>
               ))}
+
             </div>
 
             {/* QUIZ CARDS */}
 
             <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
+
               {filteredQuizzes.map((quiz) => (
                 <QuizCard
                   key={quiz.id}
                   quiz={quiz}
                 />
               ))}
+
             </div>
 
             {filteredQuizzes.length === 0 && (
               <div className="rounded-2xl border border-dashed border-gray-300 py-12 text-center dark:border-white/10">
+
                 <Search
                   size={30}
                   className="mx-auto text-gray-400"
@@ -1003,8 +1036,10 @@ export default function StudentDashboard() {
                 <p className="mt-1 text-xs text-gray-400">
                   Try another search or category.
                 </p>
+
               </div>
             )}
+
           </section>
 
           {/* =================================================
@@ -1012,10 +1047,13 @@ export default function StudentDashboard() {
           ================================================= */}
 
           <section className="mt-6 grid gap-6 xl:grid-cols-[1fr_400px]">
+
             {/* RECENT */}
 
             <div className="rounded-[24px] border border-gray-200 bg-white p-5 shadow-sm dark:border-white/10 dark:bg-[#101114] sm:p-6">
+
               <div className="flex items-center justify-between">
+
                 <div>
                   <h3 className="font-bold">
                     Recent Attempts
@@ -1038,33 +1076,41 @@ export default function StudentDashboard() {
                 >
                   View history
                 </button>
+
               </div>
 
               <div className="mt-5 space-y-3">
+
                 {demoAttempts.map((attempt) => (
                   <div
                     key={attempt.id}
                     className="flex items-center justify-between gap-3 rounded-2xl border border-gray-100 p-4 transition hover:bg-gray-50 dark:border-white/5 dark:hover:bg-white/[0.03]"
                   >
+
                     <div className="flex min-w-0 items-center gap-3">
+
                       <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-indigo-50 text-indigo-600 dark:bg-indigo-500/10 dark:text-indigo-400">
                         <BookOpen size={18} />
                       </div>
 
                       <div className="min-w-0">
+
                         <p className="truncate text-sm font-bold">
                           {attempt.quiz}
                         </p>
 
                         <p className="mt-1 text-[11px] text-gray-400">
-                          {attempt.category} •{" "}
-                          {attempt.date}
+                          {attempt.category} • {attempt.date}
                         </p>
+
                       </div>
+
                     </div>
 
                     <div className="flex items-center gap-3">
+
                       <div className="text-right">
+
                         <p className="text-sm font-black">
                           {attempt.score}%
                         </p>
@@ -1078,22 +1124,28 @@ export default function StudentDashboard() {
                         >
                           {attempt.status}
                         </span>
+
                       </div>
 
                       <ChevronRight
                         size={17}
                         className="text-gray-400"
                       />
+
                     </div>
+
                   </div>
                 ))}
+
               </div>
             </div>
 
             {/* LEADERBOARD */}
 
             <div className="rounded-[24px] border border-gray-200 bg-white p-5 shadow-sm dark:border-white/10 dark:bg-[#101114] sm:p-6">
+
               <div className="flex items-center justify-between">
+
                 <div>
                   <h3 className="font-bold">
                     Leaderboard
@@ -1108,9 +1160,11 @@ export default function StudentDashboard() {
                   size={21}
                   className="text-yellow-500"
                 />
+
               </div>
 
               <div className="mt-5 space-y-3">
+
                 <LeaderboardRow
                   rank={1}
                   name="Rahul Sharma"
@@ -1135,6 +1189,7 @@ export default function StudentDashboard() {
                   score="82%"
                   current
                 />
+
               </div>
 
               <button
@@ -1148,10 +1203,11 @@ export default function StudentDashboard() {
                 className="mt-5 flex w-full items-center justify-center gap-2 rounded-xl bg-gray-50 py-3 text-xs font-bold text-gray-600 transition hover:bg-gray-100 dark:bg-white/5 dark:text-gray-300 dark:hover:bg-white/10"
               >
                 View Full Leaderboard
-
                 <ChevronRight size={15} />
               </button>
+
             </div>
+
           </section>
 
           {/* FOOTER */}
@@ -1161,6 +1217,7 @@ export default function StudentDashboard() {
               © 2026 QuizPro. Learn. Challenge. Achieve.
             </p>
           </footer>
+
         </div>
       </main>
     </div>
@@ -1193,7 +1250,7 @@ function SidebarItem({
       }`}
     >
       {icon}
-      <span>{label}</span>
+      {label}
     </button>
   );
 }
@@ -1216,8 +1273,10 @@ function StatCard({
   iconClass: string;
 }) {
   return (
-    <div className="rounded-[22px] border border-gray-200 bg-white p-4 shadow-sm transition hover:-translate-y-1 hover:shadow-lg dark:border-white/10 dark:bg-[#101114] sm:p-5">
-      <div className="flex items-start justify-between">
+    <div className="rounded-[22px] border border-gray-200 bg-white p-5 shadow-sm transition hover:-translate-y-0.5 hover:shadow-md dark:border-white/10 dark:bg-[#101114]">
+
+      <div className="flex items-center justify-between">
+
         <div
           className={`flex h-10 w-10 items-center justify-center rounded-xl ${iconClass}`}
         >
@@ -1227,6 +1286,7 @@ function StatCard({
         <span className="text-[10px] font-bold text-emerald-500">
           ↑
         </span>
+
       </div>
 
       <p className="mt-4 text-xs font-medium text-gray-400">
@@ -1240,6 +1300,7 @@ function StatCard({
       <p className="mt-1 text-[10px] text-gray-400">
         {description}
       </p>
+
     </div>
   );
 }
@@ -1261,7 +1322,9 @@ function ProgressRow({
 }) {
   return (
     <div className="flex items-center justify-between">
+
       <div className="flex items-center gap-2">
+
         <div className="text-indigo-500">
           {icon}
         </div>
@@ -1269,9 +1332,11 @@ function ProgressRow({
         <span className="text-xs font-semibold">
           {label}
         </span>
+
       </div>
 
       <div className="flex items-center gap-2">
+
         <span className="text-xs font-bold">
           {value}
         </span>
@@ -1279,7 +1344,9 @@ function ProgressRow({
         <span className="text-[10px] text-gray-400">
           ({percent})
         </span>
+
       </div>
+
     </div>
   );
 }
@@ -1301,19 +1368,32 @@ function QuizCard({
       : "bg-red-50 text-red-600 dark:bg-red-500/10 dark:text-red-400";
 
   return (
-    <div className="group overflow-hidden rounded-[22px] border border-gray-200 bg-white shadow-sm transition duration-300 hover:-translate-y-1 hover:shadow-xl dark:border-white/10 dark:bg-[#101114]">
-      <div className="relative h-28 overflow-hidden bg-gradient-to-br from-indigo-600 via-purple-600 to-blue-600">
-        <div className="absolute -right-8 -top-8 h-28 w-28 rounded-full bg-white/10 blur-xl" />
+    <div className="overflow-hidden rounded-[22px] border border-gray-200 bg-white shadow-sm transition duration-300 hover:-translate-y-1 hover:shadow-xl dark:border-white/10 dark:bg-[#101114]">
+
+      {/* TOP */}
+
+      <div className="relative h-28 overflow-hidden bg-gradient-to-br from-indigo-600 via-indigo-700 to-purple-700">
+
+        <div className="absolute -right-6 -top-10 h-32 w-32 rounded-full bg-white/10 blur-2xl" />
+
+        <div className="absolute -bottom-10 left-20 h-24 w-24 rounded-full bg-purple-300/10 blur-xl" />
 
         <div className="absolute bottom-3 left-4">
+
           <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-white/15 text-white backdrop-blur-md">
             <BookOpen size={21} />
           </div>
+
         </div>
+
       </div>
 
+      {/* CONTENT */}
+
       <div className="p-4">
+
         <div className="flex items-center justify-between gap-2">
+
           <span
             className={`rounded-lg px-2 py-1 text-[9px] font-bold ${difficultyClass}`}
           >
@@ -1323,6 +1403,7 @@ function QuizCard({
           <span className="text-[10px] font-semibold text-gray-400">
             {quiz.category}
           </span>
+
         </div>
 
         <h4 className="mt-3 line-clamp-1 text-sm font-black">
@@ -1334,6 +1415,7 @@ function QuizCard({
         </p>
 
         <div className="mt-4 flex items-center gap-3 border-t border-gray-100 pt-3 text-[10px] font-semibold text-gray-400 dark:border-white/5">
+
           <span className="flex items-center gap-1">
             <BookOpen size={13} />
             {quiz.questions}
@@ -1343,6 +1425,7 @@ function QuizCard({
             <Clock3 size={13} />
             {quiz.duration}m
           </span>
+
         </div>
 
         <Link
@@ -1352,6 +1435,7 @@ function QuizCard({
           Start Quiz
           <Play size={14} />
         </Link>
+
       </div>
     </div>
   );
@@ -1380,7 +1464,9 @@ function LeaderboardRow({
           : ""
       }`}
     >
+
       <div className="flex items-center gap-3">
+
         <div
           className={`flex h-8 w-8 items-center justify-center rounded-lg text-xs font-black ${
             rank === 1
@@ -1402,11 +1488,13 @@ function LeaderboardRow({
         <p className="text-xs font-bold">
           {name}
         </p>
+
       </div>
 
       <p className="text-xs font-black text-indigo-600 dark:text-indigo-400">
         {score}
       </p>
+
     </div>
   );
 }
