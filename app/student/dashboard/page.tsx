@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
+import type { ReactNode } from "react";
 
 import {
   BarChart3,
@@ -18,7 +19,6 @@ import {
   Sun,
   Trophy,
   User,
-  Users,
   X,
   CheckCircle2,
   XCircle,
@@ -39,8 +39,17 @@ import {
 } from "recharts";
 
 import { toast } from "sonner";
-
 import { createClient } from "@/lib/supabase/client";
+
+/* =========================================================
+   SUPABASE CLIENT
+========================================================= */
+
+const supabase = createClient();
+
+/* =========================================================
+   TYPES
+========================================================= */
 
 type Profile = {
   id: string;
@@ -70,36 +79,23 @@ type Attempt = {
   date: string;
 };
 
+/* =========================================================
+   PERFORMANCE DATA
+========================================================= */
+
 const performanceData = [
-  {
-    name: "Mon",
-    score: 62,
-  },
-  {
-    name: "Tue",
-    score: 70,
-  },
-  {
-    name: "Wed",
-    score: 68,
-  },
-  {
-    name: "Thu",
-    score: 78,
-  },
-  {
-    name: "Fri",
-    score: 74,
-  },
-  {
-    name: "Sat",
-    score: 88,
-  },
-  {
-    name: "Sun",
-    score: 92,
-  },
+  { name: "Mon", score: 62 },
+  { name: "Tue", score: 70 },
+  { name: "Wed", score: 68 },
+  { name: "Thu", score: 78 },
+  { name: "Fri", score: 74 },
+  { name: "Sat", score: 88 },
+  { name: "Sun", score: 92 },
 ];
+
+/* =========================================================
+   DEMO QUIZZES
+========================================================= */
 
 const demoQuizzes: Quiz[] = [
   {
@@ -148,6 +144,10 @@ const demoQuizzes: Quiz[] = [
   },
 ];
 
+/* =========================================================
+   DEMO ATTEMPTS
+========================================================= */
+
 const demoAttempts: Attempt[] = [
   {
     id: "1",
@@ -175,157 +175,171 @@ const demoAttempts: Attempt[] = [
   },
 ];
 
+/* =========================================================
+   MAIN DASHBOARD
+========================================================= */
+
 export default function StudentDashboard() {
   const router = useRouter();
 
-  const supabase = createClient();
+  const [profile, setProfile] = useState<Profile | null>(null);
 
-  const [profile, setProfile] =
-    useState<Profile | null>(null);
+  const [loading, setLoading] = useState(true);
 
-  const [loading, setLoading] =
-    useState(true);
+  const [darkMode, setDarkMode] = useState(false);
 
-  const [darkMode, setDarkMode] =
-    useState(false);
+  const [sidebarOpen, setSidebarOpen] = useState(false);
 
-  const [sidebarOpen, setSidebarOpen] =
-    useState(false);
+  const [search, setSearch] = useState("");
 
-  const [search, setSearch] =
-    useState("");
+  const [category, setCategory] = useState("All");
 
-  const [category, setCategory] =
-    useState("All");
+  const [activeMenu, setActiveMenu] = useState("Dashboard");
 
-  const [activeMenu, setActiveMenu] =
-    useState("Dashboard");
-
-  /*
-   * Load theme
-   */
+  /* =======================================================
+     LOAD THEME
+  ======================================================= */
 
   useEffect(() => {
-    const savedTheme =
-      localStorage.getItem(
-        "quiz-theme"
-      );
+    const savedTheme = localStorage.getItem("quiz-theme");
 
     if (savedTheme === "dark") {
       setDarkMode(true);
-      document.documentElement.classList.add(
-        "dark"
-      );
+      document.documentElement.classList.add("dark");
+    } else {
+      setDarkMode(false);
+      document.documentElement.classList.remove("dark");
     }
   }, []);
 
-  /*
-   * Apply theme
-   */
+  /* =======================================================
+     APPLY THEME
+  ======================================================= */
 
   useEffect(() => {
     if (darkMode) {
-      document.documentElement.classList.add(
-        "dark"
-      );
-
-      localStorage.setItem(
-        "quiz-theme",
-        "dark"
-      );
+      document.documentElement.classList.add("dark");
+      localStorage.setItem("quiz-theme", "dark");
     } else {
-      document.documentElement.classList.remove(
-        "dark"
-      );
-
-      localStorage.setItem(
-        "quiz-theme",
-        "light"
-      );
+      document.documentElement.classList.remove("dark");
+      localStorage.setItem("quiz-theme", "light");
     }
   }, [darkMode]);
 
-  /*
-   * Load authenticated profile
-   */
+  /* =======================================================
+     LOAD USER PROFILE
+  ======================================================= */
 
   useEffect(() => {
+    let mounted = true;
+
     async function loadProfile() {
       try {
         const {
           data: { user },
+          error: authError,
         } = await supabase.auth.getUser();
+
+        if (authError) {
+          console.error("Auth error:", authError);
+        }
 
         if (!user) {
           router.replace("/login");
           return;
         }
 
-        const { data, error } =
-          await supabase
-            .from("profiles")
-            .select(
-              "id, name, email, role, status"
-            )
-            .eq("id", user.id)
-            .single();
+        const { data, error } = await supabase
+          .from("profiles")
+          .select("id, name, email, role, status")
+          .eq("id", user.id)
+          .single();
 
-        if (error || !data) {
-          toast.error(
-            "Unable to load your profile."
-          );
+        if (error) {
+          console.error("Profile error:", error);
+        }
 
+        if (!data) {
+          toast.error("Profile not found.");
           router.replace("/login");
           return;
         }
 
         if (data.role !== "STUDENT") {
-          router.replace(
-            "/admin/dashboard"
-          );
-
+          router.replace("/admin/dashboard");
           return;
         }
 
         if (data.status !== "ACTIVE") {
           await supabase.auth.signOut();
 
+          toast.error("Your account is inactive.");
           router.replace("/login");
-
           return;
         }
 
-        setProfile(data);
+        if (mounted) {
+          setProfile(data);
+        }
       } catch (error) {
-        console.error(error);
+        console.error("Dashboard error:", error);
+
+        if (mounted) {
+          toast.error("Unable to load dashboard.");
+        }
 
         router.replace("/login");
       } finally {
-        setLoading(false);
+        if (mounted) {
+          setLoading(false);
+        }
       }
     }
 
     loadProfile();
-  }, [router, supabase]);
 
-  /*
-   * Logout
-   */
+    return () => {
+      mounted = false;
+    };
+  }, [router]);
+
+  /* =======================================================
+     LOGOUT
+  ======================================================= */
 
   const handleLogout = async () => {
-    await supabase.auth.signOut();
+    try {
+      const { error } = await supabase.auth.signOut();
 
-    toast.success(
-      "Logged out successfully."
-    );
+      if (error) {
+        console.error("Logout error:", error);
+        toast.error("Unable to logout.");
+        return;
+      }
 
-    router.replace("/login");
-    router.refresh();
+      toast.success("Logged out successfully.");
+
+      router.replace("/login");
+      router.refresh();
+    } catch (error) {
+      console.error(error);
+      toast.error("Something went wrong.");
+    }
   };
 
-  /*
-   * Categories
-   */
+  /* =======================================================
+     NAVIGATION HELPER
+  ======================================================= */
+
+  const navigateTo = (menu: string, path: string) => {
+    setActiveMenu(menu);
+    setSidebarOpen(false);
+    router.push(path);
+  };
+
+  /* =======================================================
+     CATEGORIES
+  ======================================================= */
 
   const categories = [
     "All",
@@ -336,42 +350,36 @@ export default function StudentDashboard() {
     "CSS",
   ];
 
-  /*
-   * Filter quizzes
-   */
+  /* =======================================================
+     FILTER QUIZZES
+  ======================================================= */
 
   const filteredQuizzes = useMemo(() => {
     return demoQuizzes.filter((quiz) => {
+      const query = search.toLowerCase().trim();
+
       const matchesSearch =
-        quiz.title
-          .toLowerCase()
-          .includes(search.toLowerCase()) ||
-        quiz.category
-          .toLowerCase()
-          .includes(search.toLowerCase());
+        quiz.title.toLowerCase().includes(query) ||
+        quiz.category.toLowerCase().includes(query);
 
       const matchesCategory =
-        category === "All" ||
-        quiz.category === category;
+        category === "All" || quiz.category === category;
 
-      return (
-        matchesSearch &&
-        matchesCategory
-      );
+      return matchesSearch && matchesCategory;
     });
   }, [search, category]);
 
-  /*
-   * Loading
-   */
+  /* =======================================================
+     LOADING SCREEN
+  ======================================================= */
 
   if (loading) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-[#f7f7f8] dark:bg-[#080808]">
+      <div className="flex min-h-screen items-center justify-center bg-[#f6f7fb] dark:bg-[#08090b]">
         <div className="flex flex-col items-center gap-4">
-          <div className="h-12 w-12 rounded-full border-4 border-indigo-500/20 border-t-indigo-600 animate-spin" />
+          <div className="h-12 w-12 animate-spin rounded-full border-4 border-indigo-500/20 border-t-indigo-600" />
 
-          <p className="text-sm font-medium text-gray-500 dark:text-gray-400">
+          <p className="text-sm font-semibold text-gray-500 dark:text-gray-400">
             Loading dashboard...
           </p>
         </div>
@@ -380,24 +388,24 @@ export default function StudentDashboard() {
   }
 
   const firstName =
-    profile?.name?.split(" ")[0] ||
-    "Student";
+    profile?.name?.split(" ")[0] || "Student";
 
   return (
     <div className="min-h-screen bg-[#f6f7fb] text-gray-900 transition-colors duration-300 dark:bg-[#08090b] dark:text-white">
-
-      {/* Mobile Overlay */}
+      {/* =====================================================
+          MOBILE OVERLAY
+      ===================================================== */}
 
       {sidebarOpen && (
         <div
-          onClick={() =>
-            setSidebarOpen(false)
-          }
-          className="fixed inset-0 z-40 bg-black/50 lg:hidden"
+          onClick={() => setSidebarOpen(false)}
+          className="fixed inset-0 z-40 bg-black/50 backdrop-blur-sm lg:hidden"
         />
       )}
 
-      {/* SIDEBAR */}
+      {/* =====================================================
+          SIDEBAR
+      ===================================================== */}
 
       <aside
         className={`
@@ -423,20 +431,18 @@ export default function StudentDashboard() {
           }
         `}
       >
-
-        {/* Logo */}
+        {/* LOGO */}
 
         <div className="flex items-center justify-between">
-
-          <Link
-            href="/student/dashboard"
-            className="flex items-center gap-3"
+          <button
+            type="button"
+            onClick={() =>
+              navigateTo("Dashboard", "/student/dashboard")
+            }
+            className="flex items-center gap-3 text-left"
           >
-
             <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-gradient-to-br from-indigo-600 to-purple-600 text-white shadow-lg shadow-indigo-500/20">
-              <Sparkles
-                size={21}
-              />
+              <Sparkles size={21} />
             </div>
 
             <div>
@@ -448,158 +454,105 @@ export default function StudentDashboard() {
                 Learning Platform
               </p>
             </div>
-
-          </Link>
+          </button>
 
           <button
-            onClick={() =>
-              setSidebarOpen(false)
-            }
-            className="rounded-xl p-2 text-gray-500 hover:bg-gray-100 lg:hidden dark:hover:bg-white/10"
+            type="button"
+            onClick={() => setSidebarOpen(false)}
+            className="rounded-xl p-2 text-gray-500 hover:bg-gray-100 dark:hover:bg-white/10 lg:hidden"
           >
             <X size={20} />
           </button>
-
         </div>
 
-        {/* Navigation */}
+        {/* MAIN MENU */}
 
         <div className="mt-10">
-
           <p className="mb-3 px-3 text-[11px] font-bold uppercase tracking-[0.15em] text-gray-400">
             Main Menu
           </p>
 
           <nav className="space-y-1">
-
             <SidebarItem
               icon={<Home size={19} />}
               label="Dashboard"
-              active={
-                activeMenu ===
-                "Dashboard"
-              }
+              active={activeMenu === "Dashboard"}
               onClick={() =>
-                setActiveMenu(
-                  "Dashboard"
-                )
+                navigateTo("Dashboard", "/student/dashboard")
               }
             />
 
-            <Link
-              href="/quiz"
+            <SidebarItem
+              icon={<BookOpen size={19} />}
+              label="Explore Quizzes"
+              active={activeMenu === "Quizzes"}
               onClick={() =>
-                setActiveMenu("Quizzes")
+                navigateTo("Quizzes", "/quiz")
               }
-            >
-              <SidebarItem
-                icon={
-                  <BookOpen size={19} />
-                }
-                label="Explore Quizzes"
-                active={
-                  activeMenu ===
-                  "Quizzes"
-                }
-              />
-            </Link>
+            />
 
             <SidebarItem
-              icon={
-                <Trophy size={19} />
-              }
+              icon={<Trophy size={19} />}
               label="Leaderboard"
-              active={
-                activeMenu ===
-                "Leaderboard"
-              }
+              active={activeMenu === "Leaderboard"}
               onClick={() =>
-                setActiveMenu(
-                  "Leaderboard"
-                )
+                navigateTo("Leaderboard", "/leaderboard")
               }
             />
-                        <Link
-              href="/leaderboard"
-              onClick={() =>
-                setActiveMenu("leaderboard")
-              }
-            >
-                          
+
             <SidebarItem
-              icon={
-                <BarChart3 size={19} />
-              }
+              icon={<BarChart3 size={19} />}
               label="My Performance"
-              active={
-                activeMenu ===
-                "Performance"
-              }
+              active={activeMenu === "Performance"}
               onClick={() =>
-                setActiveMenu(
-                  "Performance"
+                navigateTo(
+                  "Performance",
+                  "/student/performance"
                 )
               }
             />
-
           </nav>
-
         </div>
 
-        {/* Account */}
+        {/* ACCOUNT */}
 
         <div className="mt-8">
-
           <p className="mb-3 px-3 text-[11px] font-bold uppercase tracking-[0.15em] text-gray-400">
             Account
           </p>
 
           <nav className="space-y-1">
-
             <SidebarItem
-              icon={
-                <User size={19} />
-              }
+              icon={<User size={19} />}
               label="Profile"
-              active={
-                activeMenu ===
-                "Profile"
-              }
+              active={activeMenu === "Profile"}
               onClick={() =>
-                setActiveMenu(
-                  "Profile"
+                navigateTo(
+                  "Profile",
+                  "/student/profile"
                 )
               }
             />
 
             <SidebarItem
-              icon={
-                <Settings size={19} />
-              }
+              icon={<Settings size={19} />}
               label="Settings"
-              active={
-                activeMenu ===
-                "Settings"
-              }
+              active={activeMenu === "Settings"}
               onClick={() =>
-                setActiveMenu(
-                  "Settings"
+                navigateTo(
+                  "Settings",
+                  "/student/settings"
                 )
               }
             />
-
           </nav>
-
         </div>
 
-        {/* Bottom */}
+        {/* BOTTOM */}
 
         <div className="absolute bottom-5 left-5 right-5">
-
           <div className="mb-4 rounded-2xl border border-indigo-100 bg-indigo-50 p-4 dark:border-indigo-500/20 dark:bg-indigo-500/10">
-
             <div className="flex items-center gap-3">
-
               <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-indigo-600 text-white">
                 <Target size={18} />
               </div>
@@ -613,47 +566,39 @@ export default function StudentDashboard() {
                   Your streak is 7 days
                 </p>
               </div>
-
             </div>
-
           </div>
 
           <button
+            type="button"
             onClick={handleLogout}
             className="flex w-full items-center gap-3 rounded-xl px-3 py-3 text-sm font-semibold text-red-500 transition hover:bg-red-50 dark:hover:bg-red-500/10"
           >
             <LogOut size={19} />
-
             Logout
           </button>
-
         </div>
-
       </aside>
 
-      {/* MAIN */}
+      {/* =====================================================
+          MAIN
+      ===================================================== */}
 
       <main className="lg:ml-[270px]">
-
         {/* HEADER */}
 
-        <header className="sticky top-0 z-30 border-b border-gray-200/80 bg-white/80 px-4 py-4 backdrop-blur-xl sm:px-6 lg:px-8 dark:border-white/10 dark:bg-[#08090b]/80">
-
+        <header className="sticky top-0 z-30 border-b border-gray-200/80 bg-white/80 px-4 py-4 backdrop-blur-xl dark:border-white/10 dark:bg-[#08090b]/80 sm:px-6 lg:px-8">
           <div className="flex items-center justify-between gap-4">
-
             <div className="flex items-center gap-3">
-
               <button
-                onClick={() =>
-                  setSidebarOpen(true)
-                }
-                className="rounded-xl border border-gray-200 bg-white p-2.5 lg:hidden dark:border-white/10 dark:bg-white/5"
+                type="button"
+                onClick={() => setSidebarOpen(true)}
+                className="rounded-xl border border-gray-200 bg-white p-2.5 dark:border-white/10 dark:bg-white/5 lg:hidden"
               >
                 <Menu size={20} />
               </button>
 
               <div className="hidden sm:block">
-
                 <p className="text-xs font-medium text-gray-400">
                   Student Dashboard
                 </p>
@@ -661,17 +606,13 @@ export default function StudentDashboard() {
                 <h2 className="text-lg font-bold">
                   Overview
                 </h2>
-
               </div>
-
             </div>
 
             <div className="flex items-center gap-3">
-
-              {/* Search */}
+              {/* SEARCH */}
 
               <div className="hidden w-[250px] items-center gap-2 rounded-xl border border-gray-200 bg-gray-50 px-3 py-2.5 md:flex dark:border-white/10 dark:bg-white/5">
-
                 <Search
                   size={17}
                   className="text-gray-400"
@@ -680,25 +621,22 @@ export default function StudentDashboard() {
                 <input
                   value={search}
                   onChange={(e) =>
-                    setSearch(
-                      e.target.value
-                    )
+                    setSearch(e.target.value)
                   }
                   placeholder="Search quizzes..."
                   className="w-full bg-transparent text-sm outline-none placeholder:text-gray-400"
                 />
-
               </div>
 
-              {/* Theme */}
+              {/* THEME */}
 
               <button
+                type="button"
                 onClick={() =>
-                  setDarkMode(
-                    !darkMode
-                  )
+                  setDarkMode((value) => !value)
                 }
                 className="flex h-10 w-10 items-center justify-center rounded-xl border border-gray-200 bg-white transition hover:scale-105 dark:border-white/10 dark:bg-white/5"
+                aria-label="Toggle theme"
               >
                 {darkMode ? (
                   <Sun
@@ -713,114 +651,89 @@ export default function StudentDashboard() {
                 )}
               </button>
 
-              {/* Avatar */}
+              {/* USER */}
 
               <div className="hidden items-center gap-3 sm:flex">
-
                 <div className="text-right">
-
                   <p className="text-sm font-bold">
-                    {profile?.name ||
-                      "Student"}
+                    {profile?.name || "Student"}
                   </p>
 
                   <p className="text-[11px] text-gray-400">
                     Student
                   </p>
-
                 </div>
 
                 <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-br from-indigo-500 to-purple-600 font-bold text-white shadow-lg">
-                  {firstName
-                    .charAt(0)
-                    .toUpperCase()}
+                  {firstName.charAt(0).toUpperCase()}
                 </div>
-
               </div>
-
             </div>
-
           </div>
-
         </header>
 
-        {/* CONTENT */}
+        {/* ===================================================
+            CONTENT
+        =================================================== */}
 
         <div className="mx-auto max-w-[1500px] px-4 py-6 sm:px-6 lg:px-8 lg:py-8">
-
-          {/* Welcome */}
+          {/* WELCOME */}
 
           <section className="relative overflow-hidden rounded-[28px] bg-gradient-to-br from-indigo-600 via-indigo-700 to-purple-700 p-6 text-white shadow-2xl shadow-indigo-500/10 sm:p-8">
-
             <div className="absolute -right-20 -top-20 h-64 w-64 rounded-full bg-white/10 blur-3xl" />
 
             <div className="absolute -bottom-24 left-1/3 h-64 w-64 rounded-full bg-purple-300/10 blur-3xl" />
 
             <div className="relative z-10 flex flex-col justify-between gap-6 md:flex-row md:items-center">
-
               <div>
-
                 <div className="mb-3 flex items-center gap-2 text-indigo-100">
-
-                  <Sparkles
-                    size={16}
-                  />
+                  <Sparkles size={16} />
 
                   <span className="text-xs font-semibold uppercase tracking-[0.15em]">
                     Keep Growing
                   </span>
-
                 </div>
 
                 <h1 className="text-2xl font-black tracking-tight sm:text-3xl">
-                  Welcome back,{" "}
-                  {firstName}! 👋
+                  Welcome back, {firstName}! 👋
                 </h1>
 
                 <p className="mt-2 max-w-xl text-sm leading-6 text-indigo-100 sm:text-base">
-                  Ready to challenge
-                  yourself? Continue
-                  learning and improve
+                  Ready to challenge yourself?
+                  Continue learning and improve
                   your score today.
                 </p>
 
-                <Link
-                  href="/quiz"
+                <button
+                  type="button"
+                  onClick={() =>
+                    navigateTo("Quizzes", "/quiz")
+                  }
                   className="mt-6 inline-flex items-center gap-2 rounded-xl bg-white px-5 py-3 text-sm font-bold text-indigo-700 shadow-xl transition hover:-translate-y-0.5 hover:shadow-2xl"
                 >
                   Explore Quizzes
 
-                  <ChevronRight
-                    size={17}
-                  />
-                </Link>
-
+                  <ChevronRight size={17} />
+                </button>
               </div>
 
               <div className="hidden h-32 w-32 items-center justify-center rounded-[28px] bg-white/10 backdrop-blur-md lg:flex">
-
                 <Trophy
                   size={65}
                   strokeWidth={1.5}
                   className="text-yellow-300"
                 />
-
               </div>
-
             </div>
-
           </section>
 
-          {/* STATISTICS */}
+          {/* =================================================
+              STATISTICS
+          ================================================= */}
 
           <section className="mt-6 grid grid-cols-2 gap-4 lg:grid-cols-4">
-
             <StatCard
-              icon={
-                <BookOpen
-                  size={21}
-                />
-              }
+              icon={<BookOpen size={21} />}
               title="Quizzes Attempted"
               value="24"
               description="+4 this month"
@@ -828,11 +741,7 @@ export default function StudentDashboard() {
             />
 
             <StatCard
-              icon={
-                <CheckCircle2
-                  size={21}
-                />
-              }
+              icon={<CheckCircle2 size={21} />}
               title="Passed"
               value="18"
               description="75% success rate"
@@ -840,9 +749,7 @@ export default function StudentDashboard() {
             />
 
             <StatCard
-              icon={
-                <Target size={21} />
-              }
+              icon={<Target size={21} />}
               title="Average Score"
               value="82%"
               description="+8% improvement"
@@ -850,60 +757,44 @@ export default function StudentDashboard() {
             />
 
             <StatCard
-              icon={
-                <Trophy size={21} />
-              }
+              icon={<Trophy size={21} />}
               title="Highest Score"
               value="96%"
               description="Personal best"
               iconClass="bg-amber-100 text-amber-600 dark:bg-amber-500/10 dark:text-amber-400"
             />
-
           </section>
 
-          {/* CHART + QUICK STATS */}
+          {/* =================================================
+              PERFORMANCE
+          ================================================= */}
 
           <section className="mt-6 grid gap-6 xl:grid-cols-[1fr_330px]">
-
-            {/* Performance */}
-
-            <div className="rounded-[24px] border border-gray-200 bg-white p-5 shadow-sm sm:p-6 dark:border-white/10 dark:bg-[#101114]">
-
+            <div className="rounded-[24px] border border-gray-200 bg-white p-5 shadow-sm dark:border-white/10 dark:bg-[#101114] sm:p-6">
               <div className="flex items-center justify-between">
-
                 <div>
-
                   <h3 className="font-bold">
                     Performance Overview
                   </h3>
 
                   <p className="mt-1 text-xs text-gray-400">
-                    Your score progress over
-                    the last 7 days
+                    Your score progress over the last
+                    7 days
                   </p>
-
                 </div>
 
                 <div className="rounded-xl bg-indigo-50 px-3 py-2 text-xs font-bold text-indigo-600 dark:bg-indigo-500/10 dark:text-indigo-400">
                   This Week
                 </div>
-
               </div>
 
               <div className="mt-6 h-[280px] w-full">
-
                 <ResponsiveContainer
                   width="100%"
                   height="100%"
                 >
-                  <AreaChart
-                    data={
-                      performanceData
-                    }
-                  >
-
+                  <AreaChart data={performanceData}>
                     <defs>
-
                       <linearGradient
                         id="scoreGradient"
                         x1="0"
@@ -914,21 +805,15 @@ export default function StudentDashboard() {
                         <stop
                           offset="0%"
                           stopColor="#6366f1"
-                          stopOpacity={
-                            0.3
-                          }
+                          stopOpacity={0.3}
                         />
 
                         <stop
                           offset="100%"
                           stopColor="#6366f1"
-                          stopOpacity={
-                            0
-                          }
+                          stopOpacity={0}
                         />
-
                       </linearGradient>
-
                     </defs>
 
                     <CartesianGrid
@@ -954,10 +839,7 @@ export default function StudentDashboard() {
                     />
 
                     <YAxis
-                      domain={[
-                        0,
-                        100,
-                      ]}
+                      domain={[0, 100]}
                       axisLine={false}
                       tickLine={false}
                       tick={{
@@ -970,15 +852,13 @@ export default function StudentDashboard() {
 
                     <Tooltip
                       contentStyle={{
-                        borderRadius:
-                          "12px",
+                        borderRadius: "12px",
                         border: darkMode
                           ? "1px solid #27272a"
                           : "1px solid #e5e7eb",
-                        background:
-                          darkMode
-                            ? "#18181b"
-                            : "#ffffff",
+                        background: darkMode
+                          ? "#18181b"
+                          : "#ffffff",
                         color: darkMode
                           ? "#ffffff"
                           : "#111827",
@@ -992,22 +872,16 @@ export default function StudentDashboard() {
                       strokeWidth={3}
                       fill="url(#scoreGradient)"
                     />
-
                   </AreaChart>
                 </ResponsiveContainer>
-
               </div>
-
             </div>
 
-            {/* Quick Stats */}
+            {/* PROGRESS */}
 
-            <div className="rounded-[24px] border border-gray-200 bg-white p-5 shadow-sm sm:p-6 dark:border-white/10 dark:bg-[#101114]">
-
+            <div className="rounded-[24px] border border-gray-200 bg-white p-5 shadow-sm dark:border-white/10 dark:bg-[#101114] sm:p-6">
               <div className="flex items-center justify-between">
-
                 <div>
-
                   <h3 className="font-bold">
                     Your Progress
                   </h3>
@@ -1015,24 +889,19 @@ export default function StudentDashboard() {
                   <p className="mt-1 text-xs text-gray-400">
                     Overall performance
                   </p>
-
                 </div>
 
                 <Flame
                   size={22}
                   className="text-orange-500"
                 />
-
               </div>
 
               <div className="mt-6 flex items-center justify-center">
-
                 <div className="relative flex h-44 w-44 items-center justify-center rounded-full border-[14px] border-indigo-100 dark:border-indigo-500/10">
-
-                  <div className="absolute inset-0 rounded-full border-[14px] border-transparent border-t-indigo-600 border-r-indigo-600 rotate-45" />
+                  <div className="absolute inset-0 rotate-45 rounded-full border-[14px] border-transparent border-r-indigo-600 border-t-indigo-600" />
 
                   <div className="text-center">
-
                     <p className="text-3xl font-black">
                       82%
                     </p>
@@ -1040,51 +909,35 @@ export default function StudentDashboard() {
                     <p className="text-xs text-gray-400">
                       Average
                     </p>
-
                   </div>
-
                 </div>
-
               </div>
 
               <div className="mt-6 space-y-4">
-
                 <ProgressRow
                   label="Passed"
                   value="18"
                   percent="75%"
-                  icon={
-                    <CheckCircle2
-                      size={16}
-                    />
-                  }
+                  icon={<CheckCircle2 size={16} />}
                 />
 
                 <ProgressRow
                   label="Failed"
                   value="6"
                   percent="25%"
-                  icon={
-                    <XCircle
-                      size={16}
-                    />
-                  }
+                  icon={<XCircle size={16} />}
                 />
-
               </div>
-
             </div>
-
           </section>
 
-          {/* AVAILABLE QUIZZES */}
+          {/* =================================================
+              QUIZZES
+          ================================================= */}
 
           <section className="mt-6">
-
             <div className="mb-4 flex flex-col justify-between gap-3 sm:flex-row sm:items-center">
-
               <div>
-
                 <h3 className="text-lg font-black">
                   Explore Quizzes
                 </h3>
@@ -1092,65 +945,52 @@ export default function StudentDashboard() {
                 <p className="mt-1 text-xs text-gray-400">
                   Find your next challenge
                 </p>
-
               </div>
 
-              <Link
-                href="/quiz"
+              <button
+                type="button"
+                onClick={() =>
+                  navigateTo("Quizzes", "/quiz")
+                }
                 className="inline-flex items-center gap-1 text-sm font-bold text-indigo-600 dark:text-indigo-400"
               >
                 View all
-
-                <ChevronRight
-                  size={16}
-                />
-              </Link>
-
+                <ChevronRight size={16} />
+              </button>
             </div>
 
-            {/* Category filters */}
+            {/* CATEGORY FILTER */}
 
             <div className="mb-5 flex gap-2 overflow-x-auto pb-1">
-
-              {categories.map(
-                (item) => (
-                  <button
-                    key={item}
-                    onClick={() =>
-                      setCategory(
-                        item
-                      )
-                    }
-                    className={`whitespace-nowrap rounded-xl px-4 py-2 text-xs font-bold transition ${
-                      category === item
-                        ? "bg-indigo-600 text-white shadow-lg shadow-indigo-500/20"
-                        : "border border-gray-200 bg-white text-gray-500 hover:border-indigo-300 dark:border-white/10 dark:bg-[#101114] dark:text-gray-400"
-                    }`}
-                  >
-                    {item}
-                  </button>
-                )
-              )}
-
+              {categories.map((item) => (
+                <button
+                  type="button"
+                  key={item}
+                  onClick={() => setCategory(item)}
+                  className={`whitespace-nowrap rounded-xl px-4 py-2 text-xs font-bold transition ${
+                    category === item
+                      ? "bg-indigo-600 text-white shadow-lg shadow-indigo-500/20"
+                      : "border border-gray-200 bg-white text-gray-500 hover:border-indigo-300 dark:border-white/10 dark:bg-[#101114] dark:text-gray-400"
+                  }`}
+                >
+                  {item}
+                </button>
+              ))}
             </div>
+
+            {/* QUIZ CARDS */}
 
             <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
-
-              {filteredQuizzes.map(
-                (quiz) => (
-                  <QuizCard
-                    key={quiz.id}
-                    quiz={quiz}
-                  />
-                )
-              )}
-
+              {filteredQuizzes.map((quiz) => (
+                <QuizCard
+                  key={quiz.id}
+                  quiz={quiz}
+                />
+              ))}
             </div>
 
-            {filteredQuizzes.length ===
-              0 && (
+            {filteredQuizzes.length === 0 && (
               <div className="rounded-2xl border border-dashed border-gray-300 py-12 text-center dark:border-white/10">
-
                 <Search
                   size={30}
                   className="mx-auto text-gray-400"
@@ -1161,27 +1001,22 @@ export default function StudentDashboard() {
                 </p>
 
                 <p className="mt-1 text-xs text-gray-400">
-                  Try another search or
-                  category.
+                  Try another search or category.
                 </p>
-
               </div>
             )}
-
           </section>
 
-          {/* RECENT + LEADERBOARD */}
+          {/* =================================================
+              RECENT + LEADERBOARD
+          ================================================= */}
 
           <section className="mt-6 grid gap-6 xl:grid-cols-[1fr_400px]">
+            {/* RECENT */}
 
-            {/* Recent Attempts */}
-
-            <div className="rounded-[24px] border border-gray-200 bg-white p-5 shadow-sm sm:p-6 dark:border-white/10 dark:bg-[#101114]">
-
+            <div className="rounded-[24px] border border-gray-200 bg-white p-5 shadow-sm dark:border-white/10 dark:bg-[#101114] sm:p-6">
               <div className="flex items-center justify-between">
-
                 <div>
-
                   <h3 className="font-bold">
                     Recent Attempts
                   </h3>
@@ -1189,105 +1024,77 @@ export default function StudentDashboard() {
                   <p className="mt-1 text-xs text-gray-400">
                     Your latest quiz activity
                   </p>
-
                 </div>
 
-                <Link
-                  href="/student/history"
+                <button
+                  type="button"
+                  onClick={() =>
+                    navigateTo(
+                      "History",
+                      "/student/history"
+                    )
+                  }
                   className="text-xs font-bold text-indigo-600 dark:text-indigo-400"
                 >
                   View history
-                </Link>
-
+                </button>
               </div>
 
               <div className="mt-5 space-y-3">
-
-                {demoAttempts.map(
-                  (attempt) => (
-                    <div
-                      key={attempt.id}
-                      className="flex items-center justify-between gap-3 rounded-2xl border border-gray-100 p-4 transition hover:bg-gray-50 dark:border-white/5 dark:hover:bg-white/[0.03]"
-                    >
-
-                      <div className="flex min-w-0 items-center gap-3">
-
-                        <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-indigo-50 text-indigo-600 dark:bg-indigo-500/10 dark:text-indigo-400">
-                          <BookOpen
-                            size={18}
-                          />
-                        </div>
-
-                        <div className="min-w-0">
-
-                          <p className="truncate text-sm font-bold">
-                            {
-                              attempt.quiz
-                            }
-                          </p>
-
-                          <p className="mt-1 text-[11px] text-gray-400">
-                            {
-                              attempt.category
-                            }{" "}
-                            •{" "}
-                            {
-                              attempt.date
-                            }
-                          </p>
-
-                        </div>
-
+                {demoAttempts.map((attempt) => (
+                  <div
+                    key={attempt.id}
+                    className="flex items-center justify-between gap-3 rounded-2xl border border-gray-100 p-4 transition hover:bg-gray-50 dark:border-white/5 dark:hover:bg-white/[0.03]"
+                  >
+                    <div className="flex min-w-0 items-center gap-3">
+                      <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-indigo-50 text-indigo-600 dark:bg-indigo-500/10 dark:text-indigo-400">
+                        <BookOpen size={18} />
                       </div>
 
-                      <div className="flex items-center gap-3">
+                      <div className="min-w-0">
+                        <p className="truncate text-sm font-bold">
+                          {attempt.quiz}
+                        </p>
 
-                        <div className="text-right">
-
-                          <p className="text-sm font-black">
-                            {
-                              attempt.score
-                            }%
-                          </p>
-
-                          <span
-                            className={`text-[10px] font-bold ${
-                              attempt.status ===
-                              "Passed"
-                                ? "text-emerald-500"
-                                : "text-red-500"
-                            }`}
-                          >
-                            {
-                              attempt.status
-                            }
-                          </span>
-
-                        </div>
-
-                        <ChevronRight
-                          size={17}
-                          className="text-gray-400"
-                        />
-
+                        <p className="mt-1 text-[11px] text-gray-400">
+                          {attempt.category} •{" "}
+                          {attempt.date}
+                        </p>
                       </div>
-
                     </div>
-                  )
-                )}
 
+                    <div className="flex items-center gap-3">
+                      <div className="text-right">
+                        <p className="text-sm font-black">
+                          {attempt.score}%
+                        </p>
+
+                        <span
+                          className={`text-[10px] font-bold ${
+                            attempt.status === "Passed"
+                              ? "text-emerald-500"
+                              : "text-red-500"
+                          }`}
+                        >
+                          {attempt.status}
+                        </span>
+                      </div>
+
+                      <ChevronRight
+                        size={17}
+                        className="text-gray-400"
+                      />
+                    </div>
+                  </div>
+                ))}
               </div>
-
             </div>
 
-            {/* Leaderboard */}
+            {/* LEADERBOARD */}
 
-            <div className="rounded-[24px] border border-gray-200 bg-white p-5 shadow-sm sm:p-6 dark:border-white/10 dark:bg-[#101114]">
-
+            <div className="rounded-[24px] border border-gray-200 bg-white p-5 shadow-sm dark:border-white/10 dark:bg-[#101114] sm:p-6">
               <div className="flex items-center justify-between">
-
                 <div>
-
                   <h3 className="font-bold">
                     Leaderboard
                   </h3>
@@ -1295,18 +1102,15 @@ export default function StudentDashboard() {
                   <p className="mt-1 text-xs text-gray-400">
                     Top performers this week
                   </p>
-
                 </div>
 
                 <Trophy
                   size={21}
                   className="text-yellow-500"
                 />
-
               </div>
 
               <div className="mt-5 space-y-3">
-
                 <LeaderboardRow
                   rank={1}
                   name="Rahul Sharma"
@@ -1327,58 +1131,45 @@ export default function StudentDashboard() {
 
                 <LeaderboardRow
                   rank={4}
-                  name={
-                    profile?.name ||
-                    "You"
-                  }
+                  name={profile?.name || "You"}
                   score="82%"
                   current
                 />
-
               </div>
 
               <button
+                type="button"
                 onClick={() =>
-                  setActiveMenu(
-                    "Leaderboard"
+                  navigateTo(
+                    "Leaderboard",
+                    "/leaderboard"
                   )
                 }
                 className="mt-5 flex w-full items-center justify-center gap-2 rounded-xl bg-gray-50 py-3 text-xs font-bold text-gray-600 transition hover:bg-gray-100 dark:bg-white/5 dark:text-gray-300 dark:hover:bg-white/10"
               >
                 View Full Leaderboard
 
-                <ChevronRight
-                  size={15}
-                />
+                <ChevronRight size={15} />
               </button>
-
             </div>
-
           </section>
 
           {/* FOOTER */}
 
           <footer className="mt-10 border-t border-gray-200 pt-6 text-center dark:border-white/10">
-
             <p className="text-xs text-gray-400">
-              © 2026 QuizPro. Learn.
-              Challenge. Achieve.
+              © 2026 QuizPro. Learn. Challenge. Achieve.
             </p>
-
           </footer>
-
         </div>
-
       </main>
     </div>
   );
 }
 
-/*
-|--------------------------------------------------------------------------
-| Sidebar Item
-|--------------------------------------------------------------------------
-*/
+/* =========================================================
+   SIDEBAR ITEM
+========================================================= */
 
 function SidebarItem({
   icon,
@@ -1386,13 +1177,14 @@ function SidebarItem({
   active,
   onClick,
 }: {
-  icon: React.ReactNode;
+  icon: ReactNode;
   label: string;
   active?: boolean;
   onClick?: () => void;
 }) {
   return (
     <button
+      type="button"
       onClick={onClick}
       className={`flex w-full items-center gap-3 rounded-xl px-3 py-3 text-sm font-semibold transition ${
         active
@@ -1401,17 +1193,14 @@ function SidebarItem({
       }`}
     >
       {icon}
-
-      {label}
+      <span>{label}</span>
     </button>
   );
 }
 
-/*
-|--------------------------------------------------------------------------
-| Stat Card
-|--------------------------------------------------------------------------
-*/
+/* =========================================================
+   STAT CARD
+========================================================= */
 
 function StatCard({
   icon,
@@ -1420,17 +1209,15 @@ function StatCard({
   description,
   iconClass,
 }: {
-  icon: React.ReactNode;
+  icon: ReactNode;
   title: string;
   value: string;
   description: string;
   iconClass: string;
 }) {
   return (
-    <div className="rounded-[22px] border border-gray-200 bg-white p-4 shadow-sm transition hover:-translate-y-1 hover:shadow-lg sm:p-5 dark:border-white/10 dark:bg-[#101114]">
-
+    <div className="rounded-[22px] border border-gray-200 bg-white p-4 shadow-sm transition hover:-translate-y-1 hover:shadow-lg dark:border-white/10 dark:bg-[#101114] sm:p-5">
       <div className="flex items-start justify-between">
-
         <div
           className={`flex h-10 w-10 items-center justify-center rounded-xl ${iconClass}`}
         >
@@ -1440,34 +1227,26 @@ function StatCard({
         <span className="text-[10px] font-bold text-emerald-500">
           ↑
         </span>
-
       </div>
 
       <p className="mt-4 text-xs font-medium text-gray-400">
         {title}
       </p>
 
-      <div className="mt-1 flex items-end justify-between gap-2">
-
-        <p className="text-2xl font-black tracking-tight">
-          {value}
-        </p>
-
-      </div>
+      <p className="mt-1 text-2xl font-black tracking-tight">
+        {value}
+      </p>
 
       <p className="mt-1 text-[10px] text-gray-400">
         {description}
       </p>
-
     </div>
   );
 }
 
-/*
-|--------------------------------------------------------------------------
-| Progress Row
-|--------------------------------------------------------------------------
-*/
+/* =========================================================
+   PROGRESS ROW
+========================================================= */
 
 function ProgressRow({
   label,
@@ -1478,13 +1257,11 @@ function ProgressRow({
   label: string;
   value: string;
   percent: string;
-  icon: React.ReactNode;
+  icon: ReactNode;
 }) {
   return (
     <div className="flex items-center justify-between">
-
       <div className="flex items-center gap-2">
-
         <div className="text-indigo-500">
           {icon}
         </div>
@@ -1492,11 +1269,9 @@ function ProgressRow({
         <span className="text-xs font-semibold">
           {label}
         </span>
-
       </div>
 
       <div className="flex items-center gap-2">
-
         <span className="text-xs font-bold">
           {value}
         </span>
@@ -1504,18 +1279,14 @@ function ProgressRow({
         <span className="text-[10px] text-gray-400">
           ({percent})
         </span>
-
       </div>
-
     </div>
   );
 }
 
-/*
-|--------------------------------------------------------------------------
-| Quiz Card
-|--------------------------------------------------------------------------
-*/
+/* =========================================================
+   QUIZ CARD
+========================================================= */
 
 function QuizCard({
   quiz,
@@ -1531,27 +1302,18 @@ function QuizCard({
 
   return (
     <div className="group overflow-hidden rounded-[22px] border border-gray-200 bg-white shadow-sm transition duration-300 hover:-translate-y-1 hover:shadow-xl dark:border-white/10 dark:bg-[#101114]">
-
       <div className="relative h-28 overflow-hidden bg-gradient-to-br from-indigo-600 via-purple-600 to-blue-600">
-
         <div className="absolute -right-8 -top-8 h-28 w-28 rounded-full bg-white/10 blur-xl" />
 
         <div className="absolute bottom-3 left-4">
-
           <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-white/15 text-white backdrop-blur-md">
-            <BookOpen
-              size={21}
-            />
+            <BookOpen size={21} />
           </div>
-
         </div>
-
       </div>
 
       <div className="p-4">
-
         <div className="flex items-center justify-between gap-2">
-
           <span
             className={`rounded-lg px-2 py-1 text-[9px] font-bold ${difficultyClass}`}
           >
@@ -1561,7 +1323,6 @@ function QuizCard({
           <span className="text-[10px] font-semibold text-gray-400">
             {quiz.category}
           </span>
-
         </div>
 
         <h4 className="mt-3 line-clamp-1 text-sm font-black">
@@ -1573,21 +1334,15 @@ function QuizCard({
         </p>
 
         <div className="mt-4 flex items-center gap-3 border-t border-gray-100 pt-3 text-[10px] font-semibold text-gray-400 dark:border-white/5">
-
           <span className="flex items-center gap-1">
-            <BookOpen
-              size={13}
-            />
+            <BookOpen size={13} />
             {quiz.questions}
           </span>
 
           <span className="flex items-center gap-1">
-            <Clock3
-              size={13}
-            />
+            <Clock3 size={13} />
             {quiz.duration}m
           </span>
-
         </div>
 
         <Link
@@ -1595,21 +1350,16 @@ function QuizCard({
           className="mt-4 flex w-full items-center justify-center gap-2 rounded-xl bg-indigo-600 py-2.5 text-xs font-bold text-white transition hover:bg-indigo-700"
         >
           Start Quiz
-
           <Play size={14} />
         </Link>
-
       </div>
-
     </div>
   );
 }
 
-/*
-|--------------------------------------------------------------------------
-| Leaderboard Row
-|--------------------------------------------------------------------------
-*/
+/* =========================================================
+   LEADERBOARD ROW
+========================================================= */
 
 function LeaderboardRow({
   rank,
@@ -1630,9 +1380,7 @@ function LeaderboardRow({
           : ""
       }`}
     >
-
       <div className="flex items-center gap-3">
-
         <div
           className={`flex h-8 w-8 items-center justify-center rounded-lg text-xs font-black ${
             rank === 1
@@ -1648,22 +1396,17 @@ function LeaderboardRow({
         </div>
 
         <div className="flex h-8 w-8 items-center justify-center rounded-full bg-gradient-to-br from-indigo-500 to-purple-500 text-xs font-bold text-white">
-          {name
-            .charAt(0)
-            .toUpperCase()}
+          {name.charAt(0).toUpperCase()}
         </div>
 
         <p className="text-xs font-bold">
           {name}
         </p>
-
       </div>
 
       <p className="text-xs font-black text-indigo-600 dark:text-indigo-400">
         {score}
       </p>
-
     </div>
   );
 }
-
