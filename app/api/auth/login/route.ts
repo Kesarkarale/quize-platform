@@ -1,9 +1,7 @@
 import { NextResponse } from "next/server";
 import { createClient } from "@supabase/supabase-js";
 
-export async function POST(
-  request: Request
-) {
+export async function POST(request: Request) {
   try {
     const body = await request.json();
 
@@ -23,74 +21,167 @@ export async function POST(
     const supabaseUrl =
       process.env.NEXT_PUBLIC_SUPABASE_URL;
 
-    const supabaseKey =
-      process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY ||
-      process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY;
+    const serviceRoleKey =
+      process.env.SUPABASE_SERVICE_ROLE_KEY;
 
-    if (!supabaseUrl || !supabaseKey) {
+    if (!supabaseUrl || !serviceRoleKey) {
+      console.error(
+        "Supabase server environment variables are missing."
+      );
+
       return NextResponse.json(
         {
           message:
-            "Supabase environment variables are missing.",
+            "Server configuration error.",
         },
         { status: 500 }
       );
     }
 
+    /*
+     * Server-side Supabase client.
+     * Service role key MUST remain server-side.
+     */
     const supabase = createClient(
       supabaseUrl,
-      supabaseKey
-    );
-
-    const {
-      data,
-      error,
-    } = await supabase.auth.signInWithPassword(
+      serviceRoleKey,
       {
-        email,
-        password,
+        auth: {
+          autoRefreshToken: false,
+          persistSession: false,
+        },
       }
     );
 
-    if (error) {
+    /*
+     * Authenticate user using Supabase Auth.
+     */
+    const {
+      data: authData,
+      error: authError,
+    } =
+      await supabase.auth.signInWithPassword({
+        email,
+        password,
+      });
+
+    if (authError || !authData.user) {
       return NextResponse.json(
         {
           message:
-            error.message ||
+            authError?.message ||
             "Invalid email or password.",
         },
         { status: 401 }
       );
     }
 
-    if (!data.user) {
+    const userId =
+      authData.user.id;
+
+    /*
+     * Get user's role from profiles.
+     */
+    const {
+      data: profile,
+      error: profileError,
+    } =
+      await supabase
+        .from("profiles")
+        .select(
+          "id, name, email, role, status"
+        )
+        .eq("id", userId)
+        .maybeSingle();
+
+    if (profileError) {
+      console.error(
+        "Profile error:",
+        profileError
+      );
+
       return NextResponse.json(
         {
           message:
-            "Unable to login.",
+            "Unable to load user profile.",
         },
-        { status: 401 }
+        { status: 500 }
       );
     }
 
+    /*
+     * Profile doesn't exist.
+     */
+    if (!profile) {
+      return NextResponse.json(
+        {
+          message:
+            "User profile not found. Please contact administrator.",
+        },
+        { status: 404 }
+      );
+    }
+
+    /*
+     * Account status.
+     */
+    if (
+      profile.status &&
+      profile.status !== "ACTIVE"
+    ) {
+      return NextResponse.json(
+        {
+          message:
+            "Your account is inactive.",
+        },
+        { status: 403 }
+      );
+    }
+
+    /*
+     * Role validation.
+     */
+    if (
+      profile.role !== "ADMIN" &&
+      profile.role !== "STUDENT"
+    ) {
+      return NextResponse.json(
+        {
+          message:
+            "User role is not configured correctly.",
+        },
+        { status: 403 }
+      );
+    }
+
+    /*
+     * Return user + role to Login Page.
+     */
     return NextResponse.json(
       {
         success: true,
+
         message:
           "Login successful.",
+
         user: {
-          id: data.user.id,
-          email:
-            data.user.email,
+          id: profile.id,
+          name: profile.name,
+          email: profile.email,
+          role: profile.role,
+          status: profile.status,
         },
-        session:
-          data.session,
+
+        /*
+         * Useful if you later need it.
+         */
+        authUserId: authData.user.id,
       },
       { status: 200 }
     );
   } catch (error) {
     console.error(
-      "LOGIN ERROR:",
+      "LOGIN API ERROR:",
       error
     );
 
@@ -103,4 +194,3 @@ export async function POST(
     );
   }
 }
-
