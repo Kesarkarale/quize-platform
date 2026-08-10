@@ -153,7 +153,7 @@ export default function QuizPage() {
                     </span>
 
                     <span className="text-[10px] font-semibold text-gray-400">
-                      {quiz.questions} Questions
+                     {quiz.questions.length} Questions
                     </span>
                   </div>
 
