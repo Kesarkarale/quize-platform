@@ -22,9 +22,9 @@ import {
 
 import { motion } from "framer-motion";
 
-/* =========================================
+/* =========================================================
    TYPES
-========================================= */
+========================================================= */
 
 type Question = {
   id: number;
@@ -33,21 +33,26 @@ type Question = {
   answer: number;
 };
 
-/* =========================================
+type QuizResult = {
+  category: string;
+  total: number;
+  correct: number;
+  wrong: number;
+  score: number;
+  timeLeft: number;
+  completedAt: string;
+};
+
+/* =========================================================
    QUESTION BANK
-========================================= */
+========================================================= */
 
 const questionBank: Record<string, Question[]> = {
   "General Knowledge": [
     {
       id: 1,
       question: "What is the capital city of India?",
-      options: [
-        "Mumbai",
-        "New Delhi",
-        "Kolkata",
-        "Chennai",
-      ],
+      options: ["Mumbai", "New Delhi", "Kolkata", "Chennai"],
       answer: 1,
     },
     {
@@ -66,42 +71,26 @@ const questionBank: Record<string, Question[]> = {
       id: 3,
       question:
         "Which is the largest planet in our solar system?",
-      options: [
-        "Earth",
-        "Mars",
-        "Jupiter",
-        "Saturn",
-      ],
+      options: ["Earth", "Mars", "Jupiter", "Saturn"],
       answer: 2,
     },
     {
       id: 4,
       question:
         "Which is the national animal of India?",
-      options: [
-        "Lion",
-        "Tiger",
-        "Elephant",
-        "Leopard",
-      ],
+      options: ["Lion", "Tiger", "Elephant", "Leopard"],
       answer: 1,
     },
     {
       id: 5,
       question:
         "How many continents are there in the world?",
-      options: [
-        "5",
-        "6",
-        "7",
-        "8",
-      ],
+      options: ["5", "6", "7", "8"],
       answer: 2,
     },
     {
       id: 6,
-      question:
-        "Which ocean is the largest?",
+      question: "Which ocean is the largest?",
       options: [
         "Atlantic Ocean",
         "Indian Ocean",
@@ -114,48 +103,28 @@ const questionBank: Record<string, Question[]> = {
       id: 7,
       question:
         "Which planet is known as the Red Planet?",
-      options: [
-        "Venus",
-        "Mars",
-        "Mercury",
-        "Neptune",
-      ],
+      options: ["Venus", "Mars", "Mercury", "Neptune"],
       answer: 1,
     },
     {
       id: 8,
       question:
         "Which is the fastest land animal?",
-      options: [
-        "Lion",
-        "Horse",
-        "Cheetah",
-        "Tiger",
-      ],
+      options: ["Lion", "Horse", "Cheetah", "Tiger"],
       answer: 2,
     },
     {
       id: 9,
       question:
         "Which country is famous for the Eiffel Tower?",
-      options: [
-        "Italy",
-        "France",
-        "Germany",
-        "Spain",
-      ],
+      options: ["Italy", "France", "Germany", "Spain"],
       answer: 1,
     },
     {
       id: 10,
       question:
         "How many days are there in a leap year?",
-      options: [
-        "364",
-        "365",
-        "366",
-        "367",
-      ],
+      options: ["364", "365", "366", "367"],
       answer: 2,
     },
   ],
@@ -165,24 +134,14 @@ const questionBank: Record<string, Question[]> = {
       id: 1,
       question:
         "What is the chemical formula of water?",
-      options: [
-        "CO2",
-        "H2O",
-        "O2",
-        "NaCl",
-      ],
+      options: ["CO2", "H2O", "O2", "NaCl"],
       answer: 1,
     },
     {
       id: 2,
       question:
         "Which organ pumps blood throughout the human body?",
-      options: [
-        "Brain",
-        "Lungs",
-        "Heart",
-        "Kidney",
-      ],
+      options: ["Brain", "Lungs", "Heart", "Kidney"],
       answer: 2,
     },
     {
@@ -201,25 +160,46 @@ const questionBank: Record<string, Question[]> = {
       id: 4,
       question:
         "What is the nearest star to Earth?",
-      options: [
-        "Moon",
-        "Sun",
-        "Sirius",
-        "Polaris",
-      ],
+      options: ["Moon", "Sun", "Sirius", "Polaris"],
       answer: 1,
     },
     {
       id: 5,
       question:
         "How many bones are there in an adult human body?",
+      options: ["196", "206", "216", "226"],
+      answer: 1,
+    },
+    {
+      id: 6,
+      question:
+        "Which part of a plant carries out photosynthesis?",
+      options: ["Root", "Stem", "Leaf", "Flower"],
+      answer: 2,
+    },
+    {
+      id: 7,
+      question:
+        "What force keeps us on the ground?",
       options: [
-        "196",
-        "206",
-        "216",
-        "226",
+        "Magnetism",
+        "Gravity",
+        "Friction",
+        "Electricity",
       ],
       answer: 1,
+    },
+    {
+      id: 8,
+      question:
+        "Which gas is most abundant in Earth's atmosphere?",
+      options: [
+        "Oxygen",
+        "Carbon Dioxide",
+        "Nitrogen",
+        "Hydrogen",
+      ],
+      answer: 2,
     },
   ],
 
@@ -240,24 +220,14 @@ const questionBank: Record<string, Question[]> = {
       id: 2,
       question:
         "Which language is primarily used for styling web pages?",
-      options: [
-        "HTML",
-        "CSS",
-        "Python",
-        "SQL",
-      ],
+      options: ["HTML", "CSS", "Python", "SQL"],
       answer: 1,
     },
     {
       id: 3,
       question:
         "Which company developed the Android operating system?",
-      options: [
-        "Microsoft",
-        "Apple",
-        "Google",
-        "IBM",
-      ],
+      options: ["Microsoft", "Apple", "Google", "IBM"],
       answer: 2,
     },
     {
@@ -276,12 +246,33 @@ const questionBank: Record<string, Question[]> = {
       id: 5,
       question:
         "Which language is commonly used with React?",
+      options: ["JavaScript", "SQL", "PHP", "C"],
+      answer: 0,
+    },
+    {
+      id: 6,
+      question:
+        "What does API stand for?",
       options: [
-        "JavaScript",
-        "SQL",
-        "PHP",
-        "C",
+        "Application Programming Interface",
+        "Advanced Program Integration",
+        "Application Process Internet",
+        "Automated Programming Interface",
       ],
+      answer: 0,
+    },
+    {
+      id: 7,
+      question:
+        "Which framework is used with React for full-stack web applications?",
+      options: ["Next.js", "Django", "Laravel", "Spring"],
+      answer: 0,
+    },
+    {
+      id: 8,
+      question:
+        "Which database is commonly used with modern JavaScript applications?",
+      options: ["Supabase", "Photoshop", "Figma", "Excel"],
       answer: 0,
     },
   ],
@@ -290,84 +281,76 @@ const questionBank: Record<string, Question[]> = {
     {
       id: 1,
       question: "What is 12 × 8?",
-      options: [
-        "86",
-        "96",
-        "108",
-        "112",
-      ],
+      options: ["86", "96", "108", "112"],
       answer: 1,
     },
     {
       id: 2,
       question:
         "What is the square root of 144?",
-      options: [
-        "10",
-        "11",
-        "12",
-        "14",
-      ],
+      options: ["10", "11", "12", "14"],
       answer: 2,
     },
     {
       id: 3,
       question:
         "What is 25% of 200?",
-      options: [
-        "25",
-        "40",
-        "50",
-        "75",
-      ],
+      options: ["25", "40", "50", "75"],
       answer: 2,
     },
     {
       id: 4,
       question:
         "What is 15 + 27?",
-      options: [
-        "40",
-        "41",
-        "42",
-        "43",
-      ],
+      options: ["40", "41", "42", "43"],
       answer: 2,
     },
     {
       id: 5,
       question:
         "What is 100 ÷ 4?",
-      options: [
-        "20",
-        "25",
-        "30",
-        "40",
-      ],
+      options: ["20", "25", "30", "40"],
       answer: 1,
+    },
+    {
+      id: 6,
+      question:
+        "What is 9 × 9?",
+      options: ["72", "81", "89", "99"],
+      answer: 1,
+    },
+    {
+      id: 7,
+      question:
+        "What is 150 - 75?",
+      options: ["65", "70", "75", "80"],
+      answer: 2,
+    },
+    {
+      id: 8,
+      question:
+        "What is 20% of 500?",
+      options: ["50", "75", "100", "125"],
+      answer: 2,
     },
   ],
 };
 
-/* =========================================
+/* =========================================================
    MAIN PAGE
-========================================= */
+========================================================= */
 
 export default function QuizPage() {
   return (
-    <Suspense
-      fallback={
-        <QuizLoading />
-      }
-    >
+    <Suspense fallback={<QuizLoading />}>
       <QuizContent />
     </Suspense>
   );
 }
 
-/* =========================================
+/* =========================================================
    QUIZ CONTENT
-========================================= */
+========================================================= */
 
 function QuizContent() {
   const router = useRouter();
@@ -397,15 +380,18 @@ function QuizContent() {
   const [isSubmitting, setIsSubmitting] =
     useState(false);
 
+  const [reported, setReported] =
+    useState(false);
+
   const question =
     questions[currentQuestion];
 
-  /* =========================================
+  /* =======================================================
      TIMER
-  ========================================= */
+  ======================================================= */
 
   useEffect(() => {
-    if (isSubmitting) {
+    if (isSubmitting || timeLeft <= 0) {
       return;
     }
 
@@ -423,11 +409,11 @@ function QuizContent() {
     return () => {
       window.clearInterval(timer);
     };
-  }, [isSubmitting]);
+  }, [isSubmitting, timeLeft]);
 
-  /* =========================================
-     AUTO SUBMIT WHEN TIME ENDS
-  ========================================= */
+  /* =======================================================
+     AUTO SUBMIT
+  ======================================================= */
 
   useEffect(() => {
     if (timeLeft === 0 && !isSubmitting) {
@@ -435,13 +421,11 @@ function QuizContent() {
     }
   }, [timeLeft, isSubmitting]);
 
-  /* =========================================
+  /* =======================================================
      TIMER FORMAT
-  ========================================= */
+  ======================================================= */
 
-  const minutes = Math.floor(
-    timeLeft / 60
-  )
+  const minutes = Math.floor(timeLeft / 60)
     .toString()
     .padStart(2, "0");
 
@@ -449,20 +433,22 @@ function QuizContent() {
     .toString()
     .padStart(2, "0");
 
-  /* =========================================
+  /* =======================================================
      SELECT ANSWER
-  ========================================= */
+  ======================================================= */
 
   function selectAnswer(index: number) {
+    if (isSubmitting) return;
+
     setAnswers((previous) => ({
       ...previous,
       [question.id]: index,
     }));
   }
 
-  /* =========================================
+  /* =======================================================
      NEXT
-  ========================================= */
+  ======================================================= */
 
   function nextQuestion() {
     if (
@@ -475,9 +461,9 @@ function QuizContent() {
     }
   }
 
-  /* =========================================
+  /* =======================================================
      PREVIOUS
-  ========================================= */
+  ======================================================= */
 
   function previousQuestion() {
     if (currentQuestion > 0) {
@@ -487,14 +473,12 @@ function QuizContent() {
     }
   }
 
-  /* =========================================
+  /* =======================================================
      SUBMIT
-  ========================================= */
+  ======================================================= */
 
   function submitQuiz() {
-    if (isSubmitting) {
-      return;
-    }
+    if (isSubmitting) return;
 
     setIsSubmitting(true);
 
@@ -514,13 +498,12 @@ function QuizContent() {
     const score =
       questions.length > 0
         ? Math.round(
-            (correct /
-              questions.length) *
+            (correct / questions.length) *
               100
           )
         : 0;
 
-    const result = {
+    const result: QuizResult = {
       category,
       total: questions.length,
       correct,
@@ -531,19 +514,29 @@ function QuizContent() {
         new Date().toISOString(),
     };
 
-    if (typeof window !== "undefined") {
-      localStorage.setItem(
-        "quizResult",
-        JSON.stringify(result)
-      );
-    }
+    localStorage.setItem(
+      "quizResult",
+      JSON.stringify(result)
+    );
 
     router.push("/student/result");
   }
 
-  /* =========================================
+  /* =======================================================
+     REPORT
+  ======================================================= */
+
+  function reportQuestion() {
+    setReported(true);
+
+    window.setTimeout(() => {
+      setReported(false);
+    }, 2000);
+  }
+
+  /* =======================================================
      PROGRESS
-  ========================================= */
+  ======================================================= */
 
   const answeredCount =
     Object.keys(answers).length;
@@ -556,13 +549,13 @@ function QuizContent() {
   const selectedAnswer =
     answers[question.id];
 
-  /* =========================================
+  /* =======================================================
      UI
-  ========================================= */
+  ======================================================= */
 
   return (
-    <main className="min-h-screen bg-[#050816] text-white">
-      {/* Background */}
+    <main className="min-h-screen overflow-x-hidden bg-[#050816] text-white">
+      {/* BACKGROUND */}
 
       <div className="pointer-events-none fixed inset-0 overflow-hidden">
         <div className="absolute -left-40 -top-40 h-[450px] w-[450px] rounded-full bg-indigo-600/10 blur-[130px]" />
@@ -570,7 +563,7 @@ function QuizContent() {
         <div className="absolute -bottom-40 -right-40 h-[450px] w-[450px] rounded-full bg-purple-600/10 blur-[130px]" />
       </div>
 
-      {/* Header */}
+      {/* HEADER */}
 
       <header className="sticky top-0 z-50 border-b border-white/10 bg-[#050816]/90 backdrop-blur-xl">
         <div className="mx-auto flex h-20 max-w-6xl items-center justify-between px-5">
@@ -578,7 +571,7 @@ function QuizContent() {
             href="/student/dashboard"
             className="flex items-center gap-3"
           >
-            <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-br from-indigo-500 to-purple-600">
+            <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-br from-indigo-500 to-purple-600 shadow-lg shadow-indigo-600/20">
               <Brain size={21} />
             </div>
 
@@ -596,10 +589,10 @@ function QuizContent() {
             </div>
           </Link>
 
-          {/* Timer */}
+          {/* TIMER */}
 
           <div
-            className={`flex items-center gap-2 rounded-xl border px-4 py-2.5 ${
+            className={`flex items-center gap-2 rounded-xl border px-4 py-2.5 transition ${
               timeLeft <= 60
                 ? "border-red-500/30 bg-red-500/10 text-red-400"
                 : "border-white/10 bg-white/[0.04] text-gray-300"
@@ -614,10 +607,10 @@ function QuizContent() {
         </div>
       </header>
 
-      {/* Content */}
+      {/* CONTENT */}
 
       <div className="relative z-10 mx-auto max-w-5xl px-5 py-8">
-        {/* Quiz Info */}
+        {/* QUIZ INFO */}
 
         <div className="mb-7">
           <div className="mb-3 flex flex-col justify-between gap-3 sm:flex-row sm:items-center">
@@ -639,19 +632,22 @@ function QuizContent() {
             </div>
           </div>
 
-          {/* Progress */}
+          {/* PROGRESS */}
 
           <div className="h-2 overflow-hidden rounded-full bg-white/10">
             <motion.div
               animate={{
                 width: `${progress}%`,
               }}
+              transition={{
+                duration: 0.3,
+              }}
               className="h-full rounded-full bg-gradient-to-r from-indigo-500 to-purple-500"
             />
           </div>
         </div>
 
-        {/* Question */}
+        {/* QUESTION CARD */}
 
         <motion.div
           key={question.id}
@@ -666,9 +662,9 @@ function QuizContent() {
           transition={{
             duration: 0.25,
           }}
-          className="rounded-3xl border border-white/10 bg-white/[0.04] p-6 shadow-2xl sm:p-8"
+          className="rounded-3xl border border-white/10 bg-white/[0.04] p-6 shadow-2xl shadow-black/20 sm:p-8"
         >
-          {/* Number */}
+          {/* QUESTION HEADER */}
 
           <div className="mb-7 flex items-center justify-between">
             <div className="flex items-center gap-3">
@@ -690,20 +686,26 @@ function QuizContent() {
 
             <button
               type="button"
+              onClick={reportQuestion}
               className="flex items-center gap-2 rounded-lg px-3 py-2 text-xs font-semibold text-gray-500 transition hover:bg-white/5 hover:text-gray-300"
             >
               <Flag size={15} />
-              Report
+
+              <span className="hidden sm:block">
+                {reported
+                  ? "Reported"
+                  : "Report"}
+              </span>
             </button>
           </div>
 
-          {/* Question */}
+          {/* QUESTION */}
 
           <h3 className="max-w-3xl text-xl font-bold leading-8 sm:text-2xl">
             {question.question}
           </h3>
 
-          {/* Options */}
+          {/* OPTIONS */}
 
           <div className="mt-8 grid gap-3">
             {question.options.map(
@@ -715,6 +717,7 @@ function QuizContent() {
                   <button
                     key={option}
                     type="button"
+                    disabled={isSubmitting}
                     onClick={() =>
                       selectAnswer(index)
                     }
@@ -725,10 +728,10 @@ function QuizContent() {
                     }`}
                   >
                     <div
-                      className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border text-sm font-bold ${
+                      className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border text-sm font-bold transition ${
                         selected
                           ? "border-indigo-500 bg-indigo-500 text-white"
-                          : "border-white/10 bg-white/[0.03] text-gray-500"
+                          : "border-white/10 bg-white/[0.03] text-gray-500 group-hover:border-indigo-500/30"
                       }`}
                     >
                       {String.fromCharCode(
@@ -749,7 +752,7 @@ function QuizContent() {
                     {selected && (
                       <CheckCircle2
                         size={20}
-                        className="ml-auto text-indigo-400"
+                        className="ml-auto shrink-0 text-indigo-400"
                       />
                     )}
                   </button>
@@ -758,13 +761,16 @@ function QuizContent() {
             )}
           </div>
 
-          {/* Navigation */}
+          {/* NAVIGATION */}
 
           <div className="mt-8 flex flex-col-reverse justify-between gap-3 border-t border-white/10 pt-6 sm:flex-row">
             <button
               type="button"
               onClick={previousQuestion}
-              disabled={currentQuestion === 0}
+              disabled={
+                currentQuestion === 0 ||
+                isSubmitting
+              }
               className="flex items-center justify-center gap-2 rounded-xl border border-white/10 px-5 py-3 text-sm font-semibold text-gray-400 transition hover:bg-white/5 hover:text-white disabled:cursor-not-allowed disabled:opacity-30"
             >
               <ArrowLeft size={17} />
@@ -777,7 +783,7 @@ function QuizContent() {
                 type="button"
                 onClick={submitQuiz}
                 disabled={isSubmitting}
-                className="flex items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-green-600 to-emerald-600 px-6 py-3 text-sm font-bold text-white transition hover:scale-[1.01] disabled:cursor-not-allowed disabled:opacity-60"
+                className="flex items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-green-600 to-emerald-600 px-6 py-3 text-sm font-bold text-white shadow-lg shadow-green-600/10 transition hover:scale-[1.01] disabled:cursor-not-allowed disabled:opacity-60"
               >
                 <Trophy size={17} />
 
@@ -789,7 +795,8 @@ function QuizContent() {
               <button
                 type="button"
                 onClick={nextQuestion}
-                className="flex items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-indigo-600 to-purple-600 px-6 py-3 text-sm font-bold text-white transition hover:scale-[1.01]"
+                disabled={isSubmitting}
+                className="flex items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-indigo-600 to-purple-600 px-6 py-3 text-sm font-bold text-white shadow-lg shadow-indigo-600/10 transition hover:scale-[1.01] disabled:opacity-50"
               >
                 Next Question
                 <ArrowRight size={17} />
@@ -798,7 +805,7 @@ function QuizContent() {
           </div>
         </motion.div>
 
-        {/* Question Navigator */}
+        {/* QUESTION NAVIGATOR */}
 
         <div className="mt-6 rounded-2xl border border-white/10 bg-white/[0.03] p-5">
           <div className="mb-4 flex items-center justify-between">
@@ -819,13 +826,13 @@ function QuizContent() {
                   undefined;
 
                 const active =
-                  currentQuestion ===
-                  index;
+                  currentQuestion === index;
 
                 return (
                   <button
                     key={item.id}
                     type="button"
+                    disabled={isSubmitting}
                     onClick={() =>
                       setCurrentQuestion(
                         index
@@ -833,7 +840,7 @@ function QuizContent() {
                     }
                     className={`flex h-9 w-9 items-center justify-center rounded-lg text-xs font-bold transition ${
                       active
-                        ? "bg-indigo-600 text-white"
+                        ? "bg-indigo-600 text-white shadow-lg shadow-indigo-600/20"
                         : answered
                         ? "bg-green-500/15 text-green-400"
                         : "bg-white/[0.05] text-gray-500 hover:bg-white/10"
@@ -847,7 +854,7 @@ function QuizContent() {
           </div>
         </div>
 
-        {/* Warning */}
+        {/* WARNING */}
 
         <div className="mt-5 flex items-start gap-3 rounded-xl border border-yellow-500/10 bg-yellow-500/[0.04] p-4 text-xs leading-5 text-gray-500">
           <Clock3
@@ -857,33 +864,43 @@ function QuizContent() {
 
           <p>
             Your quiz will be submitted
-            automatically when the timer reaches
-            zero.
+            automatically when the timer
+            reaches zero.
           </p>
         </div>
+
+        {/* FOOTER */}
+
+        <footer className="py-8 text-center">
+          <p className="text-xs text-gray-600">
+            © 2026 QuizMaster. Learn. Challenge.
+            Achieve.
+          </p>
+        </footer>
       </div>
     </main>
   );
 }
 
-/* =========================================
+/* =========================================================
    LOADING
-========================================= */
+========================================================= */
 
 function QuizLoading() {
   return (
     <main className="flex min-h-screen items-center justify-center bg-[#050816] text-white">
       <div className="text-center">
-        <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-2xl bg-indigo-500/10">
-          <Brain
-            size={27}
-            className="animate-pulse text-indigo-400"
-          />
+        <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-2xl bg-gradient-to-br from-indigo-500 to-purple-600 shadow-lg shadow-indigo-600/20">
+          <Brain size={25} />
         </div>
 
-        <p className="mt-4 text-sm text-gray-500">
+        <p className="mt-4 text-sm font-semibold text-gray-400">
           Loading quiz...
         </p>
+
+        <div className="mx-auto mt-4 h-1.5 w-32 overflow-hidden rounded-full bg-white/10">
+          <div className="h-full w-1/2 animate-pulse rounded-full bg-indigo-500" />
+        </div>
       </div>
     </main>
   );
