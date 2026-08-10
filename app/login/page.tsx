@@ -43,41 +43,79 @@ const handleSubmit = async (
     return;
   }
 
-  if (!email.includes("@")) {
-    toast.error(
-      "Please enter a valid email address."
-    );
-    return;
-  }
-
   try {
     setLoading(true);
 
-    const response = await fetch(
-      "/api/auth/login",
-      {
-        method: "POST",
-        headers: {
-          "Content-Type":
-            "application/json",
-        },
-        body: JSON.stringify({
-          email,
-          password,
-        }),
-      }
-    );
+    const supabase = createClient();
 
-    const result =
-      await response.json().catch(
-        () => null
+    const {
+      data,
+      error,
+    } =
+      await supabase.auth.signInWithPassword({
+        email,
+        password,
+      });
+
+    if (error) {
+      console.error(
+        "LOGIN ERROR:",
+        error
       );
 
-    if (!response.ok) {
       toast.error(
-        result?.message ||
+        error.message ||
           "Invalid email or password."
       );
+
+      return;
+    }
+
+    if (!data.user) {
+      toast.error(
+        "Login failed."
+      );
+
+      return;
+    }
+
+    console.log(
+      "Logged in user:",
+      data.user
+    );
+
+    console.log(
+      "Session:",
+      data.session
+    );
+
+    /*
+     * Get role from database
+     */
+    const { data: profile } =
+      await supabase
+        .from("profiles")
+        .select("role,status")
+        .eq("id", data.user.id)
+        .maybeSingle();
+
+    if (!profile) {
+      toast.error(
+        "User profile not found."
+      );
+      return;
+    }
+
+    if (
+      profile.status &&
+      profile.status !== "ACTIVE"
+    ) {
+      await supabase.auth.signOut();
+
+      toast.error(
+        "Your account is inactive."
+      );
+
       return;
     }
 
@@ -86,56 +124,47 @@ const handleSubmit = async (
     );
 
     /*
-     * ADMIN
+     * Give auth state time to persist.
      */
+    await new Promise(
+      (resolve) =>
+        setTimeout(resolve, 300)
+    );
 
     if (
-      result?.user?.role ===
-      "ADMIN"
+      profile.role === "ADMIN"
     ) {
-      router.replace(
-        "/admin/dashboard"
-      );
+      window.location.href =
+        "/admin/dashboard";
 
       return;
     }
 
-    /*
-     * STUDENT
-     */
-
     if (
-      result?.user?.role ===
-      "STUDENT"
+      profile.role === "STUDENT"
     ) {
-      router.replace(
-        "/student/dashboard"
-      );
+      window.location.href =
+        "/student/dashboard";
 
       return;
     }
-
-    /*
-     * If role is missing
-     */
 
     toast.error(
-      "User role not found."
+      "Invalid user role."
     );
   } catch (error) {
     console.error(
-      "Login error:",
+      "LOGIN ERROR:",
       error
     );
 
     toast.error(
-      "Unable to connect to the server. Please try again."
+      "Something went wrong."
     );
   } finally {
     setLoading(false);
   }
 };
-
 
   return (
     <main className="min-h-screen bg-[#050816] text-white">
