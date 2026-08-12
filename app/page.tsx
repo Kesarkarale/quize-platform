@@ -3,7 +3,6 @@
 import Link from "next/link";
 import {
   ArrowRight,
-  Award,
   BarChart3,
   Brain,
   CheckCircle2,
@@ -15,6 +14,12 @@ import {
   Trophy,
   Users,
   Zap,
+  Code2,
+  Database,
+  Globe,
+  Lock,
+  Rocket,
+  Star,
 } from "lucide-react";
 import { motion } from "framer-motion";
 
@@ -66,33 +71,33 @@ const features = [
   },
   {
     icon: Clock3,
-    title: "Timed Quizzes",
+    title: "Timed Challenges",
     description:
-      "Challenge yourself with realistic countdown-based online assessments.",
+      "Improve your speed and accuracy with realistic countdown-based assessments.",
   },
   {
     icon: BarChart3,
     title: "Detailed Analytics",
     description:
-      "Track scores, accuracy, attempts and overall performance over time.",
+      "Track your scores, accuracy, attempts and overall learning progress.",
   },
   {
     icon: Trophy,
     title: "Leaderboard",
     description:
-      "Compete with other students and see where you stand on the leaderboard.",
+      "Challenge yourself, compare your performance and climb the leaderboard.",
   },
   {
     icon: ShieldCheck,
     title: "Secure Platform",
     description:
-      "Role-based authentication and secure assessment workflows keep everything protected.",
+      "Secure authentication and assessment workflows keep your learning experience protected.",
   },
   {
     icon: Target,
-    title: "Track Progress",
+    title: "Progress Tracking",
     description:
-      "Review your previous attempts and identify areas where you can improve.",
+      "Identify your strengths and weaknesses and continuously improve your skills.",
   },
 ];
 
@@ -101,55 +106,65 @@ const steps = [
     number: "01",
     title: "Create Account",
     description:
-      "Register as a student and create your secure account.",
+      "Create your free student account and start your learning journey.",
   },
   {
     number: "02",
     title: "Choose a Quiz",
     description:
-      "Browse quizzes by category, difficulty and duration.",
+      "Explore quizzes by subject, difficulty and skill level.",
   },
   {
     number: "03",
-    title: "Take the Assessment",
+    title: "Take the Quiz",
     description:
-      "Answer questions within the given time limit.",
+      "Answer questions within the given time and challenge yourself.",
   },
   {
     number: "04",
-    title: "Check Your Result",
+    title: "See Your Result",
     description:
-      "View your score, performance and detailed answer review.",
+      "Instantly view your score and understand your performance.",
+  },
+];
+
+const stats = [
+  {
+    value: "50K+",
+    label: "Students",
+  },
+  {
+    value: "2M+",
+    label: "Questions Answered",
+  },
+  {
+    value: "10K+",
+    label: "Quiz Attempts",
+  },
+  {
+    value: "98%",
+    label: "Satisfaction",
   },
 ];
 
 export default function HomePage() {
   return (
     <main className="min-h-screen overflow-hidden bg-[#050816] text-white">
-      {/* =====================================
-          BACKGROUND
-      ===================================== */}
+      {/* BACKGROUND */}
 
-      <div className="pointer-events-none fixed inset-0">
-        <div className="absolute left-[-200px] top-[-200px] h-[500px] w-[500px] rounded-full bg-indigo-600/10 blur-[140px]" />
+      <div className="pointer-events-none fixed inset-0 overflow-hidden">
+        <div className="absolute left-[-180px] top-[-180px] h-[500px] w-[500px] rounded-full bg-indigo-600/10 blur-[140px]" />
 
-        <div className="absolute right-[-200px] top-[30%] h-[500px] w-[500px] rounded-full bg-purple-600/10 blur-[140px]" />
+        <div className="absolute right-[-180px] top-[20%] h-[500px] w-[500px] rounded-full bg-purple-600/10 blur-[140px]" />
 
-        <div className="absolute bottom-[-200px] left-[30%] h-[450px] w-[450px] rounded-full bg-cyan-600/5 blur-[140px]" />
+        <div className="absolute bottom-[-200px] left-[25%] h-[450px] w-[450px] rounded-full bg-cyan-600/5 blur-[140px]" />
       </div>
 
-      {/* =====================================
-          NAVBAR
-      ===================================== */}
+      {/* NAVBAR */}
 
       <header className="relative z-50 border-b border-white/5 bg-[#050816]/80 backdrop-blur-xl">
         <div className="mx-auto flex h-20 max-w-7xl items-center justify-between px-5 lg:px-8">
-          {/* Logo */}
-
-          <Link
-            href="/"
-            className="flex items-center gap-3"
-          >
+          <Link href="/" className="flex items-center gap-3">
             <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-gradient-to-br from-indigo-500 to-purple-600 shadow-lg shadow-indigo-600/20">
               <Brain size={23} />
             </div>
@@ -157,9 +172,7 @@ export default function HomePage() {
             <div>
               <h1 className="text-lg font-black tracking-tight">
                 Quiz
-                <span className="text-indigo-400">
-                  Master
-                </span>
+                <span className="text-indigo-400">Master</span>
               </h1>
 
               <p className="text-[8px] font-semibold tracking-[0.25em] text-gray-600">
@@ -167,8 +180,6 @@ export default function HomePage() {
               </p>
             </div>
           </Link>
-
-          {/* Desktop Navigation */}
 
           <nav className="hidden items-center gap-8 md:flex">
             <Link
@@ -179,7 +190,7 @@ export default function HomePage() {
             </Link>
 
             <Link
-              href="/quizzes"
+              href="/quiz"
               className="text-sm font-semibold text-gray-500 transition hover:text-white"
             >
               Quizzes
@@ -200,8 +211,6 @@ export default function HomePage() {
             </a>
           </nav>
 
-          {/* Auth */}
-
           <div className="flex items-center gap-2">
             <Link
               href="/login"
@@ -220,61 +229,45 @@ export default function HomePage() {
         </div>
       </header>
 
-      {/* =====================================
-          HERO
-      ===================================== */}
+      {/* HERO */}
 
       <section className="relative z-10">
         <div className="mx-auto max-w-7xl px-5 pb-24 pt-20 lg:px-8 lg:pb-32 lg:pt-28">
-          <div className="grid items-center gap-14 lg:grid-cols-[1.05fr_.95fr]">
-            {/* Left */}
+          <div className="grid items-center gap-16 lg:grid-cols-[1fr_0.9fr]">
+            {/* HERO LEFT */}
 
             <motion.div
-              initial={{
-                opacity: 0,
-                x: -30,
-              }}
-              animate={{
-                opacity: 1,
-                x: 0,
-              }}
-              transition={{
-                duration: 0.6,
-              }}
+              initial={{ opacity: 0, x: -35 }}
+              animate={{ opacity: 1, x: 0 }}
+              transition={{ duration: 0.7 }}
             >
               <div className="mb-6 inline-flex items-center gap-2 rounded-full border border-indigo-500/20 bg-indigo-500/10 px-4 py-2 text-xs font-semibold text-indigo-300">
                 <Sparkles size={14} />
-
                 Smarter way to test your knowledge
               </div>
 
-              <h2 className="max-w-4xl text-5xl font-black leading-[1.05] tracking-tight sm:text-6xl lg:text-7xl">
+              <h2 className="max-w-4xl text-5xl font-black leading-[1.02] tracking-tight sm:text-6xl lg:text-7xl">
                 Learn.
                 <br />
-
                 Practice.
                 <br />
-
                 <span className="bg-gradient-to-r from-indigo-400 via-purple-400 to-cyan-400 bg-clip-text text-transparent">
                   Master.
                 </span>
               </h2>
 
               <p className="mt-7 max-w-xl text-base leading-7 text-gray-500 sm:text-lg">
-                A modern online assessment platform
-                where students can discover quizzes,
-                challenge themselves, track their
-                performance and compete on the
-                leaderboard.
+                QuizMaster is a modern online assessment platform where you
+                can practice technical skills, challenge yourself with timed
+                quizzes and track your progress.
               </p>
 
               <div className="mt-9 flex flex-col gap-3 sm:flex-row">
                 <Link
-                  href="/quizzes"
+                  href="/quiz"
                   className="group flex items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-indigo-600 to-purple-600 px-6 py-3.5 text-sm font-bold shadow-xl shadow-indigo-600/20 transition hover:scale-[1.02]"
                 >
                   Explore Quizzes
-
                   <ArrowRight
                     size={17}
                     className="transition group-hover:translate-x-1"
@@ -289,56 +282,36 @@ export default function HomePage() {
                 </Link>
               </div>
 
-              {/* Trust */}
-
-              <div className="mt-9 flex flex-wrap items-center gap-x-6 gap-y-3 text-xs text-gray-600">
+              <div className="mt-9 flex flex-wrap gap-x-6 gap-y-3 text-xs text-gray-600">
                 <span className="flex items-center gap-2">
-                  <CheckCircle2
-                    size={14}
-                    className="text-green-400"
-                  />
+                  <CheckCircle2 size={14} className="text-green-400" />
                   Free to join
                 </span>
 
                 <span className="flex items-center gap-2">
-                  <CheckCircle2
-                    size={14}
-                    className="text-green-400"
-                  />
+                  <CheckCircle2 size={14} className="text-green-400" />
                   Timed assessments
                 </span>
 
                 <span className="flex items-center gap-2">
-                  <CheckCircle2
-                    size={14}
-                    className="text-green-400"
-                  />
-                  Detailed results
+                  <CheckCircle2 size={14} className="text-green-400" />
+                  Instant results
                 </span>
               </div>
             </motion.div>
 
-            {/* Right Preview */}
+            {/* HERO RIGHT */}
 
             <motion.div
-              initial={{
-                opacity: 0,
-                x: 30,
-              }}
-              animate={{
-                opacity: 1,
-                x: 0,
-              }}
-              transition={{
-                duration: 0.6,
-                delay: 0.15,
-              }}
+              initial={{ opacity: 0, x: 35 }}
+              animate={{ opacity: 1, x: 0 }}
+              transition={{ duration: 0.7, delay: 0.15 }}
               className="relative"
             >
-              {/* Main Card */}
+              <div className="absolute inset-0 rounded-[35px] bg-indigo-600/10 blur-3xl" />
 
-              <div className="relative overflow-hidden rounded-[28px] border border-white/10 bg-white/[0.045] p-5 shadow-2xl backdrop-blur-xl sm:p-7">
-                {/* Top */}
+              <div className="relative overflow-hidden rounded-[30px] border border-white/10 bg-white/[0.045] p-5 shadow-2xl backdrop-blur-xl sm:p-7">
+                {/* CARD HEADER */}
 
                 <div className="flex items-center justify-between">
                   <div>
@@ -356,7 +329,7 @@ export default function HomePage() {
                   </div>
                 </div>
 
-                {/* Timer */}
+                {/* TIMER */}
 
                 <div className="mt-6 rounded-2xl border border-indigo-500/10 bg-indigo-500/[0.05] p-5">
                   <div className="flex items-center justify-between">
@@ -364,18 +337,15 @@ export default function HomePage() {
                       Time Remaining
                     </span>
 
-                    <Clock3
-                      size={17}
-                      className="text-indigo-400"
-                    />
+                    <Clock3 size={17} className="text-indigo-400" />
                   </div>
 
                   <p className="mt-2 font-mono text-3xl font-black">
-                    14:32
+                    02:41
                   </p>
                 </div>
 
-                {/* Question */}
+                {/* QUESTION */}
 
                 <div className="mt-5">
                   <div className="flex items-center justify-between">
@@ -393,18 +363,11 @@ export default function HomePage() {
                   </div>
 
                   <h4 className="mt-6 text-base font-bold leading-6">
-                    Which keyword is used to
-                    declare a constant in
-                    JavaScript?
+                    Which keyword is used to declare a constant in JavaScript?
                   </h4>
 
                   <div className="mt-5 space-y-2">
-                    {[
-                      "var",
-                      "let",
-                      "const",
-                      "static",
-                    ].map(
+                    {["var", "let", "const", "static"].map(
                       (option, index) => (
                         <div
                           key={option}
@@ -415,9 +378,7 @@ export default function HomePage() {
                           }`}
                         >
                           <span className="flex h-7 w-7 items-center justify-center rounded-lg bg-white/5 text-[10px] font-bold text-gray-500">
-                            {String.fromCharCode(
-                              65 + index
-                            )}
+                            {String.fromCharCode(65 + index)}
                           </span>
 
                           <span className="text-xs font-medium text-gray-400">
@@ -447,7 +408,7 @@ export default function HomePage() {
                 </div>
               </div>
 
-              {/* Floating Stats */}
+              {/* FLOATING SCORE */}
 
               <div className="absolute -bottom-5 -left-5 hidden rounded-2xl border border-white/10 bg-[#0b1024] p-4 shadow-2xl sm:block">
                 <div className="flex items-center gap-3">
@@ -460,12 +421,12 @@ export default function HomePage() {
                       Average Score
                     </p>
 
-                    <p className="text-lg font-black">
-                      92%
-                    </p>
+                    <p className="text-lg font-black">92%</p>
                   </div>
                 </div>
               </div>
+
+              {/* FLOATING USERS */}
 
               <div className="absolute -right-4 top-10 hidden rounded-2xl border border-white/10 bg-[#0b1024] p-4 shadow-2xl sm:block">
                 <div className="flex items-center gap-3">
@@ -475,12 +436,10 @@ export default function HomePage() {
 
                   <div>
                     <p className="text-[10px] text-gray-600">
-                      Students
+                      Active Students
                     </p>
 
-                    <p className="text-lg font-black">
-                      50K+
-                    </p>
+                    <p className="text-lg font-black">50K+</p>
                   </div>
                 </div>
               </div>
@@ -489,101 +448,69 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* =====================================
-          STATS
-      ===================================== */}
+      {/* STATS */}
 
       <section className="relative z-10 border-y border-white/5 bg-white/[0.015]">
-        <div className="mx-auto grid max-w-7xl grid-cols-2 px-5 py-8 sm:grid-cols-4 lg:px-8">
-          <Stat
-            value="50K+"
-            label="Students"
-          />
-
-          <Stat
-            value="2M+"
-            label="Questions Answered"
-          />
-
-          <Stat
-            value="10K+"
-            label="Quiz Attempts"
-          />
-
-          <Stat
-            value="98%"
-            label="Platform Satisfaction"
-          />
+        <div className="mx-auto grid max-w-7xl grid-cols-2 py-8 sm:grid-cols-4 lg:px-8">
+          {stats.map((stat) => (
+            <Stat
+              key={stat.label}
+              value={stat.value}
+              label={stat.label}
+            />
+          ))}
         </div>
       </section>
 
-      {/* =====================================
-          CATEGORIES
-      ===================================== */}
+      {/* CATEGORIES */}
 
       <section className="relative z-10 mx-auto max-w-7xl px-5 py-24 lg:px-8">
         <SectionHeading
           eyebrow="EXPLORE"
           title="Popular Categories"
-          description="Choose a subject and challenge yourself with quizzes created to improve your skills."
+          description="Build your skills with quizzes covering today's most important technologies."
         />
 
         <div className="mt-12 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-          {categories.map(
-            (category, index) => (
-              <motion.div
-                key={category.name}
-                initial={{
-                  opacity: 0,
-                  y: 15,
-                }}
-                whileInView={{
-                  opacity: 1,
-                  y: 0,
-                }}
-                viewport={{
-                  once: true,
-                }}
-                transition={{
-                  delay: index * 0.05,
-                }}
+          {categories.map((category, index) => (
+            <motion.div
+              key={category.name}
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ delay: index * 0.05 }}
+            >
+              <Link
+                href={`/quiz?category=${encodeURIComponent(
+                  category.name
+                )}`}
+                className={`group flex items-center justify-between rounded-2xl border border-white/10 bg-gradient-to-br ${category.color} p-5 transition duration-300 hover:-translate-y-1 hover:border-white/20 hover:shadow-xl`}
               >
-                <Link
-                  href={`/quizzes?category=${encodeURIComponent(
-                    category.name
-                  )}`}
-                  className={`group flex items-center justify-between rounded-2xl border border-white/10 bg-gradient-to-br ${category.color} p-5 transition hover:-translate-y-1 hover:border-white/20`}
-                >
-                  <div className="flex items-center gap-4">
-                    <div className="flex h-12 w-12 items-center justify-center rounded-xl border border-white/10 bg-black/20 text-xs font-black">
-                      {category.icon}
-                    </div>
-
-                    <div>
-                      <h3 className="font-bold">
-                        {category.name}
-                      </h3>
-
-                      <p className="mt-1 text-xs text-gray-600">
-                        {category.quizzes} quizzes
-                      </p>
-                    </div>
+                <div className="flex items-center gap-4">
+                  <div className="flex h-12 w-12 items-center justify-center rounded-xl border border-white/10 bg-black/20 text-xs font-black">
+                    {category.icon}
                   </div>
 
-                  <ChevronRight
-                    size={18}
-                    className="text-gray-700 transition group-hover:translate-x-1 group-hover:text-white"
-                  />
-                </Link>
-              </motion.div>
-            )
-          )}
+                  <div>
+                    <h3 className="font-bold">{category.name}</h3>
+
+                    <p className="mt-1 text-xs text-gray-600">
+                      {category.quizzes} quizzes
+                    </p>
+                  </div>
+                </div>
+
+                <ChevronRight
+                  size={18}
+                  className="text-gray-700 transition group-hover:translate-x-1 group-hover:text-white"
+                />
+              </Link>
+            </motion.div>
+          ))}
         </div>
       </section>
 
-      {/* =====================================
-          FEATURES
-      ===================================== */}
+      {/* WHY QUIZMASTER */}
 
       <section
         id="features"
@@ -593,98 +520,120 @@ export default function HomePage() {
           <SectionHeading
             eyebrow="WHY QUIZMASTER"
             title="Everything You Need to Improve"
-            description="A complete assessment experience for learning, practice and performance tracking."
+            description="A complete assessment experience designed for focused learning and measurable progress."
           />
 
           <div className="mt-12 grid gap-5 md:grid-cols-2 lg:grid-cols-3">
-            {features.map(
-              (feature, index) => {
-                const Icon = feature.icon;
+            {features.map((feature, index) => {
+              const Icon = feature.icon;
 
-                return (
-                  <motion.div
-                    key={feature.title}
-                    initial={{
-                      opacity: 0,
-                      y: 15,
-                    }}
-                    whileInView={{
-                      opacity: 1,
-                      y: 0,
-                    }}
-                    viewport={{
-                      once: true,
-                    }}
-                    transition={{
-                      delay: index * 0.05,
-                    }}
-                    className="rounded-2xl border border-white/10 bg-white/[0.025] p-6 transition hover:border-white/20 hover:bg-white/[0.04]"
-                  >
-                    <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-indigo-500/10 text-indigo-400">
-                      <Icon size={21} />
-                    </div>
+              return (
+                <motion.div
+                  key={feature.title}
+                  initial={{ opacity: 0, y: 20 }}
+                  whileInView={{ opacity: 1, y: 0 }}
+                  viewport={{ once: true }}
+                  transition={{ delay: index * 0.05 }}
+                  className="group rounded-2xl border border-white/10 bg-white/[0.025] p-6 transition duration-300 hover:-translate-y-1 hover:border-indigo-500/20 hover:bg-white/[0.04]"
+                >
+                  <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-indigo-500/10 text-indigo-400 transition group-hover:scale-110">
+                    <Icon size={21} />
+                  </div>
 
-                    <h3 className="mt-5 font-bold">
-                      {feature.title}
-                    </h3>
+                  <h3 className="mt-5 font-bold">
+                    {feature.title}
+                  </h3>
 
-                    <p className="mt-2 text-sm leading-6 text-gray-600">
-                      {feature.description}
-                    </p>
-                  </motion.div>
-                );
-              }
-            )}
+                  <p className="mt-2 text-sm leading-6 text-gray-600">
+                    {feature.description}
+                  </p>
+                </motion.div>
+              );
+            })}
           </div>
         </div>
       </section>
 
-      {/* =====================================
-          HOW IT WORKS
-      ===================================== */}
+      {/* TECHNOLOGY STRIP */}
+
+      <section className="relative z-10 mx-auto max-w-7xl px-5 py-24 lg:px-8">
+        <div className="grid items-center gap-12 lg:grid-cols-2">
+          <div>
+            <p className="text-xs font-bold tracking-[0.2em] text-indigo-400">
+              BUILT FOR DEVELOPERS
+            </p>
+
+            <h2 className="mt-4 text-3xl font-black sm:text-4xl">
+              Practice the technologies
+              <span className="text-indigo-400">
+                {" "}
+                that matter.
+              </span>
+            </h2>
+
+            <p className="mt-5 max-w-xl text-sm leading-7 text-gray-500 sm:text-base">
+              From JavaScript fundamentals to React, Python, databases and
+              cybersecurity, QuizMaster helps you continuously test and
+              improve your technical knowledge.
+            </p>
+
+            <Link
+              href="/quiz"
+              className="mt-7 inline-flex items-center gap-2 rounded-xl bg-indigo-600 px-5 py-3 text-sm font-bold transition hover:bg-indigo-700"
+            >
+              Start Practicing
+              <ArrowRight size={16} />
+            </Link>
+          </div>
+
+          <div className="grid grid-cols-2 gap-4">
+            <TechCard icon={Code2} title="JavaScript" />
+            <TechCard icon={Rocket} title="React" />
+            <TechCard icon={Database} title="Database" />
+            <TechCard icon={Globe} title="Web Development" />
+            <TechCard icon={Lock} title="Cyber Security" />
+            <TechCard icon={Star} title="Advanced Skills" />
+          </div>
+        </div>
+      </section>
+
+      {/* HOW IT WORKS */}
 
       <section className="relative z-10 mx-auto max-w-7xl px-5 py-24 lg:px-8">
         <SectionHeading
           eyebrow="HOW IT WORKS"
           title="Start in Four Simple Steps"
-          description="From creating your account to tracking your results, everything is simple and organized."
+          description="Everything is designed to keep your learning journey simple and focused."
         />
 
         <div className="mt-12 grid gap-5 md:grid-cols-2 lg:grid-cols-4">
-          {steps.map(
-            (step, index) => (
-              <div
-                key={step.number}
-                className="relative rounded-2xl border border-white/10 bg-white/[0.025] p-6"
-              >
-                <span className="text-4xl font-black text-white/5">
-                  {step.number}
-                </span>
+          {steps.map((step, index) => (
+            <div
+              key={step.number}
+              className="relative rounded-2xl border border-white/10 bg-white/[0.025] p-6"
+            >
+              <span className="text-4xl font-black text-white/5">
+                {step.number}
+              </span>
 
-                <h3 className="mt-5 font-bold">
-                  {step.title}
-                </h3>
+              <h3 className="mt-5 font-bold">{step.title}</h3>
 
-                <p className="mt-2 text-sm leading-6 text-gray-600">
-                  {step.description}
-                </p>
+              <p className="mt-2 text-sm leading-6 text-gray-600">
+                {step.description}
+              </p>
 
-                {index <
-                  steps.length - 1 && (
-                  <ChevronRight
-                    size={18}
-                    className="absolute -right-3 top-1/2 z-10 hidden -translate-y-1/2 text-gray-700 lg:block"
-                  />
-                )}
-              </div>
-            )
-          )}
+              {index < steps.length - 1 && (
+                <ChevronRight
+                  size={18}
+                  className="absolute -right-3 top-1/2 z-10 hidden -translate-y-1/2 text-gray-700 lg:block"
+                />
+              )}
+            </div>
+          ))}
         </div>
       </section>
 
-      {/* =====================================
-          CTA
-      ===================================== */}
+      {/* CTA */}
 
       <section className="relative z-10 mx-auto max-w-7xl px-5 pb-24 lg:px-8">
         <div className="relative overflow-hidden rounded-[30px] border border-indigo-500/20 bg-gradient-to-br from-indigo-600/20 via-purple-600/10 to-transparent p-8 sm:p-12 lg:p-16">
@@ -699,79 +648,95 @@ export default function HomePage() {
               Ready to test your knowledge?
             </h2>
 
-            <p className="mt-4 text-sm leading-6 text-gray-500 sm:text-base">
-              Join QuizMaster and start taking
-              assessments, tracking your progress and
-              competing with other students.
+            <p className="mt-4 text-sm leading-7 text-gray-500 sm:text-base">
+              Start with easy questions, improve your accuracy, unlock harder
+              levels and become a better problem solver.
             </p>
 
-            <Link
-              href="/register"
-              className="mt-7 inline-flex items-center gap-2 rounded-xl bg-white px-6 py-3.5 text-sm font-bold text-black transition hover:bg-gray-200"
-            >
-              Get Started
+            <div className="mt-7 flex flex-col gap-3 sm:flex-row">
+              <Link
+                href="/register"
+                className="inline-flex items-center justify-center gap-2 rounded-xl bg-white px-6 py-3.5 text-sm font-bold text-black transition hover:bg-gray-200"
+              >
+                Get Started
+                <ArrowRight size={17} />
+              </Link>
 
-              <ArrowRight size={17} />
-            </Link>
+              <Link
+                href="/quiz"
+                className="inline-flex items-center justify-center gap-2 rounded-xl border border-white/10 bg-white/5 px-6 py-3.5 text-sm font-bold text-white transition hover:bg-white/10"
+              >
+                Explore Quizzes
+              </Link>
+            </div>
           </div>
         </div>
       </section>
 
-      {/* =====================================
-          FOOTER
-      ===================================== */}
+      {/* FOOTER */}
 
       <footer className="relative z-10 border-t border-white/5 bg-black/20">
-        <div className="mx-auto flex max-w-7xl flex-col gap-5 px-5 py-8 sm:flex-row sm:items-center sm:justify-between lg:px-8">
-          <div className="flex items-center gap-3">
-            <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-indigo-600">
-              <Brain size={18} />
-            </div>
-
+        <div className="mx-auto flex max-w-7xl flex-col gap-6 px-5 py-10 lg:px-8">
+          <div className="flex flex-col justify-between gap-8 sm:flex-row">
             <div>
-              <p className="text-sm font-bold">
-                QuizMaster
-              </p>
+              <Link href="/" className="flex items-center gap-3">
+                <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-indigo-600">
+                  <Brain size={19} />
+                </div>
 
-              <p className="text-[10px] text-gray-700">
-                Online Assessment Platform
+                <div>
+                  <p className="font-black">
+                    Quiz<span className="text-indigo-400">Master</span>
+                  </p>
+
+                  <p className="text-[10px] text-gray-700">
+                    Online Assessment Platform
+                  </p>
+                </div>
+              </Link>
+
+              <p className="mt-4 max-w-sm text-xs leading-6 text-gray-700">
+                Learn, practice and master your skills through structured
+                online assessments.
               </p>
+            </div>
+
+            <div className="flex flex-wrap gap-x-8 gap-y-3 text-xs text-gray-600">
+              <Link
+                href="/quiz"
+                className="transition hover:text-white"
+              >
+                Quizzes
+              </Link>
+
+              <Link
+                href="/leaderboard"
+                className="transition hover:text-white"
+              >
+                Leaderboard
+              </Link>
+
+              <Link
+                href="/login"
+                className="transition hover:text-white"
+              >
+                Login
+              </Link>
+
+              <Link
+                href="/register"
+                className="transition hover:text-white"
+              >
+                Register
+              </Link>
             </div>
           </div>
 
-          <div className="flex flex-wrap gap-5 text-xs text-gray-600">
-            <Link
-              href="/quizzes"
-              className="transition hover:text-white"
-            >
-              Quizzes
-            </Link>
-
-            <Link
-              href="/leaderboard"
-              className="transition hover:text-white"
-            >
-              Leaderboard
-            </Link>
-
-            <Link
-              href="/login"
-              className="transition hover:text-white"
-            >
-              Login
-            </Link>
-
-            <Link
-              href="/register"
-              className="transition hover:text-white"
-            >
-              Register
-            </Link>
+          <div className="border-t border-white/5 pt-6">
+            <p className="text-xs text-gray-700">
+              © {new Date().getFullYear()} QuizMaster. All rights reserved.
+            </p>
           </div>
-
-          <p className="text-xs text-gray-700">
-            © {new Date().getFullYear()} QuizMaster
-          </p>
         </div>
       </footer>
     </main>
@@ -832,3 +797,30 @@ function SectionHeading({
   );
 }
 
+/* =========================================
+   TECH CARD
+========================================= */
+
+function TechCard({
+  icon: Icon,
+  title,
+}: {
+  icon: React.ElementType;
+  title: string;
+}) {
+  return (
+    <div className="group rounded-2xl border border-white/10 bg-white/[0.025] p-5 transition duration-300 hover:-translate-y-1 hover:border-indigo-500/20 hover:bg-indigo-500/[0.04]">
+      <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-indigo-500/10 text-indigo-400 transition group-hover:scale-110">
+        <Icon size={19} />
+      </div>
+
+      <p className="mt-4 text-sm font-bold">
+        {title}
+      </p>
+
+      <p className="mt-1 text-[11px] text-gray-700">
+        Practice & improve
+      </p>
+    </div>
+  );
+}
