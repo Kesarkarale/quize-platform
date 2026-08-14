@@ -16,35 +16,36 @@ type ThemeContextType = {
   setTheme: (theme: Theme) => void;
 };
 
-const ThemeContext =
-  createContext<ThemeContextType | null>(null);
+const ThemeContext = createContext<ThemeContextType | undefined>(
+  undefined
+);
+
+const STORAGE_KEY = "quizmaster-theme";
 
 export function ThemeProvider({
   children,
 }: {
   children: ReactNode;
 }) {
-  const [theme, setThemeState] =
-    useState<Theme>("dark");
-
-  const [mounted, setMounted] =
-    useState(false);
+  const [theme, setThemeState] = useState<Theme>("dark");
+  const [mounted, setMounted] = useState(false);
 
   useEffect(() => {
-    const saved =
-      localStorage.getItem("quizmaster-theme");
+    const saved = localStorage.getItem(STORAGE_KEY);
 
-    const initialTheme =
+    const initialTheme: Theme =
       saved === "light" || saved === "dark"
         ? saved
         : "dark";
 
     setThemeState(initialTheme);
 
-    document.documentElement.classList.toggle(
-      "dark",
-      initialTheme === "dark"
-    );
+    const root = document.documentElement;
+
+    root.classList.remove("light", "dark");
+    root.classList.add(initialTheme);
+
+    root.style.colorScheme = initialTheme;
 
     setMounted(true);
   }, []);
@@ -52,27 +53,35 @@ export function ThemeProvider({
   const setTheme = (newTheme: Theme) => {
     setThemeState(newTheme);
 
-    localStorage.setItem(
-      "quizmaster-theme",
-      newTheme
-    );
+    localStorage.setItem(STORAGE_KEY, newTheme);
 
-    document.documentElement.classList.toggle(
-      "dark",
-      newTheme === "dark"
-    );
+    const root = document.documentElement;
+
+    root.classList.remove("light", "dark");
+    root.classList.add(newTheme);
+
+    root.style.colorScheme = newTheme;
   };
 
   const toggleTheme = () => {
-    setTheme(
-      theme === "dark"
-        ? "light"
-        : "dark"
-    );
+    setTheme(theme === "dark" ? "light" : "dark");
   };
 
+  /*
+   * Server आणि client mismatch avoid करण्यासाठी
+   */
   if (!mounted) {
-    return null;
+    return (
+      <ThemeContext.Provider
+        value={{
+          theme,
+          toggleTheme,
+          setTheme,
+        }}
+      >
+        {children}
+      </ThemeContext.Provider>
+    );
   }
 
   return (
@@ -89,8 +98,7 @@ export function ThemeProvider({
 }
 
 export function useTheme() {
-  const context =
-    useContext(ThemeContext);
+  const context = useContext(ThemeContext);
 
   if (!context) {
     throw new Error(
