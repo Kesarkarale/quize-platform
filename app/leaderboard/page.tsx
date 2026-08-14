@@ -2,7 +2,6 @@
 
 import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
-
 import {
   ArrowLeft,
   ArrowRight,
@@ -22,11 +21,11 @@ import {
   LogOut,
   Menu,
   X,
-  Settings,
-  Target,
   Sparkles,
+  Home,
+  Settings,
+  Activity,
 } from "lucide-react";
-
 import { motion, AnimatePresence } from "framer-motion";
 
 type Player = {
@@ -143,88 +142,118 @@ const categories = [
 ];
 
 export default function LeaderboardPage() {
-  const [players, setPlayers] = useState<Player[]>(initialPlayers);
+  const [players, setPlayers] =
+    useState<Player[]>(initialPlayers);
+
   const [period, setPeriod] = useState("This Week");
-  const [category, setCategory] = useState("All Categories");
+  const [category, setCategory] =
+    useState("All Categories");
+
   const [search, setSearch] = useState("");
   const [sidebarOpen, setSidebarOpen] = useState(false);
 
-  /* =========================================
-     NAVIGATION
-  ========================================= */
+  /*
+  =========================================
+  SIDEBAR
+  =========================================
+  */
 
-  const navigateTo = (href: string) => {
+  const navigateTo = (
+    _menu: string,
+    href: string
+  ) => {
     setSidebarOpen(false);
     window.location.href = href;
   };
 
-  /* =========================================
-     LOGOUT
-  ========================================= */
-
   const handleLogout = () => {
     localStorage.removeItem("quizResult");
-    localStorage.removeItem("leaderboardResultUpdated");
+    localStorage.removeItem(
+      "leaderboardResultUpdated"
+    );
 
-    navigateTo("/login");
+    window.location.href = "/login";
   };
 
-  /* =========================================
-     UPDATE USER SCORE FROM QUIZ RESULT
-  ========================================= */
+  const profile = {
+    name: "Kesar",
+    email: "student@example.com",
+  };
+
+  const firstName = profile.name || "Student";
+
+  /*
+  =========================================
+  UPDATE USER SCORE
+  =========================================
+  */
 
   useEffect(() => {
-    const savedResult = localStorage.getItem("quizResult");
+    const savedResult =
+      localStorage.getItem("quizResult");
 
     if (!savedResult) return;
 
     try {
       const result = JSON.parse(savedResult);
 
-      if (!result || typeof result.score !== "number") {
+      if (
+        !result ||
+        typeof result.score !== "number"
+      ) {
         return;
       }
 
       setPlayers((currentPlayers) => {
-        const currentUser = currentPlayers.find(
-          (player) => player.current
-        );
+        const currentUser =
+          currentPlayers.find(
+            (player) => player.current
+          );
 
         if (!currentUser) {
           return currentPlayers;
         }
 
-        const alreadyUpdated = localStorage.getItem(
-          "leaderboardResultUpdated"
-        );
+        const alreadyUpdated =
+          localStorage.getItem(
+            "leaderboardResultUpdated"
+          );
 
         if (alreadyUpdated === savedResult) {
           return currentPlayers;
         }
 
-        const updatedPlayers = currentPlayers.map((player) => {
-          if (!player.current) {
-            return player;
-          }
+        const updatedPlayers =
+          currentPlayers.map((player) => {
+            if (!player.current) {
+              return player;
+            }
 
-          return {
-            ...player,
-            points:
-              player.points +
-              (typeof result.correct === "number"
-                ? result.correct * 100
-                : 0),
-            quizzes: player.quizzes + 1,
-            score: result.score,
-          };
-        });
+            return {
+              ...player,
 
-        const sortedPlayers = [...updatedPlayers]
-          .sort((a, b) => b.points - a.points)
-          .map((player, index) => ({
-            ...player,
-            rank: index + 1,
-          }));
+              points:
+                player.points +
+                (typeof result.correct === "number"
+                  ? result.correct * 100
+                  : 0),
+
+              quizzes: player.quizzes + 1,
+
+              score: result.score,
+            };
+          });
+
+        const sortedPlayers =
+          [...updatedPlayers]
+            .sort(
+              (a, b) =>
+                b.points - a.points
+            )
+            .map((player, index) => ({
+              ...player,
+              rank: index + 1,
+            }));
 
         localStorage.setItem(
           "leaderboardResultUpdated",
@@ -234,13 +263,18 @@ export default function LeaderboardPage() {
         return sortedPlayers;
       });
     } catch (error) {
-      console.error("Leaderboard result error:", error);
+      console.error(
+        "Leaderboard result error:",
+        error
+      );
     }
   }, []);
 
-  /* =========================================
-     SEARCH + FILTER
-  ========================================= */
+  /*
+  =========================================
+  SEARCH
+  =========================================
+  */
 
   const filteredPlayers = useMemo(() => {
     return players.filter((player) =>
@@ -253,21 +287,14 @@ export default function LeaderboardPage() {
   const topThree = players.slice(0, 3);
 
   const currentUser =
-    players.find((player) => player.current) ?? players[3];
-
-  /* =========================================
-     CLOSE SIDEBAR
-  ========================================= */
-
-  const closeSidebar = () => {
-    setSidebarOpen(false);
-  };
+    players.find(
+      (player) => player.current
+    ) ?? players[3];
 
   return (
     <main className="min-h-screen overflow-x-hidden bg-[#050816] text-white">
-      {/* =====================================
-          BACKGROUND
-      ===================================== */}
+
+      {/* BACKGROUND */}
 
       <div className="pointer-events-none fixed inset-0 overflow-hidden">
         <div className="absolute -left-40 -top-40 h-[450px] w-[450px] rounded-full bg-indigo-600/15 blur-[140px]" />
@@ -277,9 +304,7 @@ export default function LeaderboardPage() {
         <div className="absolute -bottom-40 -left-40 h-[450px] w-[450px] rounded-full bg-blue-600/10 blur-[140px]" />
       </div>
 
-      {/* =====================================
-          MOBILE OVERLAY
-      ===================================== */}
+      {/* MOBILE OVERLAY */}
 
       <AnimatePresence>
         {sidebarOpen && (
@@ -287,31 +312,35 @@ export default function LeaderboardPage() {
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            onClick={closeSidebar}
+            onClick={() =>
+              setSidebarOpen(false)
+            }
             className="fixed inset-0 z-[90] bg-black/70 backdrop-blur-sm lg:hidden"
           />
         )}
       </AnimatePresence>
 
-      {/* =====================================
-          SIDEBAR
-      ===================================== */}
+      {/* =========================================
+          EXACT DASHBOARD SIDEBAR
+      ========================================= */}
 
       <aside
         className={`
           fixed
           left-0
           top-0
-          z-[100]
+          z-50
           h-screen
-          w-[270px]
+          w-[275px]
           border-r
-          border-white/10
-          bg-[#101114]
+          border-gray-200
+          bg-white
           px-5
           py-6
           transition-transform
           duration-300
+          dark:border-white/10
+          dark:bg-[#0e1013]
 
           ${
             sidebarOpen
@@ -320,166 +349,243 @@ export default function LeaderboardPage() {
           }
         `}
       >
+
         {/* LOGO */}
 
         <div className="flex items-center justify-between">
-          <Link
-            href="/student/dashboard"
-            onClick={closeSidebar}
-            className="flex items-center gap-3"
+          <button
+            type="button"
+            onClick={() =>
+              navigateTo(
+                "Dashboard",
+                "/student/dashboard"
+              )
+            }
+            className="flex items-center gap-3 text-left"
           >
-            <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-gradient-to-br from-indigo-600 to-purple-600 text-white shadow-lg shadow-indigo-500/20">
+            <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-gradient-to-br from-indigo-600 via-indigo-600 to-purple-600 text-white shadow-lg shadow-indigo-500/20">
               <Sparkles size={21} />
             </div>
 
             <div>
               <h1 className="text-lg font-black tracking-tight">
                 Quiz
-                <span className="text-indigo-400">
+                <span className="text-indigo-600 dark:text-indigo-400">
                   Pro
                 </span>
               </h1>
 
-              <p className="text-[10px] font-medium uppercase tracking-[0.2em] text-gray-500">
+              <p className="text-[9px] font-bold uppercase tracking-[0.2em] text-gray-400">
                 Learning Platform
               </p>
             </div>
-          </Link>
-
-          {/* MOBILE CLOSE */}
+          </button>
 
           <button
             type="button"
-            onClick={closeSidebar}
-            className="rounded-xl p-2 text-gray-500 transition hover:bg-white/10 hover:text-white lg:hidden"
+            onClick={() =>
+              setSidebarOpen(false)
+            }
+            className="rounded-xl p-2 text-gray-500 hover:bg-gray-100 dark:hover:bg-white/10 lg:hidden"
           >
             <X size={20} />
           </button>
         </div>
 
-        {/* =====================================
-            MAIN MENU
-        ===================================== */}
+        {/* USER MINI PROFILE */}
 
-        <div className="mt-10">
-          <p className="mb-3 px-3 text-[11px] font-bold uppercase tracking-[0.15em] text-gray-500">
+        <div className="mt-8 rounded-2xl border border-gray-100 bg-gray-50 p-3 dark:border-white/5 dark:bg-white/[0.03]">
+          <div className="flex items-center gap-3">
+
+            <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-br from-indigo-500 to-purple-600 text-sm font-black text-white">
+              {firstName
+                .charAt(0)
+                .toUpperCase()}
+            </div>
+
+            <div className="min-w-0">
+              <p className="truncate text-sm font-bold">
+                {profile?.name ||
+                  "Student"}
+              </p>
+
+              <p className="truncate text-[10px] text-gray-400">
+                {profile?.email ||
+                  "student@example.com"}
+              </p>
+            </div>
+
+          </div>
+        </div>
+
+        {/* MAIN MENU */}
+
+        <div className="mt-8">
+          <p className="mb-3 px-3 text-[10px] font-black uppercase tracking-[0.18em] text-gray-400">
             Main Menu
           </p>
 
           <nav className="space-y-1">
+
             <SidebarItem
-              href="/student/dashboard"
-              icon={LayoutDashboard}
+              icon={<Home size={19} />}
               label="Dashboard"
-              onClick={closeSidebar}
+              active={false}
+              onClick={() =>
+                navigateTo(
+                  "Dashboard",
+                  "/student/dashboard"
+                )
+              }
             />
 
             <SidebarItem
-              href="/quiz"
-              icon={BookOpen}
+              icon={<BookOpen size={19} />}
               label="Explore Quizzes"
-              onClick={closeSidebar}
+              active={false}
+              onClick={() =>
+                navigateTo(
+                  "Quizzes",
+                  "/quiz"
+                )
+              }
             />
 
-            {/* CURRENT PAGE */}
+            {/* ACTIVE LEADERBOARD */}
 
             <SidebarItem
-              href="/leaderboard"
-              icon={Trophy}
+              icon={<Trophy size={19} />}
               label="Leaderboard"
-              active
-              onClick={closeSidebar}
+              active={true}
+              onClick={() =>
+                navigateTo(
+                  "Leaderboard",
+                  "/leaderboard"
+                )
+              }
             />
 
             <SidebarItem
-              href="/student/performance"
-              icon={BarChart3}
+              icon={<BarChart3 size={19} />}
               label="My Performance"
-              onClick={closeSidebar}
+              active={false}
+              onClick={() =>
+                navigateTo(
+                  "Performance",
+                  "/student/performance"
+                )
+              }
             />
+
+            <SidebarItem
+              icon={<Activity size={19} />}
+              label="Quiz History"
+              active={false}
+              onClick={() =>
+                navigateTo(
+                  "History",
+                  "/student/history"
+                )
+              }
+            />
+
           </nav>
         </div>
 
-        {/* =====================================
-            ACCOUNT
-        ===================================== */}
+        {/* ACCOUNT */}
 
-        <div className="mt-8">
-          <p className="mb-3 px-3 text-[11px] font-bold uppercase tracking-[0.15em] text-gray-500">
+        <div className="mt-7">
+          <p className="mb-3 px-3 text-[10px] font-black uppercase tracking-[0.18em] text-gray-400">
             Account
           </p>
 
           <nav className="space-y-1">
+
             <SidebarItem
-              href="/student/profile"
-              icon={User}
+              icon={<User size={19} />}
               label="Profile"
-              onClick={closeSidebar}
+              active={false}
+              onClick={() =>
+                navigateTo(
+                  "Profile",
+                  "/student/profile"
+                )
+              }
             />
 
             <SidebarItem
-              href="/student/settings"
-              icon={Settings}
+              icon={<Settings size={19} />}
               label="Settings"
-              onClick={closeSidebar}
+              active={false}
+              onClick={() =>
+                navigateTo(
+                  "Settings",
+                  "/student/settings"
+                )
+              }
             />
+
           </nav>
         </div>
 
-        {/* =====================================
-            BOTTOM
-        ===================================== */}
+        {/* BOTTOM */}
 
         <div className="absolute bottom-5 left-5 right-5">
-          {/* STREAK */}
 
-          <div className="mb-4 rounded-2xl border border-indigo-500/20 bg-indigo-500/10 p-4">
+          <div className="mb-4 overflow-hidden rounded-2xl border border-indigo-100 bg-gradient-to-br from-indigo-50 to-purple-50 p-4 dark:border-indigo-500/20 dark:from-indigo-500/10 dark:to-purple-500/10">
+
             <div className="flex items-center gap-3">
+
               <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-indigo-600 text-white">
-                <Target size={18} />
+                <Flame size={18} />
               </div>
 
               <div>
-                <p className="text-xs font-bold">
-                  Keep learning!
+                <p className="text-xs font-black">
+                  7 day streak 🔥
                 </p>
 
-                <p className="text-[11px] text-gray-400">
-                  Your streak is 7 days
+                <p className="mt-0.5 text-[10px] text-gray-500 dark:text-gray-400">
+                  Keep your momentum!
                 </p>
               </div>
-            </div>
-          </div>
 
-          {/* LOGOUT */}
+            </div>
+
+          </div>
 
           <button
             type="button"
             onClick={handleLogout}
-            className="flex w-full items-center gap-3 rounded-xl px-3 py-3 text-sm font-semibold text-red-400 transition hover:bg-red-500/10"
+            className="flex w-full items-center gap-3 rounded-xl px-3 py-3 text-sm font-semibold text-red-500 transition hover:bg-red-50 dark:hover:bg-red-500/10"
           >
             <LogOut size={19} />
             Logout
           </button>
+
         </div>
+
       </aside>
 
-      {/* =====================================
+      {/* =========================================
           MAIN AREA
-      ===================================== */}
+      ========================================= */}
 
-      <div className="relative z-10 lg:pl-[270px]">
-        {/* =====================================
-            HEADER
-        ===================================== */}
+      <div className="relative z-10 lg:pl-[275px]">
 
-        <header className="sticky top-0 z-50 border-b border-white/10 bg-[#050816]/85 backdrop-blur-xl">
+        {/* HEADER */}
+
+        <header className="sticky top-0 z-40 border-b border-white/10 bg-[#050816]/85 backdrop-blur-xl">
+
           <div className="mx-auto flex h-20 max-w-7xl items-center justify-between px-5 lg:px-8">
+
             {/* MOBILE MENU */}
 
             <button
               type="button"
-              onClick={() => setSidebarOpen(true)}
+              onClick={() =>
+                setSidebarOpen(true)
+              }
               className="flex h-10 w-10 items-center justify-center rounded-xl border border-white/10 bg-white/[0.04] text-gray-400 transition hover:bg-white/[0.08] hover:text-white lg:hidden"
             >
               <Menu size={20} />
@@ -497,9 +603,10 @@ export default function LeaderboardPage() {
               </p>
             </div>
 
-            {/* HEADER RIGHT */}
+            {/* RIGHT */}
 
             <div className="ml-auto flex items-center gap-3">
+
               <Link
                 href="/student/dashboard"
                 className="flex items-center gap-2 rounded-xl border border-white/10 bg-white/[0.04] px-4 py-2.5 text-sm font-semibold text-gray-400 transition hover:border-white/20 hover:bg-white/[0.08] hover:text-white"
@@ -512,25 +619,40 @@ export default function LeaderboardPage() {
               </Link>
 
               <div className="flex h-10 w-10 items-center justify-center rounded-full bg-gradient-to-br from-indigo-500 to-purple-600 text-sm font-bold shadow-lg shadow-indigo-600/20">
-                K
+                {firstName
+                  .charAt(0)
+                  .toUpperCase()}
               </div>
+
             </div>
+
           </div>
+
         </header>
 
-        {/* =====================================
+        {/* =========================================
             CONTENT
-        ===================================== */}
+        ========================================= */}
 
         <div className="mx-auto max-w-7xl px-5 py-10 lg:px-8">
+
           {/* HERO */}
 
           <motion.section
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.5 }}
+            initial={{
+              opacity: 0,
+              y: 20,
+            }}
+            animate={{
+              opacity: 1,
+              y: 0,
+            }}
+            transition={{
+              duration: 0.5,
+            }}
             className="text-center"
           >
+
             <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-2xl border border-yellow-500/20 bg-yellow-500/10 text-yellow-400 shadow-lg shadow-yellow-500/5">
               <Trophy size={31} />
             </div>
@@ -544,16 +666,18 @@ export default function LeaderboardPage() {
             </h1>
 
             <p className="mx-auto mt-4 max-w-xl text-sm leading-6 text-gray-500">
-              Compete with other students, earn points,
-              maintain your streak and become the quiz
-              champion.
+              Compete with other students,
+              earn points, maintain your streak
+              and become the quiz champion.
             </p>
+
           </motion.section>
 
           {/* PODIUM */}
 
           <section className="mt-12">
             <div className="grid items-end gap-5 md:grid-cols-3">
+
               <PodiumCard
                 player={topThree[1]}
                 position={2}
@@ -572,29 +696,43 @@ export default function LeaderboardPage() {
                 position={3}
                 delay={0.3}
               />
+
             </div>
           </section>
 
           {/* USER RANK */}
 
           <motion.section
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.35 }}
+            initial={{
+              opacity: 0,
+              y: 20,
+            }}
+            animate={{
+              opacity: 1,
+              y: 0,
+            }}
+            transition={{
+              delay: 0.35,
+            }}
             className="mt-8 overflow-hidden rounded-2xl border border-indigo-500/20 bg-gradient-to-r from-indigo-500/[0.10] to-purple-500/[0.06] p-5 shadow-xl shadow-indigo-950/10"
           >
+
             <div className="flex flex-col gap-5 sm:flex-row sm:items-center sm:justify-between">
+
               <div className="flex items-center gap-4">
+
                 <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-indigo-500/10 text-indigo-400">
                   <Medal size={23} />
                 </div>
 
                 <div>
+
                   <p className="text-[10px] font-bold uppercase tracking-[0.18em] text-indigo-400">
                     Your Current Rank
                   </p>
 
                   <div className="mt-1 flex items-center gap-3">
+
                     <span className="text-2xl font-black">
                       #{currentUser.rank}
                     </span>
@@ -602,18 +740,24 @@ export default function LeaderboardPage() {
                     <span className="text-sm font-semibold text-gray-300">
                       {currentUser.name}
                     </span>
+
                   </div>
+
                 </div>
+
               </div>
 
               <div className="grid grid-cols-3 gap-5 sm:flex sm:items-center sm:gap-8">
+
                 <MiniStat
                   value={currentUser.points.toLocaleString()}
                   label="Points"
                 />
 
                 <MiniStat
-                  value={String(currentUser.quizzes)}
+                  value={String(
+                    currentUser.quizzes
+                  )}
                   label="Quizzes"
                 />
 
@@ -621,15 +765,21 @@ export default function LeaderboardPage() {
                   value={`${currentUser.score}%`}
                   label="Avg Score"
                 />
+
               </div>
+
             </div>
+
           </motion.section>
 
           {/* FILTERS */}
 
           <section className="mt-10">
+
             <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
+
               <div className="relative w-full lg:max-w-sm">
+
                 <Search
                   size={18}
                   className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-600"
@@ -638,13 +788,17 @@ export default function LeaderboardPage() {
                 <input
                   type="text"
                   value={search}
-                  onChange={(e) => setSearch(e.target.value)}
+                  onChange={(e) =>
+                    setSearch(e.target.value)
+                  }
                   placeholder="Search player..."
                   className="w-full rounded-xl border border-white/10 bg-white/[0.04] py-3 pl-11 pr-4 text-sm text-white outline-none transition placeholder:text-gray-600 focus:border-indigo-500/60 focus:bg-white/[0.06]"
                 />
+
               </div>
 
               <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+
                 <FilterSelect
                   value={period}
                   options={[
@@ -660,14 +814,19 @@ export default function LeaderboardPage() {
                   options={categories}
                   onChange={setCategory}
                 />
+
               </div>
+
             </div>
+
           </section>
 
           {/* TABLE */}
 
           <section className="mt-5 overflow-hidden rounded-2xl border border-white/10 bg-white/[0.035] shadow-2xl shadow-black/10">
+
             <div className="hidden grid-cols-12 gap-4 border-b border-white/10 bg-white/[0.02] px-6 py-4 text-[10px] font-bold uppercase tracking-[0.15em] text-gray-600 md:grid">
+
               <div className="col-span-1">
                 Rank
               </div>
@@ -691,10 +850,13 @@ export default function LeaderboardPage() {
               <div className="col-span-1 text-center">
                 Streak
               </div>
+
             </div>
 
             {filteredPlayers.length === 0 ? (
+
               <div className="p-14 text-center">
+
                 <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-2xl bg-white/[0.04]">
                   <Search
                     size={28}
@@ -709,134 +871,157 @@ export default function LeaderboardPage() {
                 <p className="mt-1 text-sm text-gray-600">
                   Try another name.
                 </p>
+
               </div>
+
             ) : (
-              filteredPlayers.map((player, index) => (
-                <motion.div
-                  key={player.name}
-                  initial={{ opacity: 0, y: 8 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{
-                    delay: index * 0.03,
-                  }}
-                  className={`border-b border-white/[0.06] p-4 transition last:border-b-0 md:grid md:grid-cols-12 md:items-center md:gap-4 md:px-6 ${
-                    player.current
-                      ? "bg-indigo-500/[0.07]"
-                      : "hover:bg-white/[0.025]"
-                  }`}
-                >
-                  <div className="flex items-center gap-4 md:contents">
-                    {/* RANK */}
 
-                    <div className="flex w-8 shrink-0 items-center justify-center md:col-span-1 md:w-auto">
-                      {player.rank <= 3 ? (
-                        <RankIcon rank={player.rank} />
-                      ) : (
-                        <span className="text-sm font-bold text-gray-500">
-                          {player.rank}
-                        </span>
-                      )}
-                    </div>
+              filteredPlayers.map(
+                (player, index) => (
 
-                    {/* PLAYER */}
+                  <motion.div
+                    key={player.name}
+                    initial={{
+                      opacity: 0,
+                      y: 8,
+                    }}
+                    animate={{
+                      opacity: 1,
+                      y: 0,
+                    }}
+                    transition={{
+                      delay:
+                        index * 0.03,
+                    }}
+                    className={`border-b border-white/[0.06] p-4 transition last:border-b-0 md:grid md:grid-cols-12 md:items-center md:gap-4 md:px-6 ${
+                      player.current
+                        ? "bg-indigo-500/[0.07]"
+                        : "hover:bg-white/[0.025]"
+                    }`}
+                  >
 
-                    <div className="flex min-w-0 flex-1 items-center gap-3 md:col-span-4">
-                      <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-gradient-to-br from-indigo-500 to-purple-600 text-xs font-bold shadow-lg shadow-indigo-600/10">
-                        {player.avatar}
+                    <div className="flex items-center gap-4 md:contents">
+
+                      <div className="flex w-8 shrink-0 items-center justify-center md:col-span-1 md:w-auto">
+
+                        {player.rank <= 3 ? (
+                          <RankIcon
+                            rank={player.rank}
+                          />
+                        ) : (
+                          <span className="text-sm font-bold text-gray-500">
+                            {player.rank}
+                          </span>
+                        )}
+
                       </div>
 
-                      <div className="min-w-0">
-                        <p className="truncate text-sm font-bold">
-                          {player.name}
+                      <div className="flex min-w-0 flex-1 items-center gap-3 md:col-span-4">
 
-                          {player.current && (
-                            <span className="ml-2 rounded-full bg-indigo-500/10 px-2 py-0.5 text-[9px] font-bold text-indigo-400">
-                              YOU
-                            </span>
-                          )}
-                        </p>
+                        <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-gradient-to-br from-indigo-500 to-purple-600 text-xs font-bold shadow-lg shadow-indigo-600/10">
+                          {player.avatar}
+                        </div>
 
-                        <p className="mt-0.5 text-xs text-gray-600 md:hidden">
-                          {player.quizzes} quizzes
-                        </p>
+                        <div className="min-w-0">
+
+                          <p className="truncate text-sm font-bold">
+
+                            {player.name}
+
+                            {player.current && (
+                              <span className="ml-2 rounded-full bg-indigo-500/10 px-2 py-0.5 text-[9px] font-bold text-indigo-400">
+                                YOU
+                              </span>
+                            )}
+
+                          </p>
+
+                          <p className="mt-0.5 text-xs text-gray-600 md:hidden">
+                            {player.quizzes} quizzes
+                          </p>
+
+                        </div>
+
                       </div>
+
+                      <div className="text-right md:hidden">
+
+                        <p className="text-sm font-black">
+                          {player.points.toLocaleString()}
+                        </p>
+
+                        <p className="mt-0.5 flex items-center justify-end gap-1 text-[10px] text-gray-600">
+                          <Zap size={10} />
+                          points
+                        </p>
+
+                      </div>
+
                     </div>
 
-                    {/* MOBILE POINTS */}
-
-                    <div className="text-right md:hidden">
-                      <p className="text-sm font-black">
-                        {player.points.toLocaleString()}
-                      </p>
-
-                      <p className="mt-0.5 flex items-center justify-end gap-1 text-[10px] text-gray-600">
-                        <Zap size={10} />
-                        points
-                      </p>
+                    <div className="hidden text-center text-sm font-bold md:col-span-2 md:block">
+                      {player.points.toLocaleString()}
                     </div>
-                  </div>
 
-                  {/* DESKTOP POINTS */}
+                    <div className="hidden text-center text-sm text-gray-400 md:col-span-2 md:block">
+                      {player.quizzes}
+                    </div>
 
-                  <div className="hidden text-center text-sm font-bold md:col-span-2 md:block">
-                    {player.points.toLocaleString()}
-                  </div>
+                    <div className="hidden text-center md:col-span-2 md:block">
 
-                  {/* DESKTOP QUIZZES */}
+                      <span
+                        className={`inline-flex rounded-full px-2.5 py-1 text-xs font-bold ${
+                          player.score >= 90
+                            ? "bg-green-500/10 text-green-400"
+                            : player.score >= 75
+                            ? "bg-indigo-500/10 text-indigo-400"
+                            : "bg-yellow-500/10 text-yellow-400"
+                        }`}
+                      >
+                        {player.score}%
+                      </span>
 
-                  <div className="hidden text-center text-sm text-gray-400 md:col-span-2 md:block">
-                    {player.quizzes}
-                  </div>
+                    </div>
 
-                  {/* DESKTOP SCORE */}
+                    <div className="hidden items-center justify-center gap-1 text-sm text-orange-400 md:col-span-1 md:flex">
+                      <Flame size={15} />
+                      {player.streak}
+                    </div>
 
-                  <div className="hidden text-center md:col-span-2 md:block">
-                    <span
-                      className={`inline-flex rounded-full px-2.5 py-1 text-xs font-bold ${
-                        player.score >= 90
-                          ? "bg-green-500/10 text-green-400"
-                          : player.score >= 75
-                          ? "bg-indigo-500/10 text-indigo-400"
-                          : "bg-yellow-500/10 text-yellow-400"
-                      }`}
-                    >
-                      {player.score}%
-                    </span>
-                  </div>
+                    <div className="mt-4 grid grid-cols-3 gap-3 border-t border-white/[0.06] pt-4 md:hidden">
 
-                  {/* DESKTOP STREAK */}
+                      <MobileStat
+                        label="Score"
+                        value={`${player.score}%`}
+                      />
 
-                  <div className="hidden items-center justify-center gap-1 text-sm text-orange-400 md:col-span-1 md:flex">
-                    <Flame size={15} />
-                    {player.streak}
-                  </div>
+                      <MobileStat
+                        label="Quizzes"
+                        value={String(
+                          player.quizzes
+                        )}
+                      />
 
-                  {/* MOBILE STATS */}
+                      <MobileStat
+                        label="Streak"
+                        value={`${player.streak} 🔥`}
+                      />
 
-                  <div className="mt-4 grid grid-cols-3 gap-3 border-t border-white/[0.06] pt-4 md:hidden">
-                    <MobileStat
-                      label="Score"
-                      value={`${player.score}%`}
-                    />
+                    </div>
 
-                    <MobileStat
-                      label="Quizzes"
-                      value={String(player.quizzes)}
-                    />
+                  </motion.div>
 
-                    <MobileStat
-                      label="Streak"
-                      value={`${player.streak} 🔥`}
-                    />
-                  </div>
-                </motion.div>
-              ))
+                )
+              )
+
             )}
+
           </section>
 
-          {/* INFO CARDS */}
+          {/* INFO */}
 
           <section className="mt-8 grid gap-4 sm:grid-cols-3">
+
             <InfoCard
               icon={Trophy}
               title="Earn Points"
@@ -860,15 +1045,19 @@ export default function LeaderboardPage() {
               iconClass="text-purple-400"
               bgClass="bg-purple-500/10"
             />
+
           </section>
 
           {/* CTA */}
 
           <section className="mt-10 pb-10">
+
             <div className="relative overflow-hidden rounded-3xl border border-indigo-500/20 bg-gradient-to-r from-indigo-600/15 to-purple-600/10 p-7 text-center shadow-2xl shadow-indigo-950/10 sm:p-10">
+
               <div className="pointer-events-none absolute left-1/2 top-0 h-40 w-80 -translate-x-1/2 rounded-full bg-indigo-500/10 blur-[100px]" />
 
               <div className="relative">
+
                 <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-xl bg-indigo-500/10 text-indigo-400">
                   <Zap size={23} />
                 </div>
@@ -878,8 +1067,9 @@ export default function LeaderboardPage() {
                 </h2>
 
                 <p className="mx-auto mt-2 max-w-lg text-sm leading-6 text-gray-500">
-                  Take another quiz, earn more points and
-                  move one step closer to the #1 spot.
+                  Take another quiz, earn more
+                  points and move one step closer
+                  to the #1 spot.
                 </p>
 
                 <Link
@@ -889,11 +1079,17 @@ export default function LeaderboardPage() {
                   Start New Quiz
                   <ArrowRight size={17} />
                 </Link>
+
               </div>
+
             </div>
+
           </section>
+
         </div>
+
       </div>
+
     </main>
   );
 }
@@ -903,23 +1099,21 @@ export default function LeaderboardPage() {
 ========================================= */
 
 function SidebarItem({
-  href,
-  icon: Icon,
+  icon,
   label,
   active = false,
   onClick,
 }: {
-  href: string;
-  icon: React.ElementType;
+  icon: React.ReactNode;
   label: string;
   active?: boolean;
   onClick?: () => void;
 }) {
   return (
-    <Link
-      href={href}
+    <button
+      type="button"
       onClick={onClick}
-      className={`group flex items-center gap-3 rounded-xl px-3.5 py-3 text-sm font-semibold transition ${
+      className={`group flex w-full items-center gap-3 rounded-xl px-3.5 py-3 text-sm font-semibold transition ${
         active
           ? "bg-indigo-500/10 text-indigo-400 shadow-sm"
           : "text-gray-500 hover:bg-white/[0.04] hover:text-white"
@@ -932,7 +1126,7 @@ function SidebarItem({
             : "text-gray-600 group-hover:text-gray-300"
         }`}
       >
-        <Icon size={17} />
+        {icon}
       </div>
 
       <span>{label}</span>
@@ -940,12 +1134,12 @@ function SidebarItem({
       {active && (
         <span className="ml-auto h-1.5 w-1.5 rounded-full bg-indigo-400" />
       )}
-    </Link>
+    </button>
   );
 }
 
 /* =========================================
-   PODIUM CARD
+   PODIUM
 ========================================= */
 
 function PodiumCard({
@@ -989,8 +1183,12 @@ function PodiumCard({
       )}
 
       <div className="relative">
+
         <div className="mx-auto mb-4 flex items-center justify-center">
-          <RankIcon rank={position} large />
+          <RankIcon
+            rank={position}
+            large
+          />
         </div>
 
         <div
@@ -1012,6 +1210,7 @@ function PodiumCard({
         </p>
 
         <div className="mt-5 flex items-center justify-center gap-2">
+
           <Trophy
             size={16}
             className={
@@ -1028,16 +1227,20 @@ function PodiumCard({
           <span className="text-xs text-gray-600">
             pts
           </span>
+
         </div>
 
         <div className="mt-3 flex items-center justify-center gap-1 text-xs text-gray-500">
+
           <Flame
             size={13}
             className="text-orange-400"
           />
 
           {player.streak} day streak
+
         </div>
+
       </div>
     </motion.div>
   );
@@ -1104,7 +1307,7 @@ function MiniStat({
 }
 
 /* =========================================
-   FILTER SELECT
+   FILTER
 ========================================= */
 
 function FilterSelect({
@@ -1118,9 +1321,12 @@ function FilterSelect({
 }) {
   return (
     <div className="relative">
+
       <select
         value={value}
-        onChange={(e) => onChange(e.target.value)}
+        onChange={(e) =>
+          onChange(e.target.value)
+        }
         className="w-full appearance-none rounded-xl border border-white/10 bg-white/[0.04] py-3 pl-4 pr-10 text-sm font-semibold text-gray-300 outline-none transition focus:border-indigo-500/50 focus:bg-white/[0.06] sm:w-auto"
       >
         {options.map((option) => (
@@ -1138,6 +1344,7 @@ function FilterSelect({
         size={16}
         className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-gray-600"
       />
+
     </div>
   );
 }
@@ -1155,6 +1362,7 @@ function MobileStat({
 }) {
   return (
     <div className="text-center">
+
       <p className="text-sm font-black">
         {value}
       </p>
@@ -1162,6 +1370,7 @@ function MobileStat({
       <p className="mt-1 text-[10px] uppercase tracking-wider text-gray-600">
         {label}
       </p>
+
     </div>
   );
 }
@@ -1177,7 +1386,7 @@ function InfoCard({
   iconClass,
   bgClass,
 }: {
-  icon: React.ElementType;
+  icon: typeof Trophy;
   title: string;
   description: string;
   iconClass: string;
@@ -1185,6 +1394,7 @@ function InfoCard({
 }) {
   return (
     <div className="group rounded-2xl border border-white/10 bg-white/[0.035] p-5 transition hover:-translate-y-1 hover:border-white/15 hover:bg-white/[0.05]">
+
       <div
         className={`flex h-11 w-11 items-center justify-center rounded-xl ${bgClass} ${iconClass}`}
       >
@@ -1198,6 +1408,7 @@ function InfoCard({
       <p className="mt-1 text-xs leading-5 text-gray-600">
         {description}
       </p>
+
     </div>
   );
 }
