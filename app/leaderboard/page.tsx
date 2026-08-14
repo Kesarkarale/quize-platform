@@ -273,159 +273,207 @@ export default function LeaderboardPage() {
       ===================================== */}
 
       <aside
-        className={`fixed left-0 top-0 z-[100] flex h-screen w-[270px] flex-col border-r border-white/10 bg-[#080b18] transition-transform duration-300 lg:translate-x-0 ${
-          sidebarOpen
-            ? "translate-x-0"
-            : "-translate-x-full"
-        }`}
-      >
-        {/* SIDEBAR LOGO */}
+        className={`
+          fixed
+          left-0
+          top-0
+          z-50
+          h-screen
+          w-[270px]
+          border-r
+          border-gray-200
+          bg-white
+          px-5
+          py-6
+          transition-transform
+          duration-300
+          dark:border-white/10
+          dark:bg-[#101114]
 
-        <div className="flex h-20 shrink-0 items-center justify-between border-b border-white/10 px-5">
-          <Link
-            href="/student/dashboard"
-            onClick={closeSidebar}
-            className="group flex items-center gap-3"
+          ${
+            sidebarOpen
+              ? "translate-x-0"
+              : "-translate-x-full lg:translate-x-0"
+          }
+        `}
+      >
+
+        {/* =================================================
+            LOGO
+        ================================================= */}
+
+        <div className="flex items-center justify-between">
+
+          <button
+            type="button"
+            onClick={() => navigateTo("/student/dashboard")}
+            className="flex items-center gap-3 text-left"
           >
-            <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-gradient-to-br from-indigo-500 to-purple-600 shadow-lg shadow-indigo-600/20 transition group-hover:scale-105">
-              <Brain size={21} />
+
+            <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-gradient-to-br from-indigo-600 to-purple-600 text-white shadow-lg shadow-indigo-500/20">
+              <Sparkles size={21} />
             </div>
 
             <div>
               <h1 className="text-lg font-black tracking-tight">
                 Quiz
-                <span className="text-indigo-400">
-                  Master
+                <span className="text-indigo-600 dark:text-indigo-400">
+                  Pro
                 </span>
               </h1>
 
-              <p className="text-[8px] font-medium tracking-[0.2em] text-gray-600">
-                PLAY • LEARN • WIN
+              <p className="text-[10px] font-medium uppercase tracking-[0.2em] text-gray-400">
+                Learning Platform
               </p>
             </div>
-          </Link>
+
+          </button>
+
+          {/* MOBILE CLOSE */}
 
           <button
             type="button"
-            onClick={closeSidebar}
-            className="flex h-9 w-9 items-center justify-center rounded-lg text-gray-500 transition hover:bg-white/5 hover:text-white lg:hidden"
+            onClick={() => setSidebarOpen(false)}
+            className="rounded-xl p-2 text-gray-500 transition hover:bg-gray-100 dark:hover:bg-white/10 lg:hidden"
           >
-            <X size={19} />
+            <X size={20} />
           </button>
+
         </div>
 
-        {/* USER */}
+        {/* =================================================
+            MAIN MENU
+        ================================================= */}
 
-        <div className="mx-4 mt-5 rounded-2xl border border-white/10 bg-white/[0.035] p-3">
-          <div className="flex items-center gap-3">
-            <div className="flex h-10 w-10 items-center justify-center rounded-full bg-gradient-to-br from-indigo-500 to-purple-600 text-xs font-bold">
-              K
-            </div>
+        <div className="mt-10">
 
-            <div className="min-w-0">
-              <p className="truncate text-sm font-bold">
-                Kesar
-              </p>
-
-              <p className="mt-0.5 text-[10px] text-gray-600">
-                Student Account
-              </p>
-            </div>
-
-            <Star
-              size={15}
-              className="ml-auto text-yellow-400"
-            />
-          </div>
-        </div>
-
-        {/* NAVIGATION */}
-
-        <div className="mt-7 px-3">
-          <p className="px-3 text-[10px] font-bold uppercase tracking-[0.2em] text-gray-600">
+          <p className="mb-3 px-3 text-[11px] font-bold uppercase tracking-[0.15em] text-gray-400">
             Main Menu
           </p>
 
-          <nav className="mt-3 space-y-1.5">
+          <nav className="space-y-1">
+
+            {/* DASHBOARD */}
+
             <SidebarItem
-              href="/student/dashboard"
-              icon={LayoutDashboard}
+              icon={<Home size={19} />}
               label="Dashboard"
-              onClick={closeSidebar}
+              onClick={() =>
+                navigateTo("/student/dashboard")
+              }
             />
 
+            {/* EXPLORE QUIZZES */}
+
             <SidebarItem
-              href="/quiz"
-              icon={BookOpen}
+              icon={<BookOpen size={19} />}
               label="Explore Quizzes"
-              onClick={closeSidebar}
-            />
-
-            <SidebarItem
-              href="/student/leaderboard"
-              icon={Trophy}
-              label="Leaderboard"
               active
-              onClick={closeSidebar}
+              onClick={() =>
+                navigateTo("/quiz")
+              }
             />
 
+            {/* LEADERBOARD */}
+
             <SidebarItem
-              href="/student/results"
-              icon={BarChart3}
-              label="My Results"
-              onClick={closeSidebar}
+              icon={<Trophy size={19} />}
+              label="Leaderboard"
+              onClick={() =>
+                navigateTo("/leaderboard")
+              }
             />
+
+            {/* PERFORMANCE */}
+
+            <SidebarItem
+              icon={<BarChart3 size={19} />}
+              label="My Performance"
+              onClick={() =>
+                navigateTo("/student/performance")
+              }
+            />
+
           </nav>
+
         </div>
 
-        {/* ACCOUNT */}
+        {/* =================================================
+            ACCOUNT
+        ================================================= */}
 
-        <div className="mt-7 px-3">
-          <p className="px-3 text-[10px] font-bold uppercase tracking-[0.2em] text-gray-600">
+        <div className="mt-8">
+
+          <p className="mb-3 px-3 text-[11px] font-bold uppercase tracking-[0.15em] text-gray-400">
             Account
           </p>
 
-          <nav className="mt-3 space-y-1.5">
+          <nav className="space-y-1">
+
             <SidebarItem
-              href="/student/profile"
-              icon={User}
-              label="My Profile"
-              onClick={closeSidebar}
+              icon={<User size={19} />}
+              label="Profile"
+              onClick={() =>
+                navigateTo("/student/profile")
+              }
             />
+
+            <SidebarItem
+              icon={<Settings size={19} />}
+              label="Settings"
+              onClick={() =>
+                navigateTo("/student/settings")
+              }
+            />
+
           </nav>
+
         </div>
 
-        {/* BOTTOM */}
+        {/* =================================================
+            BOTTOM
+        ================================================= */}
 
-        <div className="mt-auto p-4">
-          <div className="mb-4 rounded-2xl border border-indigo-500/10 bg-gradient-to-br from-indigo-500/[0.08] to-purple-500/[0.04] p-4">
-            <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-indigo-500/10 text-indigo-400">
-              <GraduationCap size={18} />
+        <div className="absolute bottom-5 left-5 right-5">
+
+          {/* STREAK */}
+
+          <div className="mb-4 rounded-2xl border border-indigo-100 bg-indigo-50 p-4 dark:border-indigo-500/20 dark:bg-indigo-500/10">
+
+            <div className="flex items-center gap-3">
+
+              <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-indigo-600 text-white">
+                <Target size={18} />
+              </div>
+
+              <div>
+                <p className="text-xs font-bold">
+                  Keep learning!
+                </p>
+
+                <p className="text-[11px] text-gray-500 dark:text-gray-400">
+                  Your streak is 7 days
+                </p>
+              </div>
+
             </div>
 
-            <p className="mt-3 text-xs font-bold">
-              Keep Learning!
-            </p>
-
-            <p className="mt-1 text-[10px] leading-4 text-gray-600">
-              Complete quizzes and climb higher on the leaderboard.
-            </p>
           </div>
+
+          {/* LOGOUT */}
 
           <button
             type="button"
-            onClick={() => {
-              localStorage.removeItem("quizResult");
-              window.location.href = "/login";
-            }}
-            className="flex w-full items-center gap-3 rounded-xl px-3 py-3 text-sm font-semibold text-gray-500 transition hover:bg-red-500/10 hover:text-red-400"
+            onClick={handleLogout}
+            className="flex w-full items-center gap-3 rounded-xl px-3 py-3 text-sm font-semibold text-red-500 transition hover:bg-red-50 dark:hover:bg-red-500/10"
           >
-            <LogOut size={18} />
+            <LogOut size={19} />
             Logout
           </button>
-        </div>
-      </aside>
 
+        </div>
+
+      </aside>
       {/* =====================================
           MAIN AREA
       ===================================== */}
