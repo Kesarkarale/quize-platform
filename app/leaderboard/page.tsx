@@ -2,31 +2,36 @@
 
 import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
+
 import {
   ArrowLeft,
   ArrowRight,
   Award,
-  Brain,
-  ChevronDown,
-  Flame,
-  Medal,
-  Search,
-  Trophy,
-  Zap,
-  Crown,
-  LayoutDashboard,
-  BookOpen,
   BarChart3,
-  User,
-  LogOut,
-  Menu,
-  X,
-  Sparkles,
+  BookOpen,
+  ChevronDown,
+  Crown,
+  Flame,
   Home,
+  LogOut,
+  Medal,
+  Menu,
+  Search,
   Settings,
+  Sparkles,
+  Target,
+  Trophy,
+  User,
+  X,
+  Zap,
   Activity,
 } from "lucide-react";
+
 import { motion, AnimatePresence } from "framer-motion";
+
+/* =========================================================
+   TYPES
+========================================================= */
 
 type Player = {
   rank: number;
@@ -38,6 +43,10 @@ type Player = {
   avatar: string;
   current?: boolean;
 };
+
+/* =========================================================
+   INITIAL PLAYERS
+========================================================= */
 
 const initialPlayers: Player[] = [
   {
@@ -133,6 +142,10 @@ const initialPlayers: Player[] = [
   },
 ];
 
+/* =========================================================
+   CATEGORIES
+========================================================= */
+
 const categories = [
   "All Categories",
   "General Knowledge",
@@ -141,52 +154,67 @@ const categories = [
   "Mathematics",
 ];
 
+/* =========================================================
+   PAGE
+========================================================= */
+
 export default function LeaderboardPage() {
   const [players, setPlayers] =
     useState<Player[]>(initialPlayers);
 
-  const [period, setPeriod] = useState("This Week");
+  const [period, setPeriod] =
+    useState("This Week");
+
   const [category, setCategory] =
     useState("All Categories");
 
-  const [search, setSearch] = useState("");
-  const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [search, setSearch] =
+    useState("");
 
-  /*
-  =========================================
-  SIDEBAR
-  =========================================
-  */
+  const [sidebarOpen, setSidebarOpen] =
+    useState(false);
 
-  const navigateTo = (
-    _menu: string,
-    href: string
-  ) => {
+  /* =======================================================
+     ACTIVE SIDEBAR MENU
+  ======================================================= */
+
+  const activeMenu = "Leaderboard";
+
+  /* =======================================================
+     NAVIGATION
+  ======================================================= */
+
+  const navigateTo = (href: string) => {
     setSidebarOpen(false);
     window.location.href = href;
   };
 
+  /* =======================================================
+     LOGOUT
+  ======================================================= */
+
   const handleLogout = () => {
     localStorage.removeItem("quizResult");
-    localStorage.removeItem(
-      "leaderboardResultUpdated"
-    );
+    localStorage.removeItem("leaderboardResultUpdated");
 
     window.location.href = "/login";
   };
+
+  /* =======================================================
+     PROFILE
+  ======================================================= */
 
   const profile = {
     name: "Kesar",
     email: "student@example.com",
   };
 
-  const firstName = profile.name || "Student";
+  const firstName =
+    profile.name || "Student";
 
-  /*
-  =========================================
-  UPDATE USER SCORE
-  =========================================
-  */
+  /* =======================================================
+     UPDATE USER SCORE
+  ======================================================= */
 
   useEffect(() => {
     const savedResult =
@@ -234,11 +262,13 @@ export default function LeaderboardPage() {
 
               points:
                 player.points +
-                (typeof result.correct === "number"
+                (typeof result.correct ===
+                "number"
                   ? result.correct * 100
                   : 0),
 
-              quizzes: player.quizzes + 1,
+              quizzes:
+                player.quizzes + 1,
 
               score: result.score,
             };
@@ -270,11 +300,9 @@ export default function LeaderboardPage() {
     }
   }, []);
 
-  /*
-  =========================================
-  SEARCH
-  =========================================
-  */
+  /* =======================================================
+     SEARCH
+  ======================================================= */
 
   const filteredPlayers = useMemo(() => {
     return players.filter((player) =>
@@ -284,7 +312,15 @@ export default function LeaderboardPage() {
     );
   }, [players, search]);
 
+  /* =======================================================
+     TOP THREE
+  ======================================================= */
+
   const topThree = players.slice(0, 3);
+
+  /* =======================================================
+     CURRENT USER
+  ======================================================= */
 
   const currentUser =
     players.find(
@@ -294,17 +330,23 @@ export default function LeaderboardPage() {
   return (
     <main className="min-h-screen overflow-x-hidden bg-[#050816] text-white">
 
-      {/* BACKGROUND */}
+      {/* =====================================================
+          BACKGROUND
+      ===================================================== */}
 
       <div className="pointer-events-none fixed inset-0 overflow-hidden">
+
         <div className="absolute -left-40 -top-40 h-[450px] w-[450px] rounded-full bg-indigo-600/15 blur-[140px]" />
 
         <div className="absolute right-[-180px] top-[30%] h-[450px] w-[450px] rounded-full bg-purple-600/10 blur-[140px]" />
 
         <div className="absolute -bottom-40 -left-40 h-[450px] w-[450px] rounded-full bg-blue-600/10 blur-[140px]" />
+
       </div>
 
-      {/* MOBILE OVERLAY */}
+      {/* =====================================================
+          MOBILE OVERLAY
+      ===================================================== */}
 
       <AnimatePresence>
         {sidebarOpen && (
@@ -320,243 +362,321 @@ export default function LeaderboardPage() {
         )}
       </AnimatePresence>
 
-    {/* =========================================================
-    SIDEBAR — SAME AS STUDENT DASHBOARD
-========================================================= */}
+      {/* =====================================================
+          SIDEBAR
+          SAME AS STUDENT DASHBOARD
+      ===================================================== */}
 
-<aside
-  className={`
-    fixed
-    left-0
-    top-0
-    z-50
-    h-screen
-    w-[275px]
-    border-r
-    border-gray-200
-    bg-white
-    px-5
-    py-6
-    transition-transform
-    duration-300
-    dark:border-white/10
-    dark:bg-[#0e1013]
+      <aside
+        className={`
+          fixed
+          left-0
+          top-0
+          z-50
+          h-screen
+          w-[270px]
+          border-r
+          border-gray-200
+          bg-white
+          px-5
+          py-6
+          transition-transform
+          duration-300
+          dark:border-white/10
+          dark:bg-[#101114]
 
-    ${
-      sidebarOpen
-        ? "translate-x-0"
-        : "-translate-x-full lg:translate-x-0"
-    }
-  `}
->
-  {/* =================================================
-      LOGO
-  ================================================= */}
+          ${
+            sidebarOpen
+              ? "translate-x-0"
+              : "-translate-x-full lg:translate-x-0"
+          }
+        `}
+      >
 
-  <div className="flex items-center justify-between">
-    <button
-      type="button"
-      onClick={() =>
-        navigateTo("Dashboard", "/student/dashboard")
-      }
-      className="flex items-center gap-3 text-left"
-    >
-      <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-gradient-to-br from-indigo-600 via-indigo-600 to-purple-600 text-white shadow-lg shadow-indigo-500/20">
-        <Sparkles size={21} />
-      </div>
+        {/* =================================================
+            LOGO
+        ================================================= */}
 
-      <div>
-        <h1 className="text-lg font-black tracking-tight">
-          Quiz
-          <span className="text-indigo-600 dark:text-indigo-400">
-            Pro
-          </span>
-        </h1>
+        <div className="flex items-center justify-between">
 
-        <p className="text-[9px] font-bold uppercase tracking-[0.2em] text-gray-400">
-          Learning Platform
-        </p>
-      </div>
-    </button>
+          <button
+            type="button"
+            onClick={() =>
+              navigateTo(
+                "/student/dashboard"
+              )
+            }
+            className="flex items-center gap-3 text-left"
+          >
 
-    {/* MOBILE CLOSE */}
+            <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-gradient-to-br from-indigo-600 to-purple-600 text-white shadow-lg shadow-indigo-500/20">
+              <Sparkles size={21} />
+            </div>
 
-    <button
-      type="button"
-      onClick={() => setSidebarOpen(false)}
-      className="rounded-xl p-2 text-gray-500 hover:bg-gray-100 dark:hover:bg-white/10 lg:hidden"
-    >
-      <X size={20} />
-    </button>
-  </div>
+            <div>
 
-  {/* =================================================
-      USER MINI PROFILE
-  ================================================= */}
+              <h1 className="text-lg font-black tracking-tight">
 
-  <div className="mt-8 rounded-2xl border border-gray-100 bg-gray-50 p-3 dark:border-white/5 dark:bg-white/[0.03]">
-    <div className="flex items-center gap-3">
-      <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-br from-indigo-500 to-purple-600 text-sm font-black text-white">
-        {firstName.charAt(0).toUpperCase()}
-      </div>
+                Quiz
 
-      <div className="min-w-0">
-        <p className="truncate text-sm font-bold">
-          {profile?.name || "Student"}
-        </p>
+                <span className="text-indigo-600 dark:text-indigo-400">
+                  Pro
+                </span>
 
-        <p className="truncate text-[10px] text-gray-400">
-          {profile?.email || "student@example.com"}
-        </p>
-      </div>
-    </div>
-  </div>
+              </h1>
 
-  {/* =================================================
-      MAIN MENU
-  ================================================= */}
+              <p className="text-[10px] font-medium uppercase tracking-[0.2em] text-gray-400">
+                Learning Platform
+              </p>
 
-  <div className="mt-8">
-    <p className="mb-3 px-3 text-[10px] font-black uppercase tracking-[0.18em] text-gray-400">
-      Main Menu
-    </p>
+            </div>
 
-    <nav className="space-y-1">
-      <SidebarItem
-        icon={<Home size={19} />}
-        label="Dashboard"
-        active={activeMenu === "Dashboard"}
-        onClick={() =>
-          navigateTo("Dashboard", "/student/dashboard")
-        }
-      />
+          </button>
 
-      <SidebarItem
-        icon={<BookOpen size={19} />}
-        label="Explore Quizzes"
-        active={activeMenu === "Quizzes"}
-        onClick={() =>
-          navigateTo("Quizzes", "/quiz")
-        }
-      />
+          {/* MOBILE CLOSE */}
 
-      <SidebarItem
-        icon={<Trophy size={19} />}
-        label="Leaderboard"
-        active={activeMenu === "Leaderboard"}
-        onClick={() =>
-          navigateTo("Leaderboard", "/leaderboard")
-        }
-      />
+          <button
+            type="button"
+            onClick={() =>
+              setSidebarOpen(false)
+            }
+            className="rounded-xl p-2 text-gray-500 transition hover:bg-gray-100 dark:hover:bg-white/10 lg:hidden"
+          >
+            <X size={20} />
+          </button>
 
-      <SidebarItem
-        icon={<BarChart3 size={19} />}
-        label="My Performance"
-        active={activeMenu === "Performance"}
-        onClick={() =>
-          navigateTo(
-            "Performance",
-            "/student/performance"
-          )
-        }
-      />
-
-      <SidebarItem
-        icon={<Activity size={19} />}
-        label="Quiz History"
-        active={activeMenu === "History"}
-        onClick={() =>
-          navigateTo(
-            "History",
-            "/student/history"
-          )
-        }
-      />
-    </nav>
-  </div>
-
-  {/* =================================================
-      ACCOUNT
-  ================================================= */}
-
-  <div className="mt-7">
-    <p className="mb-3 px-3 text-[10px] font-black uppercase tracking-[0.18em] text-gray-400">
-      Account
-    </p>
-
-    <nav className="space-y-1">
-      <SidebarItem
-        icon={<User size={19} />}
-        label="Profile"
-        active={activeMenu === "Profile"}
-        onClick={() =>
-          navigateTo(
-            "Profile",
-            "/student/profile"
-          )
-        }
-      />
-
-      <SidebarItem
-        icon={<Settings size={19} />}
-        label="Settings"
-        active={activeMenu === "Settings"}
-        onClick={() =>
-          navigateTo(
-            "Settings",
-            "/student/settings"
-          )
-        }
-      />
-    </nav>
-  </div>
-
-  {/* =================================================
-      BOTTOM
-  ================================================= */}
-
-  <div className="absolute bottom-5 left-5 right-5">
-
-    {/* STREAK */}
-
-    <div className="mb-4 overflow-hidden rounded-2xl border border-indigo-100 bg-gradient-to-br from-indigo-50 to-purple-50 p-4 dark:border-indigo-500/20 dark:from-indigo-500/10 dark:to-purple-500/10">
-      <div className="flex items-center gap-3">
-        <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-indigo-600 text-white">
-          <Flame size={18} />
         </div>
 
-        <div>
-          <p className="text-xs font-black">
-            7 day streak 🔥
-          </p>
+        {/* =================================================
+            USER MINI PROFILE
+        ================================================= */}
 
-          <p className="mt-0.5 text-[10px] text-gray-500 dark:text-gray-400">
-            Keep your momentum!
-          </p>
+        <div className="mt-8 rounded-2xl border border-gray-100 bg-gray-50 p-3 dark:border-white/5 dark:bg-white/[0.03]">
+
+          <div className="flex items-center gap-3">
+
+            <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-br from-indigo-500 to-purple-600 text-sm font-black text-white">
+              {firstName
+                .charAt(0)
+                .toUpperCase()}
+            </div>
+
+            <div className="min-w-0">
+
+              <p className="truncate text-sm font-bold">
+                {profile?.name ||
+                  "Student"}
+              </p>
+
+              <p className="truncate text-[10px] text-gray-400">
+                {profile?.email ||
+                  "student@example.com"}
+              </p>
+
+            </div>
+
+          </div>
+
         </div>
-      </div>
-    </div>
 
-    {/* LOGOUT */}
+        {/* =================================================
+            MAIN MENU
+        ================================================= */}
 
-    <button
-      type="button"
-      onClick={handleLogout}
-      className="flex w-full items-center gap-3 rounded-xl px-3 py-3 text-sm font-semibold text-red-500 transition hover:bg-red-50 dark:hover:bg-red-500/10"
-    >
-      <LogOut size={19} />
-      Logout
-    </button>
-  </div>
-</aside>
+        <div className="mt-8">
 
-      {/* =========================================
+          <p className="mb-3 px-3 text-[10px] font-black uppercase tracking-[0.18em] text-gray-400">
+            Main Menu
+          </p>
+
+          <nav className="space-y-1">
+
+            {/* DASHBOARD */}
+
+            <SidebarItem
+              icon={<Home size={19} />}
+              label="Dashboard"
+              active={
+                activeMenu ===
+                "Dashboard"
+              }
+              onClick={() =>
+                navigateTo(
+                  "/student/dashboard"
+                )
+              }
+            />
+
+            {/* EXPLORE QUIZZES */}
+
+            <SidebarItem
+              icon={<BookOpen size={19} />}
+              label="Explore Quizzes"
+              active={
+                activeMenu ===
+                "Quizzes"
+              }
+              onClick={() =>
+                navigateTo("/quiz")
+              }
+            />
+
+            {/* LEADERBOARD */}
+
+            <SidebarItem
+              icon={<Trophy size={19} />}
+              label="Leaderboard"
+              active={
+                activeMenu ===
+                "Leaderboard"
+              }
+              onClick={() =>
+                navigateTo(
+                  "/leaderboard"
+                )
+              }
+            />
+
+            {/* PERFORMANCE */}
+
+            <SidebarItem
+              icon={<BarChart3 size={19} />}
+              label="My Performance"
+              active={
+                activeMenu ===
+                "Performance"
+              }
+              onClick={() =>
+                navigateTo(
+                  "/student/performance"
+                )
+              }
+            />
+
+            {/* QUIZ HISTORY */}
+
+            <SidebarItem
+              icon={<Activity size={19} />}
+              label="Quiz History"
+              active={
+                activeMenu ===
+                "History"
+              }
+              onClick={() =>
+                navigateTo(
+                  "/student/history"
+                )
+              }
+            />
+
+          </nav>
+
+        </div>
+
+        {/* =================================================
+            ACCOUNT
+        ================================================= */}
+
+        <div className="mt-7">
+
+          <p className="mb-3 px-3 text-[10px] font-black uppercase tracking-[0.18em] text-gray-400">
+            Account
+          </p>
+
+          <nav className="space-y-1">
+
+            {/* PROFILE */}
+
+            <SidebarItem
+              icon={<User size={19} />}
+              label="Profile"
+              active={
+                activeMenu ===
+                "Profile"
+              }
+              onClick={() =>
+                navigateTo(
+                  "/student/profile"
+                )
+              }
+            />
+
+            {/* SETTINGS */}
+
+            <SidebarItem
+              icon={<Settings size={19} />}
+              label="Settings"
+              active={
+                activeMenu ===
+                "Settings"
+              }
+              onClick={() =>
+                navigateTo(
+                  "/student/settings"
+                )
+              }
+            />
+
+          </nav>
+
+        </div>
+
+        {/* =================================================
+            BOTTOM
+        ================================================= */}
+
+        <div className="absolute bottom-5 left-5 right-5">
+
+          {/* STREAK */}
+
+          <div className="mb-4 rounded-2xl border border-indigo-100 bg-indigo-50 p-4 dark:border-indigo-500/20 dark:bg-indigo-500/10">
+
+            <div className="flex items-center gap-3">
+
+              <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-indigo-600 text-white">
+                <Target size={18} />
+              </div>
+
+              <div>
+
+                <p className="text-xs font-bold">
+                  Keep learning!
+                </p>
+
+                <p className="text-[11px] text-gray-500 dark:text-gray-400">
+                  Your streak is 7 days
+                </p>
+
+              </div>
+
+            </div>
+
+          </div>
+
+          {/* LOGOUT */}
+
+          <button
+            type="button"
+            onClick={handleLogout}
+            className="flex w-full items-center gap-3 rounded-xl px-3 py-3 text-sm font-semibold text-red-500 transition hover:bg-red-50 dark:hover:bg-red-500/10"
+          >
+            <LogOut size={19} />
+            Logout
+          </button>
+
+        </div>
+
+      </aside>
+
+      {/* =====================================================
           MAIN AREA
-      ========================================= */}
+      ===================================================== */}
 
-      <div className="relative z-10 lg:pl-[275px]">
+      <div className="relative z-10 lg:pl-[270px]">
 
-        {/* HEADER */}
+        {/* ===================================================
+            HEADER
+        =================================================== */}
 
         <header className="sticky top-0 z-40 border-b border-white/10 bg-[#050816]/85 backdrop-blur-xl">
 
@@ -577,6 +697,7 @@ export default function LeaderboardPage() {
             {/* DESKTOP TITLE */}
 
             <div className="hidden lg:block">
+
               <p className="text-[10px] font-bold uppercase tracking-[0.2em] text-indigo-400">
                 Student Portal
               </p>
@@ -584,6 +705,7 @@ export default function LeaderboardPage() {
               <p className="mt-1 text-sm font-semibold text-gray-400">
                 Leaderboard
               </p>
+
             </div>
 
             {/* RIGHT */}
@@ -594,11 +716,13 @@ export default function LeaderboardPage() {
                 href="/student/dashboard"
                 className="flex items-center gap-2 rounded-xl border border-white/10 bg-white/[0.04] px-4 py-2.5 text-sm font-semibold text-gray-400 transition hover:border-white/20 hover:bg-white/[0.08] hover:text-white"
               >
+
                 <ArrowLeft size={16} />
 
                 <span className="hidden sm:block">
                   Dashboard
                 </span>
+
               </Link>
 
               <div className="flex h-10 w-10 items-center justify-center rounded-full bg-gradient-to-br from-indigo-500 to-purple-600 text-sm font-bold shadow-lg shadow-indigo-600/20">
@@ -613,13 +737,15 @@ export default function LeaderboardPage() {
 
         </header>
 
-        {/* =========================================
+        {/* ===================================================
             CONTENT
-        ========================================= */}
+        =================================================== */}
 
         <div className="mx-auto max-w-7xl px-5 py-10 lg:px-8">
 
-          {/* HERO */}
+          {/* =================================================
+              HERO
+          ================================================= */}
 
           <motion.section
             initial={{
@@ -650,15 +776,19 @@ export default function LeaderboardPage() {
 
             <p className="mx-auto mt-4 max-w-xl text-sm leading-6 text-gray-500">
               Compete with other students,
-              earn points, maintain your streak
-              and become the quiz champion.
+              earn points, maintain your
+              streak and become the quiz
+              champion.
             </p>
 
           </motion.section>
 
-          {/* PODIUM */}
+          {/* =================================================
+              PODIUM
+          ================================================= */}
 
           <section className="mt-12">
+
             <div className="grid items-end gap-5 md:grid-cols-3">
 
               <PodiumCard
@@ -681,9 +811,12 @@ export default function LeaderboardPage() {
               />
 
             </div>
+
           </section>
 
-          {/* USER RANK */}
+          {/* =================================================
+              USER RANK
+          ================================================= */}
 
           <motion.section
             initial={{
@@ -755,7 +888,9 @@ export default function LeaderboardPage() {
 
           </motion.section>
 
-          {/* FILTERS */}
+          {/* =================================================
+              FILTERS
+          ================================================= */}
 
           <section className="mt-10">
 
@@ -804,9 +939,13 @@ export default function LeaderboardPage() {
 
           </section>
 
-          {/* TABLE */}
+          {/* =================================================
+              TABLE
+          ================================================= */}
 
           <section className="mt-5 overflow-hidden rounded-2xl border border-white/10 bg-white/[0.035] shadow-2xl shadow-black/10">
+
+            {/* TABLE HEADER */}
 
             <div className="hidden grid-cols-12 gap-4 border-b border-white/10 bg-white/[0.02] px-6 py-4 text-[10px] font-bold uppercase tracking-[0.15em] text-gray-600 md:grid">
 
@@ -836,15 +975,19 @@ export default function LeaderboardPage() {
 
             </div>
 
+            {/* EMPTY */}
+
             {filteredPlayers.length === 0 ? (
 
               <div className="p-14 text-center">
 
                 <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-2xl bg-white/[0.04]">
+
                   <Search
                     size={28}
                     className="text-gray-700"
                   />
+
                 </div>
 
                 <p className="mt-4 font-semibold text-gray-400">
@@ -885,19 +1028,27 @@ export default function LeaderboardPage() {
 
                     <div className="flex items-center gap-4 md:contents">
 
+                      {/* RANK */}
+
                       <div className="flex w-8 shrink-0 items-center justify-center md:col-span-1 md:w-auto">
 
                         {player.rank <= 3 ? (
+
                           <RankIcon
                             rank={player.rank}
                           />
+
                         ) : (
+
                           <span className="text-sm font-bold text-gray-500">
                             {player.rank}
                           </span>
+
                         )}
 
                       </div>
+
+                      {/* PLAYER */}
 
                       <div className="flex min-w-0 flex-1 items-center gap-3 md:col-span-4">
 
@@ -912,9 +1063,11 @@ export default function LeaderboardPage() {
                             {player.name}
 
                             {player.current && (
+
                               <span className="ml-2 rounded-full bg-indigo-500/10 px-2 py-0.5 text-[9px] font-bold text-indigo-400">
                                 YOU
                               </span>
+
                             )}
 
                           </p>
@@ -927,6 +1080,8 @@ export default function LeaderboardPage() {
 
                       </div>
 
+                      {/* MOBILE POINTS */}
+
                       <div className="text-right md:hidden">
 
                         <p className="text-sm font-black">
@@ -934,21 +1089,30 @@ export default function LeaderboardPage() {
                         </p>
 
                         <p className="mt-0.5 flex items-center justify-end gap-1 text-[10px] text-gray-600">
+
                           <Zap size={10} />
+
                           points
+
                         </p>
 
                       </div>
 
                     </div>
 
+                    {/* POINTS */}
+
                     <div className="hidden text-center text-sm font-bold md:col-span-2 md:block">
                       {player.points.toLocaleString()}
                     </div>
 
+                    {/* QUIZZES */}
+
                     <div className="hidden text-center text-sm text-gray-400 md:col-span-2 md:block">
                       {player.quizzes}
                     </div>
+
+                    {/* SCORE */}
 
                     <div className="hidden text-center md:col-span-2 md:block">
 
@@ -966,10 +1130,17 @@ export default function LeaderboardPage() {
 
                     </div>
 
+                    {/* STREAK */}
+
                     <div className="hidden items-center justify-center gap-1 text-sm text-orange-400 md:col-span-1 md:flex">
+
                       <Flame size={15} />
+
                       {player.streak}
+
                     </div>
+
+                    {/* MOBILE STATS */}
 
                     <div className="mt-4 grid grid-cols-3 gap-3 border-t border-white/[0.06] pt-4 md:hidden">
 
@@ -1001,7 +1172,9 @@ export default function LeaderboardPage() {
 
           </section>
 
-          {/* INFO */}
+          {/* =================================================
+              INFO
+          ================================================= */}
 
           <section className="mt-8 grid gap-4 sm:grid-cols-3">
 
@@ -1031,7 +1204,9 @@ export default function LeaderboardPage() {
 
           </section>
 
-          {/* CTA */}
+          {/* =================================================
+              CTA
+          ================================================= */}
 
           <section className="mt-10 pb-10">
 
@@ -1060,7 +1235,9 @@ export default function LeaderboardPage() {
                   className="mt-6 inline-flex items-center gap-2 rounded-xl bg-gradient-to-r from-indigo-600 to-purple-600 px-6 py-3.5 text-sm font-bold shadow-lg shadow-indigo-600/20 transition hover:-translate-y-0.5 hover:shadow-indigo-600/30"
                 >
                   Start New Quiz
+
                   <ArrowRight size={17} />
+
                 </Link>
 
               </div>
@@ -1077,9 +1254,9 @@ export default function LeaderboardPage() {
   );
 }
 
-/* =========================================
+/* =========================================================
    SIDEBAR ITEM
-========================================= */
+========================================================= */
 
 function SidebarItem({
   icon,
@@ -1099,31 +1276,35 @@ function SidebarItem({
       className={`group flex w-full items-center gap-3 rounded-xl px-3.5 py-3 text-sm font-semibold transition ${
         active
           ? "bg-indigo-500/10 text-indigo-400 shadow-sm"
-          : "text-gray-500 hover:bg-white/[0.04] hover:text-white"
+          : "text-gray-500 hover:bg-gray-100 hover:text-gray-900 dark:text-gray-500 dark:hover:bg-white/[0.04] dark:hover:text-white"
       }`}
     >
+
       <div
         className={`flex h-8 w-8 items-center justify-center rounded-lg transition ${
           active
             ? "bg-indigo-500/10 text-indigo-400"
-            : "text-gray-600 group-hover:text-gray-300"
+            : "text-gray-600 group-hover:text-gray-900 dark:text-gray-600 dark:group-hover:text-gray-300"
         }`}
       >
         {icon}
       </div>
 
-      <span>{label}</span>
+      <span>
+        {label}
+      </span>
 
       {active && (
         <span className="ml-auto h-1.5 w-1.5 rounded-full bg-indigo-400" />
       )}
+
     </button>
   );
 }
 
-/* =========================================
-   PODIUM
-========================================= */
+/* =========================================================
+   PODIUM CARD
+========================================================= */
 
 function PodiumCard({
   player,
@@ -1158,20 +1339,26 @@ function PodiumCard({
           : "border-orange-500/10 bg-white/[0.035]"
       }`}
     >
+
       {first && (
         <div className="absolute right-4 top-4 flex items-center gap-1 rounded-full bg-yellow-500/10 px-2.5 py-1 text-[9px] font-bold uppercase tracking-wider text-yellow-400">
+
           <Crown size={11} />
+
           Champion
+
         </div>
       )}
 
       <div className="relative">
 
         <div className="mx-auto mb-4 flex items-center justify-center">
+
           <RankIcon
             rank={position}
             large
           />
+
         </div>
 
         <div
@@ -1225,13 +1412,14 @@ function PodiumCard({
         </div>
 
       </div>
+
     </motion.div>
   );
 }
 
-/* =========================================
+/* =========================================================
    RANK ICON
-========================================= */
+========================================================= */
 
 function RankIcon({
   rank,
@@ -1265,9 +1453,9 @@ function RankIcon({
   );
 }
 
-/* =========================================
+/* =========================================================
    MINI STAT
-========================================= */
+========================================================= */
 
 function MiniStat({
   value,
@@ -1278,6 +1466,7 @@ function MiniStat({
 }) {
   return (
     <div className="text-center sm:text-right">
+
       <p className="text-base font-black sm:text-lg">
         {value}
       </p>
@@ -1285,13 +1474,14 @@ function MiniStat({
       <p className="mt-0.5 text-[10px] uppercase tracking-wider text-gray-600">
         {label}
       </p>
+
     </div>
   );
 }
 
-/* =========================================
-   FILTER
-========================================= */
+/* =========================================================
+   FILTER SELECT
+========================================================= */
 
 function FilterSelect({
   value,
@@ -1312,6 +1502,7 @@ function FilterSelect({
         }
         className="w-full appearance-none rounded-xl border border-white/10 bg-white/[0.04] py-3 pl-4 pr-10 text-sm font-semibold text-gray-300 outline-none transition focus:border-indigo-500/50 focus:bg-white/[0.06] sm:w-auto"
       >
+
         {options.map((option) => (
           <option
             key={option}
@@ -1321,6 +1512,7 @@ function FilterSelect({
             {option}
           </option>
         ))}
+
       </select>
 
       <ChevronDown
@@ -1332,9 +1524,9 @@ function FilterSelect({
   );
 }
 
-/* =========================================
+/* =========================================================
    MOBILE STAT
-========================================= */
+========================================================= */
 
 function MobileStat({
   label,
@@ -1358,9 +1550,9 @@ function MobileStat({
   );
 }
 
-/* =========================================
+/* =========================================================
    INFO CARD
-========================================= */
+========================================================= */
 
 function InfoCard({
   icon: Icon,
