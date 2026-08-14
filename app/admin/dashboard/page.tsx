@@ -2,52 +2,38 @@
 
 import Link from "next/link";
 import { useEffect, useMemo, useState } from "react";
-import ThemeToggle from "@/components/theme-toggle";
 import {
-  LayoutDashboard,
-  Brain,
-  Users,
-  Trophy,
-  BarChart3,
-  Settings,
-  LogOut,
-  Plus,
-  Search,
-  MoreHorizontal,
-  CheckCircle2,
-  Clock3,
-  Menu,
-  X,
-  FileQuestion,
-  TrendingUp,
-  UserCheck,
-  Target,
-  ClipboardList,
-  ChevronRight,
   Activity,
-  BookOpen,
-  ShieldCheck,
-  UserX,
+  BarChart3,
+  Brain,
+  CheckCircle2,
+  ChevronRight,
+  Clock3,
+  FileQuestion,
+  LayoutDashboard,
+  LogOut,
+  Menu,
+  Plus,
   RefreshCw,
+  Search,
+  Settings,
+  ShieldCheck,
+  Target,
+  Trophy,
+  UserCheck,
+  Users,
+  UserX,
+  X,
+  BookOpen,
+  ClipboardList,
 } from "lucide-react";
 
+import ThemeToggle from "@/components/theme-toggle";
 import { createClient } from "@/lib/supabase/client";
 
-type Quiz = {
-  id: string;
-  title: string;
-  description: string | null;
-  status: "DRAFT" | "PUBLISHED" | "UNPUBLISHED";
-  duration_minutes: number;
-  total_marks: number;
-  created_at: string;
-  category_id: string | null;
-};
-
-type Category = {
-  id: string;
-  name: string;
-};
+/* =========================================================
+   TYPES
+========================================================= */
 
 type Profile = {
   id: string;
@@ -58,15 +44,31 @@ type Profile = {
   created_at: string;
 };
 
+type Quiz = {
+  id: string;
+  title: string;
+  description: string | null;
+  status: "DRAFT" | "PUBLISHED" | "UNPUBLISHED";
+  duration_minutes: number;
+  total_marks: number;
+  category_id: string | null;
+  created_at: string;
+};
+
+type Category = {
+  id: string;
+  name: string;
+};
+
 type Attempt = {
   id: string;
+  student_id: string;
+  quiz_id: string;
   score: number;
   total_marks: number;
   percentage: number;
   status: "IN_PROGRESS" | "COMPLETED" | "ABANDONED";
   created_at: string;
-  student_id: string;
-  quiz_id: string;
 };
 
 type DashboardData = {
@@ -77,10 +79,14 @@ type DashboardData = {
   questionCount: number;
 };
 
+/* =========================================================
+   NAVIGATION
+========================================================= */
+
 const navItems = [
   {
     title: "Dashboard",
-    href: "/admin",
+    href: "/admin/dashboard",
     icon: LayoutDashboard,
   },
   {
@@ -130,10 +136,14 @@ const navItems = [
   },
 ];
 
+/* =========================================================
+   HELPERS
+========================================================= */
+
 const formatNumber = (value: number) =>
   new Intl.NumberFormat("en-IN").format(value);
 
-const formatTimeAgo = (date: string) => {
+function timeAgo(date: string) {
   const diff = Date.now() - new Date(date).getTime();
 
   const minutes = Math.floor(diff / 60000);
@@ -147,23 +157,22 @@ const formatTimeAgo = (date: string) => {
 
   const days = Math.floor(hours / 24);
 
-  return `${days} day${days > 1 ? "s" : ""} ago`;
-};
+  return `${days} day${days !== 1 ? "s" : ""} ago`;
+}
 
-export default function AdminPage() {
+/* =========================================================
+   PAGE
+========================================================= */
+
+export default function AdminDashboardPage() {
   const supabase = createClient();
 
   const [sidebarOpen, setSidebarOpen] = useState(false);
-
-  const [searchQuery, setSearchQuery] = useState("");
-
   const [loading, setLoading] = useState(true);
-
   const [refreshing, setRefreshing] = useState(false);
-
   const [error, setError] = useState("");
-
   const [adminName, setAdminName] = useState("Admin");
+  const [search, setSearch] = useState("");
 
   const [data, setData] = useState<DashboardData>({
     students: [],
@@ -173,11 +182,15 @@ export default function AdminPage() {
     questionCount: 0,
   });
 
-  const loadDashboard = async (showRefresh = false) => {
+  /* =======================================================
+     LOAD DASHBOARD
+  ======================================================= */
+
+  const loadDashboard = async (refresh = false) => {
     try {
       setError("");
 
-      if (showRefresh) {
+      if (refresh) {
         setRefreshing(true);
       } else {
         setLoading(true);
@@ -185,31 +198,29 @@ export default function AdminPage() {
 
       const {
         data: { user },
-        error: userError,
+        error: authError,
       } = await supabase.auth.getUser();
 
-      if (userError) {
-        throw userError;
-      }
+      if (authError) throw authError;
 
       if (!user) {
         window.location.href = "/login";
         return;
       }
 
-      const { data: profile, error: profileError } = await supabase
-        .from("profiles")
-        .select("id, name, email, role, status")
-        .eq("id", user.id)
-        .maybeSingle();
+      const { data: profile, error: profileError } =
+        await supabase
+          .from("profiles")
+          .select(
+            "id, name, email, role, status, created_at"
+          )
+          .eq("id", user.id)
+          .maybeSingle();
 
-      if (profileError) {
-        throw profileError;
-      }
+      if (profileError) throw profileError;
 
       if (!profile) {
-        setError("Admin profile was not found.");
-        return;
+        throw new Error("Admin profile was not found.");
       }
 
       if (profile.role !== "ADMIN") {
@@ -226,64 +237,74 @@ export default function AdminPage() {
       setAdminName(profile.name || "Admin");
 
       const [
-        studentsResult,
-        quizzesResult,
-        categoriesResult,
-        attemptsResult,
-        questionsResult,
+        students,
+        quizzes,
+        categories,
+        attempts,
+        questions,
       ] = await Promise.all([
         supabase
           .from("profiles")
           .select(
-            "id, name, email, role, status, created_at",
-            { count: "exact" }
+            "id, name, email, role, status, created_at"
           )
           .eq("role", "STUDENT")
-          .order("created_at", { ascending: false }),
+          .order("created_at", {
+            ascending: false,
+          }),
 
         supabase
           .from("quizzes")
           .select(
-            "id, title, description, status, duration_minutes, total_marks, created_at, category_id"
+            "id, title, description, status, duration_minutes, total_marks, category_id, created_at"
           )
-          .order("created_at", { ascending: false }),
+          .order("created_at", {
+            ascending: false,
+          }),
 
         supabase
           .from("categories")
           .select("id, name")
-          .order("name", { ascending: true }),
+          .order("name"),
 
         supabase
           .from("quiz_attempts")
           .select(
-            "id, score, total_marks, percentage, status, created_at, student_id, quiz_id"
+            "id, student_id, quiz_id, score, total_marks, percentage, status, created_at"
           )
-          .order("created_at", { ascending: false }),
+          .order("created_at", {
+            ascending: false,
+          }),
 
         supabase
           .from("questions")
-          .select("id", { count: "exact", head: true }),
+          .select("id", {
+            count: "exact",
+            head: true,
+          }),
       ]);
 
-      if (studentsResult.error) throw studentsResult.error;
-      if (quizzesResult.error) throw quizzesResult.error;
-      if (categoriesResult.error) throw categoriesResult.error;
-      if (attemptsResult.error) throw attemptsResult.error;
-      if (questionsResult.error) throw questionsResult.error;
+      if (students.error) throw students.error;
+      if (quizzes.error) throw quizzes.error;
+      if (categories.error) throw categories.error;
+      if (attempts.error) throw attempts.error;
+      if (questions.error) throw questions.error;
 
       setData({
-        students: (studentsResult.data || []) as Profile[],
-        quizzes: (quizzesResult.data || []) as Quiz[],
-        categories: (categoriesResult.data || []) as Category[],
-        attempts: (attemptsResult.data || []) as Attempt[],
-        questionCount: questionsResult.count || 0,
+        students: (students.data || []) as Profile[],
+        quizzes: (quizzes.data || []) as Quiz[],
+        categories: (categories.data ||
+          []) as Category[],
+        attempts: (attempts.data ||
+          []) as Attempt[],
+        questionCount: questions.count || 0,
       });
     } catch (err: any) {
-      console.error("Admin dashboard error:", err);
+      console.error(err);
 
       setError(
         err?.message ||
-          "Something went wrong while loading the admin dashboard."
+          "Unable to load admin dashboard."
       );
     } finally {
       setLoading(false);
@@ -295,6 +316,10 @@ export default function AdminPage() {
     loadDashboard();
   }, []);
 
+  /* =======================================================
+     STATS
+  ======================================================= */
+
   const stats = useMemo(() => {
     const totalStudents = data.students.length;
 
@@ -304,67 +329,61 @@ export default function AdminPage() {
 
     const totalQuizzes = data.quizzes.length;
 
-    const publishedQuizzes = data.quizzes.filter(
-      (quiz) => quiz.status === "PUBLISHED"
-    ).length;
+    const publishedQuizzes =
+      data.quizzes.filter(
+        (quiz) => quiz.status === "PUBLISHED"
+      ).length;
 
-    const draftQuizzes = data.quizzes.filter(
-      (quiz) => quiz.status === "DRAFT"
-    ).length;
+    const draftQuizzes =
+      data.quizzes.filter(
+        (quiz) => quiz.status === "DRAFT"
+      ).length;
 
-    const unpublishedQuizzes = data.quizzes.filter(
-      (quiz) => quiz.status === "UNPUBLISHED"
-    ).length;
-
-    const completedAttempts = data.attempts.filter(
-      (attempt) => attempt.status === "COMPLETED"
-    );
+    const completedAttempts =
+      data.attempts.filter(
+        (attempt) =>
+          attempt.status === "COMPLETED"
+      );
 
     const totalAttempts = data.attempts.length;
 
     const averageScore =
       completedAttempts.length > 0
         ? completedAttempts.reduce(
-            (sum, attempt) => sum + Number(attempt.percentage || 0),
+            (sum, item) =>
+              sum + Number(item.percentage || 0),
             0
           ) / completedAttempts.length
         : 0;
 
-    const passedAttempts = completedAttempts.filter(
-      (attempt) => Number(attempt.percentage || 0) >= 40
-    ).length;
+    const passed =
+      completedAttempts.filter(
+        (attempt) =>
+          Number(attempt.percentage || 0) >= 40
+      ).length;
 
     const passRate =
       completedAttempts.length > 0
-        ? (passedAttempts / completedAttempts.length) * 100
+        ? (passed / completedAttempts.length) * 100
         : 0;
 
     return {
       totalStudents,
       activeStudents,
+      inactiveStudents:
+        totalStudents - activeStudents,
       totalQuizzes,
       publishedQuizzes,
       draftQuizzes,
-      unpublishedQuizzes,
       totalAttempts,
       averageScore,
       passRate,
     };
   }, [data]);
 
-  const filteredQuizzes = useMemo(() => {
-    const query = searchQuery.trim().toLowerCase();
-
-    if (!query) {
-      return data.quizzes.slice(0, 8);
-    }
-
-    return data.quizzes
-      .filter((quiz) =>
-        quiz.title.toLowerCase().includes(query)
-      )
-      .slice(0, 8);
-  }, [data.quizzes, searchQuery]);
+  /* =======================================================
+     MAPS
+  ======================================================= */
 
   const categoryMap = useMemo(() => {
     const map = new Map<string, string>();
@@ -375,8 +394,6 @@ export default function AdminPage() {
 
     return map;
   }, [data.categories]);
-
-  const recentAttempts = data.attempts.slice(0, 5);
 
   const studentMap = useMemo(() => {
     const map = new Map<string, Profile>();
@@ -398,22 +415,42 @@ export default function AdminPage() {
     return map;
   }, [data.quizzes]);
 
-  const activityData = useMemo(() => {
-    const days = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];
+  /* =======================================================
+     FILTER
+  ======================================================= */
 
-    const now = new Date();
+  const filteredQuizzes = useMemo(() => {
+    const query = search.trim().toLowerCase();
 
-    return days.map((day, index) => {
-      const date = new Date(now);
+    if (!query) {
+      return data.quizzes.slice(0, 6);
+    }
 
-      const currentDay = date.getDay();
+    return data.quizzes
+      .filter((quiz) =>
+        quiz.title
+          .toLowerCase()
+          .includes(query)
+      )
+      .slice(0, 6);
+  }, [data.quizzes, search]);
 
-      const mondayOffset =
-        currentDay === 0 ? -6 : 1 - currentDay;
+  /* =======================================================
+     WEEK ACTIVITY
+  ======================================================= */
 
-      date.setDate(
-        now.getDate() + mondayOffset + index
-      );
+  const weeklyActivity = useMemo(() => {
+    const result: {
+      label: string;
+      count: number;
+    }[] = [];
+
+    const today = new Date();
+
+    for (let i = 6; i >= 0; i--) {
+      const date = new Date(today);
+
+      date.setDate(today.getDate() - i);
 
       const start = new Date(date);
       start.setHours(0, 0, 0, 0);
@@ -421,198 +458,249 @@ export default function AdminPage() {
       const end = new Date(date);
       end.setHours(23, 59, 59, 999);
 
-      const count = data.attempts.filter((attempt) => {
-        const attemptDate = new Date(attempt.created_at);
+      const count = data.attempts.filter(
+        (attempt) => {
+          const created = new Date(
+            attempt.created_at
+          );
 
-        return (
-          attemptDate >= start &&
-          attemptDate <= end
-        );
-      }).length;
+          return (
+            created >= start &&
+            created <= end
+          );
+        }
+      ).length;
 
-      return {
-        day,
+      result.push({
+        label: date.toLocaleDateString(
+          "en-US",
+          {
+            weekday: "short",
+          }
+        ),
         count,
-      };
-    });
+      });
+    }
+
+    return result;
   }, [data.attempts]);
 
   const maxActivity = Math.max(
-    ...activityData.map((item) => item.count),
+    ...weeklyActivity.map(
+      (item) => item.count
+    ),
     1
   );
 
+  /* =======================================================
+     LOGOUT
+  ======================================================= */
+
   const handleLogout = async () => {
     await supabase.auth.signOut();
-
     window.location.href = "/login";
   };
 
+  /* =======================================================
+     UI
+  ======================================================= */
+
   return (
-    <main className="min-h-screen bg-[#f7f8fc] text-gray-900">
+    <div className="min-h-screen bg-[#f6f7fb] text-gray-900 dark:bg-[#050816] dark:text-gray-100">
       {/* MOBILE HEADER */}
-      <header className="sticky top-0 z-40 flex h-16 items-center justify-between border-b border-gray-200 bg-white px-5 lg:hidden">
+
+      <header className="sticky top-0 z-40 flex h-16 items-center justify-between border-b border-gray-200 bg-white/95 px-5 backdrop-blur dark:border-white/10 dark:bg-[#080b18]/95 lg:hidden">
         <button
           onClick={() => setSidebarOpen(true)}
-          className="rounded-xl p-2 hover:bg-gray-100"
-          aria-label="Open menu"
+          className="rounded-xl p-2 text-gray-600 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-white/10"
         >
           <Menu size={22} />
         </button>
 
         <div className="flex items-center gap-2">
-            <ThemeToggle />
           <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-indigo-600 text-white">
             <Brain size={18} />
           </div>
 
-          <span className="font-extrabold">
-            Quiz<span className="text-indigo-600">Master</span>
+          <span className="font-black">
+            Quiz<span className="text-indigo-500">
+              Master
+            </span>
           </span>
         </div>
 
-        <div className="flex h-9 w-9 items-center justify-center rounded-full bg-indigo-100 font-black text-indigo-600">
-          {adminName.charAt(0).toUpperCase()}
+        <div className="flex items-center gap-2">
+          <ThemeToggle />
+
+          <div className="flex h-9 w-9 items-center justify-center rounded-full bg-indigo-100 font-black text-indigo-600 dark:bg-indigo-500/10 dark:text-indigo-400">
+            {adminName
+              .charAt(0)
+              .toUpperCase()}
+          </div>
         </div>
       </header>
 
-      {/* MOBILE OVERLAY */}
+      {/* OVERLAY */}
+
       {sidebarOpen && (
         <div
-          onClick={() => setSidebarOpen(false)}
-          className="fixed inset-0 z-40 bg-black/40 lg:hidden"
+          onClick={() =>
+            setSidebarOpen(false)
+          }
+          className="fixed inset-0 z-40 bg-black/50 lg:hidden"
         />
       )}
 
       {/* SIDEBAR */}
+
       <aside
-        className={`fixed inset-y-0 left-0 z-50 flex w-64 flex-col border-r border-gray-200 bg-white transition-transform duration-300 ${
+        className={`fixed inset-y-0 left-0 z-50 flex w-64 flex-col border-r border-gray-200 bg-white transition-transform duration-300 dark:border-white/10 dark:bg-[#080b18] ${
           sidebarOpen
             ? "translate-x-0"
             : "-translate-x-full lg:translate-x-0"
         }`}
       >
-        <div className="flex h-20 items-center justify-between border-b border-gray-100 px-6">
+        <div className="flex h-20 items-center justify-between border-b border-gray-100 px-5 dark:border-white/10">
           <Link
-            href="/admin"
-            onClick={() => setSidebarOpen(false)}
+            href="/admin/dashboard"
             className="flex items-center gap-3"
+            onClick={() =>
+              setSidebarOpen(false)
+            }
           >
-            <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-indigo-600 text-white shadow-lg shadow-indigo-100">
+            <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-indigo-600 text-white shadow-lg shadow-indigo-500/20">
               <Brain size={21} />
             </div>
 
             <div>
-              <p className="font-extrabold">
-                Quiz<span className="text-indigo-600">Master</span>
+              <p className="font-black">
+                Quiz
+                <span className="text-indigo-500">
+                  Master
+                </span>
               </p>
 
-              <p className="text-[10px] font-semibold tracking-widest text-gray-400">
+              <p className="text-[10px] font-bold tracking-[0.2em] text-gray-400">
                 ADMIN PANEL
               </p>
             </div>
           </Link>
 
           <button
-            onClick={() => setSidebarOpen(false)}
-            className="rounded-lg p-2 hover:bg-gray-100 lg:hidden"
+            onClick={() =>
+              setSidebarOpen(false)
+            }
+            className="rounded-lg p-2 hover:bg-gray-100 dark:hover:bg-white/10 lg:hidden"
           >
             <X size={18} />
           </button>
         </div>
 
-        <div className="flex-1 overflow-y-auto px-4 py-6">
-          <p className="px-3 text-xs font-bold uppercase tracking-widest text-gray-400">
+        <div className="flex-1 overflow-y-auto px-3 py-5">
+          <p className="px-3 text-[10px] font-black uppercase tracking-[0.2em] text-gray-400">
             Main Menu
           </p>
 
-          <nav className="mt-4 space-y-1">
+          <nav className="mt-3 space-y-1">
             {navItems.map((item) => {
               const Icon = item.icon;
 
-              const active = item.href === "/admin";
+              const active =
+                item.href ===
+                "/admin/dashboard";
 
               return (
                 <Link
-                  key={item.title}
+                  key={item.href}
                   href={item.href}
-                  onClick={() => setSidebarOpen(false)}
-                  className={`flex w-full items-center gap-3 rounded-xl px-3 py-3 text-sm font-semibold transition ${
+                  onClick={() =>
+                    setSidebarOpen(false)
+                  }
+                  className={`flex items-center gap-3 rounded-xl px-3 py-3 text-sm font-bold transition ${
                     active
-                      ? "bg-indigo-50 text-indigo-600"
-                      : "text-gray-500 hover:bg-gray-50 hover:text-gray-900"
+                      ? "bg-indigo-50 text-indigo-600 dark:bg-indigo-500/10 dark:text-indigo-400"
+                      : "text-gray-500 hover:bg-gray-50 hover:text-gray-900 dark:text-gray-400 dark:hover:bg-white/5 dark:hover:text-white"
                   }`}
                 >
-                  <Icon size={19} />
-                  <span>{item.title}</span>
+                  <Icon size={18} />
+                  {item.title}
                 </Link>
               );
             })}
           </nav>
 
-          <p className="mt-8 px-3 text-xs font-bold uppercase tracking-widest text-gray-400">
+          <p className="mt-8 px-3 text-[10px] font-black uppercase tracking-[0.2em] text-gray-400">
             System
           </p>
 
-          <nav className="mt-4 space-y-1">
-            <Link
-              href="/admin/settings"
-              onClick={() => setSidebarOpen(false)}
-              className="flex w-full items-center gap-3 rounded-xl px-3 py-3 text-sm font-semibold text-gray-500 hover:bg-gray-50 hover:text-gray-900"
-            >
-              <Settings size={19} />
-              Settings
-            </Link>
-          </nav>
+          <Link
+            href="/admin/settings"
+            className="mt-3 flex items-center gap-3 rounded-xl px-3 py-3 text-sm font-bold text-gray-500 hover:bg-gray-50 dark:text-gray-400 dark:hover:bg-white/5"
+          >
+            <Settings size={18} />
+            Settings
+          </Link>
         </div>
 
-        <div className="border-t border-gray-100 p-4">
+        <div className="border-t border-gray-100 p-4 dark:border-white/10">
           <button
             onClick={handleLogout}
-            className="flex w-full items-center gap-3 rounded-xl px-3 py-3 text-sm font-semibold text-red-500 hover:bg-red-50"
+            className="flex w-full items-center gap-3 rounded-xl px-3 py-3 text-sm font-bold text-red-500 hover:bg-red-50 dark:hover:bg-red-500/10"
           >
-            <LogOut size={19} />
+            <LogOut size={18} />
             Logout
           </button>
         </div>
       </aside>
 
       {/* MAIN */}
-      <div className="lg:ml-64">
-        <div className="mx-auto max-w-7xl px-5 py-8 sm:px-8">
-          {/* TOP HEADER */}
-          <div className="flex flex-col justify-between gap-5 md:flex-row md:items-center">
-            <div>
-              <p className="text-sm font-semibold text-indigo-600">
-                Admin Control Center
-              </p>
 
-              <h1 className="mt-1 text-3xl font-black tracking-tight">
+      <main className="lg:ml-64">
+        <div className="mx-auto max-w-[1500px] px-5 py-7 sm:px-8 lg:px-10">
+          {/* TOP BAR */}
+
+          <div className="flex flex-col gap-5 xl:flex-row xl:items-center xl:justify-between">
+            <div>
+              <div className="flex items-center gap-2 text-sm font-bold text-indigo-600 dark:text-indigo-400">
+                <ShieldCheck size={16} />
+                Admin Control Center
+              </div>
+
+              <h1 className="mt-2 text-3xl font-black tracking-tight sm:text-4xl">
                 Dashboard Overview
               </h1>
 
-              <p className="mt-1 text-gray-400">
-                Welcome back, {adminName}. Here's what's happening
-                on your platform.
+              <p className="mt-2 max-w-2xl text-sm text-gray-500 dark:text-gray-400">
+                Monitor students, quizzes, attempts,
+                performance and platform activity from
+                one place.
               </p>
             </div>
 
-            <div className="flex flex-wrap gap-3">
+            <div className="flex flex-wrap items-center gap-3">
+              <ThemeToggle />
+
               <button
-                onClick={() => loadDashboard(true)}
+                onClick={() =>
+                  loadDashboard(true)
+                }
                 disabled={refreshing}
-                className="flex items-center justify-center gap-2 rounded-xl border border-gray-200 bg-white px-4 py-3 text-sm font-bold text-gray-700 shadow-sm transition hover:bg-gray-50 disabled:opacity-60"
+                className="flex items-center gap-2 rounded-xl border border-gray-200 bg-white px-4 py-3 text-sm font-bold shadow-sm transition hover:bg-gray-50 disabled:opacity-60 dark:border-white/10 dark:bg-white/5 dark:hover:bg-white/10"
               >
                 <RefreshCw
                   size={17}
-                  className={refreshing ? "animate-spin" : ""}
+                  className={
+                    refreshing
+                      ? "animate-spin"
+                      : ""
+                  }
                 />
                 Refresh
               </button>
 
               <Link
                 href="/admin/quizzes/create"
-                className="flex items-center justify-center gap-2 rounded-xl bg-indigo-600 px-5 py-3 font-bold text-white shadow-lg shadow-indigo-100 transition hover:bg-indigo-700"
+                className="flex items-center gap-2 rounded-xl bg-indigo-600 px-5 py-3 text-sm font-black text-white shadow-lg shadow-indigo-500/20 transition hover:bg-indigo-700"
               >
                 <Plus size={18} />
                 Create Quiz
@@ -621,13 +709,14 @@ export default function AdminPage() {
           </div>
 
           {/* ERROR */}
+
           {error && (
-            <div className="mt-6 flex items-start gap-3 rounded-2xl border border-red-100 bg-red-50 p-4 text-red-700">
-              <X size={18} className="mt-0.5 shrink-0" />
+            <div className="mt-6 flex items-start gap-3 rounded-2xl border border-red-200 bg-red-50 p-4 text-red-700 dark:border-red-500/20 dark:bg-red-500/10 dark:text-red-400">
+              <X size={18} />
 
               <div>
-                <p className="font-bold">
-                  Unable to load dashboard
+                <p className="font-black">
+                  Dashboard Error
                 </p>
 
                 <p className="mt-1 text-sm">
@@ -638,190 +727,195 @@ export default function AdminPage() {
           )}
 
           {/* LOADING */}
-          {loading ? (
-            <div className="mt-8 space-y-6">
-              <div className="grid gap-5 sm:grid-cols-2 xl:grid-cols-4">
-                {[1, 2, 3, 4].map((item) => (
-                  <div
-                    key={item}
-                    className="h-36 animate-pulse rounded-2xl bg-white shadow-sm"
-                  />
-                ))}
-              </div>
 
-              <div className="grid gap-6 lg:grid-cols-[1fr_340px]">
-                <div className="h-80 animate-pulse rounded-2xl bg-white" />
-                <div className="h-80 animate-pulse rounded-2xl bg-white" />
-              </div>
-            </div>
+          {loading ? (
+            <DashboardSkeleton />
           ) : (
             <>
-              {/* STATS */}
+              {/* STAT CARDS */}
+
               <div className="mt-8 grid gap-5 sm:grid-cols-2 xl:grid-cols-4">
                 <StatCard
                   title="Total Students"
-                  value={formatNumber(stats.totalStudents)}
-                  change={`${formatNumber(
+                  value={formatNumber(
+                    stats.totalStudents
+                  )}
+                  subtitle={`${formatNumber(
                     stats.activeStudents
-                  )} active`}
+                  )} active students`}
                   icon={Users}
-                  iconClass="bg-indigo-50 text-indigo-600"
-                  changeClass="bg-green-50 text-green-600"
+                  iconStyle="bg-indigo-50 text-indigo-600 dark:bg-indigo-500/10 dark:text-indigo-400"
                 />
 
                 <StatCard
                   title="Total Quizzes"
-                  value={formatNumber(stats.totalQuizzes)}
-                  change={`${formatNumber(
+                  value={formatNumber(
+                    stats.totalQuizzes
+                  )}
+                  subtitle={`${formatNumber(
                     stats.publishedQuizzes
                   )} published`}
                   icon={Brain}
-                  iconClass="bg-purple-50 text-purple-600"
-                  changeClass="bg-green-50 text-green-600"
+                  iconStyle="bg-purple-50 text-purple-600 dark:bg-purple-500/10 dark:text-purple-400"
                 />
 
                 <StatCard
                   title="Quiz Attempts"
-                  value={formatNumber(stats.totalAttempts)}
-                  change={`${stats.averageScore.toFixed(
+                  value={formatNumber(
+                    stats.totalAttempts
+                  )}
+                  subtitle={`${stats.averageScore.toFixed(
                     1
-                  )}% avg score`}
-                  icon={TrendingUp}
-                  iconClass="bg-blue-50 text-blue-600"
-                  changeClass="bg-blue-50 text-blue-600"
+                  )}% average score`}
+                  icon={Activity}
+                  iconStyle="bg-blue-50 text-blue-600 dark:bg-blue-500/10 dark:text-blue-400"
                 />
 
                 <StatCard
                   title="Questions"
-                  value={formatNumber(data.questionCount)}
-                  change={`${stats.passRate.toFixed(
+                  value={formatNumber(
+                    data.questionCount
+                  )}
+                  subtitle={`${stats.passRate.toFixed(
                     1
-                  )}% pass rate`}
+                  )}% overall pass rate`}
                   icon={FileQuestion}
-                  iconClass="bg-orange-50 text-orange-600"
-                  changeClass="bg-orange-50 text-orange-600"
+                  iconStyle="bg-orange-50 text-orange-600 dark:bg-orange-500/10 dark:text-orange-400"
                 />
               </div>
 
-              {/* SECONDARY STATS */}
+              {/* SMALL STATS */}
+
               <div className="mt-5 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
                 <MiniStat
-                  icon={UserCheck}
                   title="Active Students"
-                  value={formatNumber(stats.activeStudents)}
-                  className="text-green-600 bg-green-50"
+                  value={stats.activeStudents}
+                  icon={UserCheck}
+                  style="text-green-600 bg-green-50 dark:bg-green-500/10"
                 />
 
                 <MiniStat
-                  icon={CheckCircle2}
                   title="Published Quizzes"
-                  value={formatNumber(stats.publishedQuizzes)}
-                  className="text-indigo-600 bg-indigo-50"
+                  value={
+                    stats.publishedQuizzes
+                  }
+                  icon={CheckCircle2}
+                  style="text-indigo-600 bg-indigo-50 dark:bg-indigo-500/10"
                 />
 
                 <MiniStat
-                  icon={Clock3}
                   title="Draft Quizzes"
-                  value={formatNumber(stats.draftQuizzes)}
-                  className="text-orange-600 bg-orange-50"
+                  value={stats.draftQuizzes}
+                  icon={Clock3}
+                  style="text-orange-600 bg-orange-50 dark:bg-orange-500/10"
                 />
 
                 <MiniStat
-                  icon={UserX}
                   title="Inactive Students"
-                  value={formatNumber(
-                    stats.totalStudents -
-                      stats.activeStudents
-                  )}
-                  className="text-red-600 bg-red-50"
+                  value={
+                    stats.inactiveStudents
+                  }
+                  icon={UserX}
+                  style="text-red-600 bg-red-50 dark:bg-red-500/10"
                 />
               </div>
 
               {/* ANALYTICS */}
-              <div className="mt-6 grid gap-6 lg:grid-cols-[1fr_340px]">
-                <section className="rounded-2xl border border-gray-100 bg-white p-6 shadow-sm">
-                  <div className="flex flex-col justify-between gap-3 sm:flex-row sm:items-center">
+
+              <div className="mt-6 grid gap-6 xl:grid-cols-[1fr_360px]">
+                {/* ACTIVITY */}
+
+                <section className="rounded-2xl border border-gray-200 bg-white p-6 shadow-sm dark:border-white/10 dark:bg-white/[0.03]">
+                  <div className="flex items-center justify-between">
                     <div>
-                      <div className="flex items-center gap-2">
-                        <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-indigo-50 text-indigo-600">
-                          <Activity size={18} />
+                      <div className="flex items-center gap-3">
+                        <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-indigo-50 text-indigo-600 dark:bg-indigo-500/10 dark:text-indigo-400">
+                          <Activity size={19} />
                         </div>
 
-                        <h2 className="font-black">
-                          Quiz Activity
-                        </h2>
+                        <div>
+                          <h2 className="font-black">
+                            Quiz Activity
+                          </h2>
+
+                          <p className="text-xs text-gray-400">
+                            Last 7 days
+                          </p>
+                        </div>
                       </div>
-
-                      <p className="mt-2 text-sm text-gray-400">
-                        Quiz attempts during the current week.
-                      </p>
                     </div>
 
-                    <div className="rounded-xl bg-gray-50 px-3 py-2 text-xs font-bold text-gray-500">
-                      This Week
-                    </div>
+                    <span className="rounded-full bg-gray-100 px-3 py-1.5 text-xs font-bold text-gray-500 dark:bg-white/5 dark:text-gray-400">
+                      Weekly
+                    </span>
                   </div>
 
-                  <div className="mt-8 flex h-56 items-end gap-2 sm:gap-5">
-                    {activityData.map((item) => {
-                      const height =
-                        item.count === 0
-                          ? 4
-                          : Math.max(
-                              (item.count / maxActivity) *
-                                100,
-                              8
-                            );
+                  <div className="mt-8 flex h-60 items-end gap-3 sm:gap-5">
+                    {weeklyActivity.map(
+                      (item) => {
+                        const height =
+                          item.count === 0
+                            ? 5
+                            : Math.max(
+                                (item.count /
+                                  maxActivity) *
+                                  100,
+                                10
+                              );
 
-                      return (
-                        <div
-                          key={item.day}
-                          className="flex h-full flex-1 flex-col items-center justify-end gap-3"
-                        >
-                          <div className="flex h-44 w-full items-end">
-                            <div
-                              className="group relative w-full cursor-pointer rounded-t-xl bg-indigo-500 transition hover:bg-indigo-600"
-                              style={{
-                                height: `${height}%`,
-                              }}
-                            >
-                              <span className="absolute -top-8 left-1/2 hidden -translate-x-1/2 rounded-lg bg-gray-900 px-2 py-1 text-[10px] font-bold text-white group-hover:block">
-                                {item.count}
-                              </span>
+                        return (
+                          <div
+                            key={`${item.label}-${item.count}`}
+                            className="flex h-full flex-1 flex-col items-center justify-end gap-3"
+                          >
+                            <div className="flex h-48 w-full items-end">
+                              <div
+                                className="group relative w-full rounded-t-xl bg-indigo-500 transition-all hover:bg-indigo-600"
+                                style={{
+                                  height: `${height}%`,
+                                }}
+                              >
+                                <span className="absolute -top-8 left-1/2 hidden -translate-x-1/2 rounded-lg bg-gray-900 px-2 py-1 text-[10px] font-black text-white group-hover:block">
+                                  {item.count}
+                                </span>
+                              </div>
                             </div>
-                          </div>
 
-                          <span className="text-xs font-semibold text-gray-400">
-                            {item.day}
-                          </span>
-                        </div>
-                      );
-                    })}
+                            <span className="text-xs font-bold text-gray-400">
+                              {item.label}
+                            </span>
+                          </div>
+                        );
+                      }
+                    )}
                   </div>
                 </section>
 
                 {/* PLATFORM HEALTH */}
-                <section className="rounded-2xl border border-gray-100 bg-white p-6 shadow-sm">
+
+                <section className="rounded-2xl border border-gray-200 bg-white p-6 shadow-sm dark:border-white/10 dark:bg-white/[0.03]">
                   <div className="flex items-center gap-3">
-                    <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-green-50 text-green-600">
-                      <ShieldCheck size={20} />
+                    <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-green-50 text-green-600 dark:bg-green-500/10 dark:text-green-400">
+                      <ShieldCheck size={19} />
                     </div>
 
                     <div>
                       <h2 className="font-black">
-                        Platform Overview
+                        Platform Health
                       </h2>
 
                       <p className="text-xs text-gray-400">
-                        Current platform health
+                        Current overview
                       </p>
                     </div>
                   </div>
 
-                  <div className="mt-6 space-y-5">
+                  <div className="mt-7 space-y-6">
                     <ProgressRow
                       title="Active Students"
-                      value={stats.activeStudents}
+                      value={
+                        stats.activeStudents
+                      }
                       total={Math.max(
                         stats.totalStudents,
                         1
@@ -830,7 +924,9 @@ export default function AdminPage() {
 
                     <ProgressRow
                       title="Published Quizzes"
-                      value={stats.publishedQuizzes}
+                      value={
+                        stats.publishedQuizzes
+                      }
                       total={Math.max(
                         stats.totalQuizzes,
                         1
@@ -845,48 +941,71 @@ export default function AdminPage() {
                     />
                   </div>
 
-                  <div className="mt-6 rounded-xl bg-gray-50 p-4">
-                    <div className="flex items-center justify-between">
-                      <span className="text-xs font-bold text-gray-400">
-                        Total Categories
-                      </span>
+                  <div className="mt-7 grid grid-cols-2 gap-3">
+                    <div className="rounded-xl bg-gray-50 p-4 dark:bg-white/5">
+                      <p className="text-xs font-bold text-gray-400">
+                        Categories
+                      </p>
 
-                      <span className="font-black">
+                      <p className="mt-1 text-xl font-black">
                         {data.categories.length}
-                      </span>
+                      </p>
+                    </div>
+
+                    <div className="rounded-xl bg-gray-50 p-4 dark:bg-white/5">
+                      <p className="text-xs font-bold text-gray-400">
+                        Avg. Score
+                      </p>
+
+                      <p className="mt-1 text-xl font-black">
+                        {stats.averageScore.toFixed(
+                          1
+                        )}
+                        %
+                      </p>
                     </div>
                   </div>
                 </section>
               </div>
 
-              {/* RECENT ATTEMPTS */}
-              <div className="mt-6 grid gap-6 lg:grid-cols-[1fr_340px]">
-                <section className="overflow-hidden rounded-2xl border border-gray-100 bg-white shadow-sm">
-                  <div className="flex items-center justify-between border-b border-gray-100 p-6">
+              {/* RECENT ACTIVITY */}
+
+              <div className="mt-6 grid gap-6 xl:grid-cols-[1fr_360px]">
+                <section className="overflow-hidden rounded-2xl border border-gray-200 bg-white shadow-sm dark:border-white/10 dark:bg-white/[0.03]">
+                  <div className="flex items-center justify-between border-b border-gray-100 p-6 dark:border-white/10">
                     <div>
                       <h2 className="font-black">
                         Recent Quiz Attempts
                       </h2>
 
                       <p className="mt-1 text-sm text-gray-400">
-                        Latest student quiz activity.
+                        Latest student activity
                       </p>
                     </div>
 
                     <Link
                       href="/admin/attempts"
-                      className="flex items-center gap-1 text-sm font-bold text-indigo-600 hover:text-indigo-700"
+                      className="flex items-center gap-1 text-sm font-black text-indigo-600 dark:text-indigo-400"
                     >
-                      View All
-                      <ChevronRight size={16} />
+                      View all
+                      <ChevronRight
+                        size={16}
+                      />
                     </Link>
                   </div>
 
                   <div className="overflow-x-auto">
-                    {recentAttempts.length > 0 ? (
-                      <table className="w-full min-w-[650px] text-left">
-                        <thead className="bg-gray-50 text-xs uppercase tracking-wider text-gray-400">
-                          <tr>
+                    {data.attempts.length ===
+                    0 ? (
+                      <EmptyState
+                        icon={ClipboardList}
+                        title="No attempts yet"
+                        description="Student attempts will appear here."
+                      />
+                    ) : (
+                      <table className="w-full min-w-[700px] text-left">
+                        <thead className="bg-gray-50 dark:bg-white/[0.02]">
+                          <tr className="text-xs font-black uppercase tracking-wider text-gray-400">
                             <th className="px-6 py-4">
                               Student
                             </th>
@@ -909,108 +1028,100 @@ export default function AdminPage() {
                           </tr>
                         </thead>
 
-                        <tbody className="divide-y divide-gray-100">
-                          {recentAttempts.map(
-                            (attempt) => {
-                              const student =
-                                studentMap.get(
-                                  attempt.student_id
-                                );
+                        <tbody className="divide-y divide-gray-100 dark:divide-white/10">
+                          {data.attempts
+                            .slice(0, 6)
+                            .map(
+                              (attempt) => {
+                                const student =
+                                  studentMap.get(
+                                    attempt.student_id
+                                  );
 
-                              const quiz =
-                                quizMap.get(
-                                  attempt.quiz_id
-                                );
+                                const quiz =
+                                  quizMap.get(
+                                    attempt.quiz_id
+                                  );
 
-                              return (
-                                <tr
-                                  key={attempt.id}
-                                  className="transition hover:bg-gray-50"
-                                >
-                                  <td className="px-6 py-4">
-                                    <div className="flex items-center gap-3">
-                                      <div className="flex h-9 w-9 items-center justify-center rounded-full bg-indigo-50 text-sm font-black text-indigo-600">
-                                        {(
-                                          student?.name ||
-                                          "S"
-                                        )
-                                          .charAt(0)
-                                          .toUpperCase()}
+                                return (
+                                  <tr
+                                    key={
+                                      attempt.id
+                                    }
+                                    className="transition hover:bg-gray-50 dark:hover:bg-white/[0.03]"
+                                  >
+                                    <td className="px-6 py-4">
+                                      <div className="flex items-center gap-3">
+                                        <div className="flex h-9 w-9 items-center justify-center rounded-full bg-indigo-50 text-xs font-black text-indigo-600 dark:bg-indigo-500/10 dark:text-indigo-400">
+                                          {(
+                                            student?.name ||
+                                            "S"
+                                          )
+                                            .charAt(
+                                              0
+                                            )
+                                            .toUpperCase()}
+                                        </div>
+
+                                        <div>
+                                          <p className="text-sm font-bold">
+                                            {student?.name ||
+                                              "Unknown"}
+                                          </p>
+
+                                          <p className="text-xs text-gray-400">
+                                            {student?.email ||
+                                              "No email"}
+                                          </p>
+                                        </div>
                                       </div>
+                                    </td>
 
-                                      <div>
-                                        <p className="text-sm font-bold">
-                                          {student?.name ||
-                                            "Unknown Student"}
-                                        </p>
+                                    <td className="px-6 py-4">
+                                      <p className="max-w-[180px] truncate text-sm font-bold">
+                                        {quiz?.title ||
+                                          "Unknown Quiz"}
+                                      </p>
+                                    </td>
 
-                                        <p className="text-xs text-gray-400">
-                                          {student?.email ||
-                                            "No email"}
-                                        </p>
-                                      </div>
-                                    </div>
-                                  </td>
-
-                                  <td className="px-6 py-4">
-                                    <p className="max-w-[180px] truncate text-sm font-semibold">
-                                      {quiz?.title ||
-                                        "Unknown Quiz"}
-                                    </p>
-                                  </td>
-
-                                  <td className="px-6 py-4">
-                                    <span className="font-black text-gray-800">
-                                      {Number(
-                                        attempt.percentage ||
+                                    <td className="px-6 py-4">
+                                      <span className="font-black">
+                                        {Number(
+                                          attempt.percentage ||
+                                            0
+                                        ).toFixed(
                                           0
-                                      ).toFixed(0)}
-                                      %
-                                    </span>
-                                  </td>
+                                        )}
+                                        %
+                                      </span>
+                                    </td>
 
-                                  <td className="px-6 py-4">
-                                    <span
-                                      className={`inline-flex rounded-full px-2.5 py-1 text-xs font-bold ${
-                                        attempt.status ===
-                                        "COMPLETED"
-                                          ? "bg-green-50 text-green-600"
-                                          : attempt.status ===
-                                            "IN_PROGRESS"
-                                          ? "bg-blue-50 text-blue-600"
-                                          : "bg-red-50 text-red-600"
-                                      }`}
-                                    >
-                                      {attempt.status.replace(
-                                        "_",
-                                        " "
+                                    <td className="px-6 py-4">
+                                      <StatusBadge
+                                        status={
+                                          attempt.status
+                                        }
+                                      />
+                                    </td>
+
+                                    <td className="px-6 py-4 text-xs font-semibold text-gray-400">
+                                      {timeAgo(
+                                        attempt.created_at
                                       )}
-                                    </span>
-                                  </td>
-
-                                  <td className="px-6 py-4 text-xs font-semibold text-gray-400">
-                                    {formatTimeAgo(
-                                      attempt.created_at
-                                    )}
-                                  </td>
-                                </tr>
-                              );
-                            }
-                          )}
+                                    </td>
+                                  </tr>
+                                );
+                              }
+                            )}
                         </tbody>
                       </table>
-                    ) : (
-                      <EmptyState
-                        icon={ClipboardList}
-                        title="No attempts yet"
-                        description="Student quiz attempts will appear here."
-                      />
                     )}
                   </div>
                 </section>
 
-                {/* RECENT STUDENTS */}
-                <section className="rounded-2xl border border-gray-100 bg-white p-6 shadow-sm">
+                {/* STUDENTS */}
+
+                <section className="rounded-2xl border border-gray-200 bg-white p-6 shadow-sm dark:border-white/10 dark:bg-white/[0.03]">
                   <div className="flex items-center justify-between">
                     <div>
                       <h2 className="font-black">
@@ -1018,60 +1129,61 @@ export default function AdminPage() {
                       </h2>
 
                       <p className="mt-1 text-sm text-gray-400">
-                        Newly registered students.
+                        Latest registrations
                       </p>
                     </div>
 
                     <Link
                       href="/admin/students"
-                      className="rounded-lg p-2 text-gray-400 hover:bg-gray-100 hover:text-gray-700"
+                      className="text-sm font-black text-indigo-600 dark:text-indigo-400"
                     >
-                      <MoreHorizontal size={20} />
+                      View
                     </Link>
                   </div>
 
                   <div className="mt-6 space-y-4">
-                    {data.students.length > 0 ? (
-                      data.students
-                        .slice(0, 5)
-                        .map((student) => (
-                          <div
-                            key={student.id}
-                            className="flex items-center justify-between gap-3"
-                          >
-                            <div className="flex min-w-0 items-center gap-3">
-                              <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-indigo-50 font-black text-indigo-600">
-                                {student.name
-                                  .charAt(0)
-                                  .toUpperCase()}
-                              </div>
-
-                              <div className="min-w-0">
-                                <p className="truncate text-sm font-bold">
-                                  {student.name}
-                                </p>
-
-                                <p className="truncate text-xs text-gray-400">
-                                  {formatTimeAgo(
-                                    student.created_at
-                                  )}
-                                </p>
-                              </div>
+                    {data.students
+                      .slice(0, 5)
+                      .map((student) => (
+                        <div
+                          key={student.id}
+                          className="flex items-center justify-between gap-3"
+                        >
+                          <div className="flex min-w-0 items-center gap-3">
+                            <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-indigo-50 font-black text-indigo-600 dark:bg-indigo-500/10 dark:text-indigo-400">
+                              {student.name
+                                .charAt(0)
+                                .toUpperCase()}
                             </div>
 
-                            <span
-                              className={`shrink-0 rounded-full px-2.5 py-1 text-[10px] font-bold ${
-                                student.status ===
-                                "ACTIVE"
-                                  ? "bg-green-50 text-green-600"
-                                  : "bg-red-50 text-red-600"
-                              }`}
-                            >
-                              {student.status}
-                            </span>
+                            <div className="min-w-0">
+                              <p className="truncate text-sm font-black">
+                                {student.name}
+                              </p>
+
+                              <p className="truncate text-xs text-gray-400">
+                                {timeAgo(
+                                  student.created_at
+                                )}
+                              </p>
+                            </div>
                           </div>
-                        ))
-                    ) : (
+
+                          <span
+                            className={`rounded-full px-2.5 py-1 text-[10px] font-black ${
+                              student.status ===
+                              "ACTIVE"
+                                ? "bg-green-50 text-green-600 dark:bg-green-500/10 dark:text-green-400"
+                                : "bg-red-50 text-red-600 dark:bg-red-500/10 dark:text-red-400"
+                            }`}
+                          >
+                            {student.status}
+                          </span>
+                        </div>
+                      ))}
+
+                    {data.students.length ===
+                      0 && (
                       <EmptyState
                         icon={Users}
                         title="No students"
@@ -1083,15 +1195,16 @@ export default function AdminPage() {
               </div>
 
               {/* QUIZ MANAGEMENT */}
-              <section className="mt-6 overflow-hidden rounded-2xl border border-gray-100 bg-white shadow-sm">
-                <div className="flex flex-col justify-between gap-4 border-b border-gray-100 p-6 sm:flex-row sm:items-center">
+
+              <section className="mt-6 overflow-hidden rounded-2xl border border-gray-200 bg-white shadow-sm dark:border-white/10 dark:bg-white/[0.03]">
+                <div className="flex flex-col gap-4 border-b border-gray-100 p-6 lg:flex-row lg:items-center lg:justify-between dark:border-white/10">
                   <div>
                     <h2 className="font-black">
                       Quiz Management
                     </h2>
 
                     <p className="mt-1 text-sm text-gray-400">
-                      Manage quizzes, status and content.
+                      Manage your latest quizzes.
                     </p>
                   </div>
 
@@ -1103,32 +1216,51 @@ export default function AdminPage() {
                       />
 
                       <input
-                        value={searchQuery}
+                        value={search}
                         onChange={(e) =>
-                          setSearchQuery(
+                          setSearch(
                             e.target.value
                           )
                         }
-                        placeholder="Search quizzes..."
-                        className="w-full rounded-xl border border-gray-200 bg-white py-2.5 pl-10 pr-4 text-sm outline-none transition focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100 sm:w-64"
+                        placeholder="Search quiz..."
+                        className="w-full rounded-xl border border-gray-200 bg-white py-2.5 pl-10 pr-4 text-sm font-medium outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100 dark:border-white/10 dark:bg-white/5 dark:focus:ring-indigo-500/10 sm:w-64"
                       />
                     </div>
 
                     <Link
                       href="/admin/quizzes"
-                      className="flex items-center gap-2 rounded-xl border border-gray-200 px-4 py-2.5 text-sm font-bold text-gray-600 hover:bg-gray-50"
+                      className="flex items-center gap-2 rounded-xl border border-gray-200 px-4 py-2.5 text-sm font-black hover:bg-gray-50 dark:border-white/10 dark:hover:bg-white/5"
                     >
                       Manage
-                      <ChevronRight size={16} />
+                      <ChevronRight
+                        size={16}
+                      />
                     </Link>
                   </div>
                 </div>
 
-                <div className="overflow-x-auto">
-                  {filteredQuizzes.length > 0 ? (
-                    <table className="w-full min-w-[850px] text-left">
-                      <thead className="bg-gray-50 text-xs uppercase tracking-wider text-gray-400">
-                        <tr>
+                {filteredQuizzes.length ===
+                0 ? (
+                  <EmptyState
+                    icon={Brain}
+                    title={
+                      search
+                        ? "No quizzes found"
+                        : "No quizzes yet"
+                    }
+                    description={
+                      search
+                        ? "Try another search term."
+                        : "Create your first quiz to get started."
+                    }
+                    actionHref="/admin/quizzes/create"
+                    actionText="Create Quiz"
+                  />
+                ) : (
+                  <div className="overflow-x-auto">
+                    <table className="w-full min-w-[800px] text-left">
+                      <thead className="bg-gray-50 dark:bg-white/[0.02]">
+                        <tr className="text-xs font-black uppercase tracking-wider text-gray-400">
                           <th className="px-6 py-4">
                             Quiz
                           </th>
@@ -1155,25 +1287,28 @@ export default function AdminPage() {
                         </tr>
                       </thead>
 
-                      <tbody className="divide-y divide-gray-100">
+                      <tbody className="divide-y divide-gray-100 dark:divide-white/10">
                         {filteredQuizzes.map(
                           (quiz) => (
                             <tr
                               key={quiz.id}
-                              className="transition hover:bg-gray-50"
+                              className="transition hover:bg-gray-50 dark:hover:bg-white/[0.03]"
                             >
                               <td className="px-6 py-5">
                                 <div className="flex items-center gap-3">
-                                  <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-indigo-50 text-indigo-600">
-                                    <Brain size={18} />
+                                  <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-indigo-50 text-indigo-600 dark:bg-indigo-500/10 dark:text-indigo-400">
+                                    <Brain
+                                      size={18}
+                                    />
                                   </div>
 
                                   <div>
-                                    <p className="font-bold">
+                                    <p className="font-black">
                                       {quiz.title}
                                     </p>
 
                                     <p className="mt-1 text-xs text-gray-400">
+                                      ID:{" "}
                                       {quiz.id.slice(
                                         0,
                                         8
@@ -1185,7 +1320,7 @@ export default function AdminPage() {
                               </td>
 
                               <td className="px-6 py-5">
-                                <span className="rounded-full bg-indigo-50 px-3 py-1.5 text-xs font-bold text-indigo-600">
+                                <span className="rounded-full bg-indigo-50 px-3 py-1.5 text-xs font-black text-indigo-600 dark:bg-indigo-500/10 dark:text-indigo-400">
                                   {quiz.category_id
                                     ? categoryMap.get(
                                         quiz.category_id
@@ -1195,51 +1330,32 @@ export default function AdminPage() {
                                 </span>
                               </td>
 
-                              <td className="px-6 py-5 font-semibold text-gray-600">
+                              <td className="px-6 py-5 text-sm font-bold text-gray-500 dark:text-gray-400">
                                 {
                                   quiz.duration_minutes
                                 }{" "}
                                 min
                               </td>
 
-                              <td className="px-6 py-5 font-semibold text-gray-600">
+                              <td className="px-6 py-5 text-sm font-bold text-gray-500 dark:text-gray-400">
                                 {quiz.total_marks}
                               </td>
 
                               <td className="px-6 py-5">
-                                <span
-                                  className={`inline-flex items-center gap-1.5 rounded-full px-3 py-1.5 text-xs font-bold ${
-                                    quiz.status ===
-                                    "PUBLISHED"
-                                      ? "bg-green-50 text-green-600"
-                                      : quiz.status ===
-                                        "DRAFT"
-                                      ? "bg-orange-50 text-orange-600"
-                                      : "bg-gray-100 text-gray-600"
-                                  }`}
-                                >
-                                  {quiz.status ===
-                                  "PUBLISHED" ? (
-                                    <CheckCircle2
-                                      size={14}
-                                    />
-                                  ) : (
-                                    <Clock3
-                                      size={14}
-                                    />
-                                  )}
-
-                                  {quiz.status}
-                                </span>
+                                <QuizStatus
+                                  status={
+                                    quiz.status
+                                  }
+                                />
                               </td>
 
                               <td className="px-6 py-5">
                                 <Link
                                   href={`/admin/quizzes/${quiz.id}`}
-                                  className="rounded-lg p-2 text-gray-400 hover:bg-gray-100 hover:text-gray-700"
+                                  className="inline-flex rounded-lg p-2 text-gray-400 hover:bg-gray-100 hover:text-gray-900 dark:hover:bg-white/10 dark:hover:text-white"
                                 >
-                                  <MoreHorizontal
-                                    size={20}
+                                  <ChevronRight
+                                    size={18}
                                   />
                                 </Link>
                               </td>
@@ -1248,59 +1364,46 @@ export default function AdminPage() {
                         )}
                       </tbody>
                     </table>
-                  ) : (
-                    <EmptyState
-                      icon={Brain}
-                      title={
-                        searchQuery
-                          ? "No quizzes found"
-                          : "No quizzes created yet"
-                      }
-                      description={
-                        searchQuery
-                          ? "Try a different search term."
-                          : "Create your first quiz to get started."
-                      }
-                      actionHref="/admin/quizzes/create"
-                      actionText="Create Quiz"
-                    />
-                  )}
-                </div>
+                  </div>
+                )}
               </section>
 
-              {/* BOTTOM CARDS */}
+              {/* BOTTOM SUMMARY */}
+
               <div className="mt-6 grid gap-5 md:grid-cols-3">
-                <BottomCard
+                <SummaryCard
                   icon={CheckCircle2}
                   title="Published Quizzes"
-                  value={stats.publishedQuizzes}
-                  description="Currently available to students"
-                  className="bg-green-50 text-green-600"
+                  value={
+                    stats.publishedQuizzes
+                  }
+                  description="Available to students"
+                  style="bg-green-50 text-green-600 dark:bg-green-500/10 dark:text-green-400"
                 />
 
-                <BottomCard
+                <SummaryCard
                   icon={Clock3}
                   title="Draft Quizzes"
                   value={stats.draftQuizzes}
-                  description="Quizzes waiting to be published"
-                  className="bg-orange-50 text-orange-600"
+                  description="Waiting to be published"
+                  style="bg-orange-50 text-orange-600 dark:bg-orange-500/10 dark:text-orange-400"
                 />
 
-                <BottomCard
+                <SummaryCard
                   icon={BarChart3}
                   title="Average Score"
                   value={`${stats.averageScore.toFixed(
                     1
                   )}%`}
                   description="Across completed attempts"
-                  className="bg-indigo-50 text-indigo-600"
+                  style="bg-indigo-50 text-indigo-600 dark:bg-indigo-500/10 dark:text-indigo-400"
                 />
               </div>
             </>
           )}
         </div>
-      </div>
-    </main>
+      </main>
+    </div>
   );
 }
 
@@ -1311,70 +1414,70 @@ export default function AdminPage() {
 function StatCard({
   title,
   value,
-  change,
+  subtitle,
   icon: Icon,
-  iconClass,
-  changeClass,
+  iconStyle,
 }: {
   title: string;
   value: string;
-  change: string;
+  subtitle: string;
   icon: any;
-  iconClass: string;
-  changeClass: string;
+  iconStyle: string;
 }) {
   return (
-    <div className="rounded-2xl border border-gray-100 bg-white p-5 shadow-sm transition hover:-translate-y-0.5 hover:shadow-md">
-      <div className="flex items-center justify-between gap-3">
+    <div className="group rounded-2xl border border-gray-200 bg-white p-5 shadow-sm transition hover:-translate-y-1 hover:shadow-lg dark:border-white/10 dark:bg-white/[0.03]">
+      <div className="flex items-start justify-between">
         <div
-          className={`flex h-11 w-11 items-center justify-center rounded-xl ${iconClass}`}
+          className={`flex h-11 w-11 items-center justify-center rounded-xl ${iconStyle}`}
         >
           <Icon size={21} />
         </div>
 
-        <span
-          className={`rounded-full px-2.5 py-1 text-xs font-bold ${changeClass}`}
-        >
-          {change}
-        </span>
+        <div className="h-2 w-2 rounded-full bg-green-500" />
       </div>
 
-      <p className="mt-5 text-sm font-medium text-gray-400">
+      <p className="mt-5 text-sm font-bold text-gray-400">
         {title}
       </p>
 
-      <p className="mt-1 text-2xl font-black">
+      <p className="mt-1 text-3xl font-black">
         {value}
+      </p>
+
+      <p className="mt-2 text-xs font-semibold text-gray-400">
+        {subtitle}
       </p>
     </div>
   );
 }
 
 function MiniStat({
-  icon: Icon,
   title,
   value,
-  className,
+  icon: Icon,
+  style,
 }: {
-  icon: any;
   title: string;
-  value: string;
-  className: string;
+  value: number;
+  icon: any;
+  style: string;
 }) {
   return (
-    <div className="flex items-center gap-3 rounded-2xl border border-gray-100 bg-white p-4 shadow-sm">
+    <div className="flex items-center gap-3 rounded-2xl border border-gray-200 bg-white p-4 shadow-sm dark:border-white/10 dark:bg-white/[0.03]">
       <div
-        className={`flex h-10 w-10 items-center justify-center rounded-xl ${className}`}
+        className={`flex h-10 w-10 items-center justify-center rounded-xl ${style}`}
       >
         <Icon size={18} />
       </div>
 
       <div>
-        <p className="text-xs font-medium text-gray-400">
+        <p className="text-xs font-bold text-gray-400">
           {title}
         </p>
 
-        <p className="mt-0.5 font-black">{value}</p>
+        <p className="mt-0.5 text-lg font-black">
+          {formatNumber(value)}
+        </p>
       </div>
     </div>
   );
@@ -1392,28 +1495,29 @@ function ProgressRow({
   suffix?: string;
 }) {
   const percentage = Math.min(
-    Math.max((value / total) * 100, 0),
-    100
+    100,
+    Math.max(
+      0,
+      (value / Math.max(total, 1)) * 100
+    )
   );
 
   return (
     <div>
-      <div className="mb-2 flex items-center justify-between">
-        <span className="text-xs font-bold text-gray-500">
+      <div className="mb-2 flex justify-between">
+        <span className="text-xs font-bold text-gray-500 dark:text-gray-400">
           {title}
         </span>
 
-        <span className="text-xs font-black text-gray-800">
-          {typeof value === "number"
-            ? value.toFixed(
-                suffix === "%" ? 1 : 0
-              )
-            : value}
+        <span className="text-xs font-black">
+          {value.toFixed(
+            suffix === "%" ? 1 : 0
+          )}
           {suffix}
         </span>
       </div>
 
-      <div className="h-2 overflow-hidden rounded-full bg-gray-100">
+      <div className="h-2 overflow-hidden rounded-full bg-gray-100 dark:bg-white/10">
         <div
           className="h-full rounded-full bg-indigo-500 transition-all duration-700"
           style={{
@@ -1421,6 +1525,100 @@ function ProgressRow({
           }}
         />
       </div>
+    </div>
+  );
+}
+
+function StatusBadge({
+  status,
+}: {
+  status:
+    | "IN_PROGRESS"
+    | "COMPLETED"
+    | "ABANDONED";
+}) {
+  const styles =
+    status === "COMPLETED"
+      ? "bg-green-50 text-green-600 dark:bg-green-500/10 dark:text-green-400"
+      : status === "IN_PROGRESS"
+      ? "bg-blue-50 text-blue-600 dark:bg-blue-500/10 dark:text-blue-400"
+      : "bg-red-50 text-red-600 dark:bg-red-500/10 dark:text-red-400";
+
+  return (
+    <span
+      className={`inline-flex rounded-full px-2.5 py-1 text-[10px] font-black ${styles}`}
+    >
+      {status.replace("_", " ")}
+    </span>
+  );
+}
+
+function QuizStatus({
+  status,
+}: {
+  status:
+    | "DRAFT"
+    | "PUBLISHED"
+    | "UNPUBLISHED";
+}) {
+  const styles =
+    status === "PUBLISHED"
+      ? "bg-green-50 text-green-600 dark:bg-green-500/10 dark:text-green-400"
+      : status === "DRAFT"
+      ? "bg-orange-50 text-orange-600 dark:bg-orange-500/10 dark:text-orange-400"
+      : "bg-gray-100 text-gray-600 dark:bg-white/10 dark:text-gray-400";
+
+  return (
+    <span
+      className={`inline-flex items-center gap-1.5 rounded-full px-3 py-1.5 text-xs font-black ${styles}`}
+    >
+      {status === "PUBLISHED" ? (
+        <CheckCircle2 size={13} />
+      ) : (
+        <Clock3 size={13} />
+      )}
+
+      {status}
+    </span>
+  );
+}
+
+function SummaryCard({
+  icon: Icon,
+  title,
+  value,
+  description,
+  style,
+}: {
+  icon: any;
+  title: string;
+  value: number | string;
+  description: string;
+  style: string;
+}) {
+  return (
+    <div className="rounded-2xl border border-gray-200 bg-white p-5 shadow-sm dark:border-white/10 dark:bg-white/[0.03]">
+      <div className="flex items-center gap-4">
+        <div
+          className={`flex h-12 w-12 items-center justify-center rounded-xl ${style}`}
+        >
+          <Icon size={21} />
+        </div>
+
+        <div>
+          <p className="text-sm font-bold text-gray-400">
+            {title}
+          </p>
+
+          <p className="text-2xl font-black">
+            {value}
+          </p>
+        </div>
+      </div>
+
+      <p className="mt-4 text-xs font-semibold text-gray-400">
+        {description}
+      </p>
     </div>
   );
 }
@@ -1440,11 +1638,13 @@ function EmptyState({
 }) {
   return (
     <div className="flex flex-col items-center justify-center px-6 py-14 text-center">
-      <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-gray-50 text-gray-400">
+      <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-gray-100 text-gray-400 dark:bg-white/5">
         <Icon size={24} />
       </div>
 
-      <h3 className="mt-4 font-black">{title}</h3>
+      <h3 className="mt-4 font-black">
+        {title}
+      </h3>
 
       <p className="mt-1 max-w-sm text-sm text-gray-400">
         {description}
@@ -1453,7 +1653,7 @@ function EmptyState({
       {actionHref && actionText && (
         <Link
           href={actionHref}
-          className="mt-5 inline-flex items-center gap-2 rounded-xl bg-indigo-600 px-4 py-2.5 text-sm font-bold text-white hover:bg-indigo-700"
+          className="mt-5 flex items-center gap-2 rounded-xl bg-indigo-600 px-4 py-2.5 text-sm font-black text-white hover:bg-indigo-700"
         >
           <Plus size={16} />
           {actionText}
@@ -1463,42 +1663,25 @@ function EmptyState({
   );
 }
 
-function BottomCard({
-  icon: Icon,
-  title,
-  value,
-  description,
-  className,
-}: {
-  icon: any;
-  title: string;
-  value: number | string;
-  description: string;
-  className: string;
-}) {
+function DashboardSkeleton() {
   return (
-    <div className="rounded-2xl border border-gray-100 bg-white p-5 shadow-sm">
-      <div className="flex items-center gap-4">
-        <div
-          className={`flex h-12 w-12 items-center justify-center rounded-xl ${className}`}
-        >
-          <Icon size={21} />
-        </div>
-
-        <div>
-          <p className="text-sm text-gray-400">
-            {title}
-          </p>
-
-          <p className="text-2xl font-black">
-            {value}
-          </p>
-        </div>
+    <div className="mt-8 space-y-6">
+      <div className="grid gap-5 sm:grid-cols-2 xl:grid-cols-4">
+        {[1, 2, 3, 4].map((item) => (
+          <div
+            key={item}
+            className="h-40 animate-pulse rounded-2xl bg-white dark:bg-white/5"
+          />
+        ))}
       </div>
 
-      <p className="mt-4 text-xs font-medium text-gray-400">
-        {description}
-      </p>
+      <div className="grid gap-6 xl:grid-cols-[1fr_360px]">
+        <div className="h-80 animate-pulse rounded-2xl bg-white dark:bg-white/5" />
+
+        <div className="h-80 animate-pulse rounded-2xl bg-white dark:bg-white/5" />
+      </div>
+
+      <div className="h-96 animate-pulse rounded-2xl bg-white dark:bg-white/5" />
     </div>
   );
 }
