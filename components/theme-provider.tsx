@@ -16,31 +16,35 @@ type ThemeContextType = {
   setTheme: (theme: Theme) => void;
 };
 
-const ThemeContext = createContext<ThemeContextType | undefined>(
-  undefined
-);
+const ThemeContext =
+  createContext<ThemeContextType | null>(null);
 
 export function ThemeProvider({
   children,
 }: {
   children: ReactNode;
 }) {
-  const [theme, setThemeState] = useState<Theme>("dark");
-  const [mounted, setMounted] = useState(false);
+  const [theme, setThemeState] =
+    useState<Theme>("dark");
+
+  const [mounted, setMounted] =
+    useState(false);
 
   useEffect(() => {
-    const savedTheme = localStorage.getItem("quizmaster-theme");
+    const saved =
+      localStorage.getItem("quizmaster-theme");
 
-    if (savedTheme === "light" || savedTheme === "dark") {
-      setThemeState(savedTheme);
-      document.documentElement.classList.toggle(
-        "dark",
-        savedTheme === "dark"
-      );
-    } else {
-      setThemeState("dark");
-      document.documentElement.classList.add("dark");
-    }
+    const initialTheme =
+      saved === "light" || saved === "dark"
+        ? saved
+        : "dark";
+
+    setThemeState(initialTheme);
+
+    document.documentElement.classList.toggle(
+      "dark",
+      initialTheme === "dark"
+    );
 
     setMounted(true);
   }, []);
@@ -60,7 +64,11 @@ export function ThemeProvider({
   };
 
   const toggleTheme = () => {
-    setTheme(theme === "dark" ? "light" : "dark");
+    setTheme(
+      theme === "dark"
+        ? "light"
+        : "dark"
+    );
   };
 
   if (!mounted) {
@@ -81,7 +89,8 @@ export function ThemeProvider({
 }
 
 export function useTheme() {
-  const context = useContext(ThemeContext);
+  const context =
+    useContext(ThemeContext);
 
   if (!context) {
     throw new Error(
