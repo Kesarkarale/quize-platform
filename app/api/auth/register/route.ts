@@ -34,6 +34,29 @@ export async function POST(request: Request) {
 
     const password = String(body.password || "");
 
+    /*
+    |--------------------------------------------------------------------------
+    | ROLE
+    |--------------------------------------------------------------------------
+    */
+
+    const requestedRole = String(
+      body.role || "STUDENT"
+    )
+      .trim()
+      .toUpperCase();
+
+    const role =
+      requestedRole === "ADMIN"
+        ? "ADMIN"
+        : "STUDENT";
+
+    /*
+    |--------------------------------------------------------------------------
+    | VALIDATION
+    |--------------------------------------------------------------------------
+    */
+
     if (!name || !email || !password) {
       return NextResponse.json(
         {
@@ -71,6 +94,12 @@ export async function POST(request: Request) {
       );
     }
 
+    /*
+    |--------------------------------------------------------------------------
+    | CREATE SUPABASE AUTH USER
+    |--------------------------------------------------------------------------
+    */
+
     const { data, error } =
       await supabase.auth.admin.createUser({
         email,
@@ -79,6 +108,7 @@ export async function POST(request: Request) {
 
         user_metadata: {
           name,
+          role,
         },
       });
 
@@ -120,6 +150,12 @@ export async function POST(request: Request) {
       );
     }
 
+    /*
+    |--------------------------------------------------------------------------
+    | CREATE PROFILE
+    |--------------------------------------------------------------------------
+    */
+
     const { error: profileError } =
       await supabase
         .from("profiles")
@@ -127,7 +163,7 @@ export async function POST(request: Request) {
           id: data.user.id,
           name,
           email,
-          role: "STUDENT",
+          role,
           status: "ACTIVE",
         });
 
@@ -136,6 +172,11 @@ export async function POST(request: Request) {
         "Profile Error:",
         profileError
       );
+
+      /*
+      | If profile creation fails,
+      | delete the auth user as rollback.
+      */
 
       await supabase.auth.admin.deleteUser(
         data.user.id
@@ -150,18 +191,26 @@ export async function POST(request: Request) {
       );
     }
 
+    /*
+    |--------------------------------------------------------------------------
+    | SUCCESS
+    |--------------------------------------------------------------------------
+    */
+
     return NextResponse.json(
       {
         success: true,
 
         message:
-          "Account created successfully.",
+          role === "ADMIN"
+            ? "Admin account created successfully."
+            : "Student account created successfully.",
 
         user: {
           id: data.user.id,
           name,
           email,
-          role: "STUDENT",
+          role,
           status: "ACTIVE",
         },
       },
@@ -181,4 +230,4 @@ export async function POST(request: Request) {
       { status: 500 }
     );
   }
-} 
+}
