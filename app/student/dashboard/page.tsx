@@ -439,7 +439,7 @@ export default function StudentDashboard() {
               navigateTo("Dashboard", "/student/dashboard")
             }
             className="flex items-center gap-3 text-left">
-             <ThemeToggle />
+             
 
             <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-gradient-to-br from-indigo-600 to-purple-600 text-white shadow-lg shadow-indigo-500/20">
               <Sparkles size={21} />
