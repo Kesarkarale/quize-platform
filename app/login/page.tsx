@@ -7,6 +7,7 @@ import { motion } from "framer-motion";
 import {
   ArrowRight,
   Brain,
+  Check,
   Eye,
   EyeOff,
   Lock,
@@ -18,154 +19,231 @@ import {
 import { toast } from "sonner";
 import { createClient } from "@/lib/supabase/client";
 
+type LoginRole = "STUDENT" | "ADMIN";
+
 export default function LoginPage() {
   const router = useRouter();
 
   const [loading, setLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
 
+  const [loginRole, setLoginRole] =
+    useState<LoginRole>("STUDENT");
+
   const [formData, setFormData] = useState({
     email: "",
     password: "",
   });
 
-const handleSubmit = async (
-  e: FormEvent<HTMLFormElement>
-) => {
-  e.preventDefault();
+  const handleSubmit = async (
+    e: FormEvent<HTMLFormElement>
+  ) => {
+    e.preventDefault();
 
-  const email = formData.email.trim();
-  const password = formData.password;
+    const email = formData.email.trim().toLowerCase();
+    const password = formData.password;
 
-  if (!email || !password) {
-    toast.error(
-      "Please enter email and password."
-    );
-    return;
-  }
+    if (!email || !password) {
+      toast.error(
+        "Please enter email and password."
+      );
+      return;
+    }
 
-  try {
-    setLoading(true);
+    try {
+      setLoading(true);
 
-    const supabase = createClient();
+      const supabase = createClient();
 
-    const {
-      data,
-      error,
-    } =
-      await supabase.auth.signInWithPassword({
+      /*
+       * Sign in with Supabase
+       */
+      const {
+        data,
+        error,
+      } = await supabase.auth.signInWithPassword({
         email,
         password,
       });
 
-    if (error) {
+      if (error) {
+        console.error(
+          "LOGIN ERROR:",
+          error
+        );
+
+        toast.error(
+          error.message ||
+            "Invalid email or password."
+        );
+
+        return;
+      }
+
+      if (!data.user) {
+        toast.error(
+          "Login failed."
+        );
+
+        return;
+      }
+
+      console.log(
+        "Logged in user:",
+        data.user
+      );
+
+      console.log(
+        "Session:",
+        data.session
+      );
+
+      /*
+       * Get role and status from profiles table
+       */
+      const {
+        data: profile,
+        error: profileError,
+      } = await supabase
+        .from("profiles")
+        .select("role,status,name,email")
+        .eq("id", data.user.id)
+        .maybeSingle();
+
+      /*
+       * Profile error
+       */
+      if (profileError) {
+        console.error(
+          "PROFILE ERROR:",
+          profileError
+        );
+
+        toast.error(
+          "Unable to load your account profile."
+        );
+
+        await supabase.auth.signOut();
+
+        return;
+      }
+
+      /*
+       * Profile not found
+       */
+      if (!profile) {
+        toast.error(
+          "User profile not found."
+        );
+
+        await supabase.auth.signOut();
+
+        return;
+      }
+
+      /*
+       * Check account status
+       */
+      if (
+        profile.status &&
+        profile.status !== "ACTIVE"
+      ) {
+        await supabase.auth.signOut();
+
+        toast.error(
+          "Your account is inactive. Please contact the administrator."
+        );
+
+        return;
+      }
+
+      /*
+       * Normalize role
+       */
+      const actualRole =
+        String(profile.role || "")
+          .toUpperCase();
+
+      /*
+       * Check selected login type
+       *
+       * Example:
+       * User selects ADMIN
+       * but database says STUDENT
+       * => block login
+       */
+      if (actualRole !== loginRole) {
+        await supabase.auth.signOut();
+
+        if (loginRole === "ADMIN") {
+          toast.error(
+            "This account is not registered as an Admin."
+          );
+        } else {
+          toast.error(
+            "This account is not registered as a Student."
+          );
+        }
+
+        return;
+      }
+
+      /*
+       * Successful login
+       */
+      toast.success(
+        loginRole === "ADMIN"
+          ? "Admin login successful! 🎉"
+          : "Student login successful! 🎉"
+      );
+
+      /*
+       * Give Supabase auth state
+       * a moment to persist.
+       */
+      await new Promise(
+        (resolve) =>
+          setTimeout(resolve, 300)
+      );
+
+      /*
+       * Redirect according to role
+       */
+      if (actualRole === "ADMIN") {
+        window.location.href =
+          "/admin/dashboard";
+
+        return;
+      }
+
+      if (actualRole === "STUDENT") {
+        window.location.href =
+          "/student/dashboard";
+
+        return;
+      }
+
+      /*
+       * Unknown role
+       */
+      await supabase.auth.signOut();
+
+      toast.error(
+        "Invalid user role."
+      );
+    } catch (error) {
       console.error(
         "LOGIN ERROR:",
         error
       );
 
       toast.error(
-        error.message ||
-          "Invalid email or password."
+        "Something went wrong. Please try again."
       );
-
-      return;
+    } finally {
+      setLoading(false);
     }
-
-    if (!data.user) {
-      toast.error(
-        "Login failed."
-      );
-
-      return;
-    }
-
-    console.log(
-      "Logged in user:",
-      data.user
-    );
-
-    console.log(
-      "Session:",
-      data.session
-    );
-
-    /*
-     * Get role from database
-     */
-    const { data: profile } =
-      await supabase
-        .from("profiles")
-        .select("role,status")
-        .eq("id", data.user.id)
-        .maybeSingle();
-
-    if (!profile) {
-      toast.error(
-        "User profile not found."
-      );
-      return;
-    }
-
-    if (
-      profile.status &&
-      profile.status !== "ACTIVE"
-    ) {
-      await supabase.auth.signOut();
-
-      toast.error(
-        "Your account is inactive."
-      );
-
-      return;
-    }
-
-    toast.success(
-      "Login successful! 🎉"
-    );
-
-    /*
-     * Give auth state time to persist.
-     */
-    await new Promise(
-      (resolve) =>
-        setTimeout(resolve, 300)
-    );
-
-    if (
-      profile.role === "ADMIN"
-    ) {
-      window.location.href =
-        "/admin/dashboard";
-
-      return;
-    }
-
-    if (
-      profile.role === "STUDENT"
-    ) {
-      window.location.href =
-        "/student/dashboard";
-
-      return;
-    }
-
-    toast.error(
-      "Invalid user role."
-    );
-  } catch (error) {
-    console.error(
-      "LOGIN ERROR:",
-      error
-    );
-
-    toast.error(
-      "Something went wrong."
-    );
-  } finally {
-    setLoading(false);
-  }
-};
+  };
 
   return (
     <main className="min-h-screen bg-[#050816] text-white">
@@ -208,6 +286,7 @@ const handleSubmit = async (
           <div className="max-w-xl">
             <div className="mb-6 inline-flex items-center gap-2 rounded-full border border-indigo-500/20 bg-indigo-500/10 px-4 py-2 text-xs font-semibold text-indigo-300">
               <span className="h-1.5 w-1.5 rounded-full bg-indigo-400" />
+
               Smart learning starts here
             </div>
 
@@ -216,6 +295,7 @@ const handleSubmit = async (
               <br />
               knowledge.
               <br />
+
               <span className="bg-gradient-to-r from-indigo-400 via-purple-400 to-cyan-400 bg-clip-text text-transparent">
                 Track your growth.
               </span>
@@ -251,6 +331,7 @@ const handleSubmit = async (
 
           <div className="flex items-center gap-2 text-xs text-gray-700">
             <ShieldCheck size={15} />
+
             Secure online assessment platform
           </div>
         </section>
@@ -305,8 +386,8 @@ const handleSubmit = async (
                 </h2>
 
                 <p className="mt-2 text-sm leading-6 text-gray-600">
-                  Continue your learning journey and
-                  access your quizzes.
+                  Choose your account type and
+                  continue to QuizMaster.
                 </p>
               </div>
 
@@ -314,6 +395,109 @@ const handleSubmit = async (
                 onSubmit={handleSubmit}
                 className="mt-8 space-y-5"
               >
+                {/* =====================================
+                    LOGIN AS
+                ===================================== */}
+
+                <div>
+                  <label className="mb-2 block text-xs font-bold text-gray-400">
+                    Login As
+                  </label>
+
+                  <div className="grid grid-cols-2 gap-3">
+                    {/* Student */}
+
+                    <button
+                      type="button"
+                      onClick={() =>
+                        setLoginRole("STUDENT")
+                      }
+                      className={`relative flex items-center gap-3 rounded-xl border p-3.5 text-left transition ${
+                        loginRole === "STUDENT"
+                          ? "border-indigo-500 bg-indigo-500/10 text-indigo-300"
+                          : "border-white/10 bg-black/20 text-gray-500 hover:border-white/20"
+                      }`}
+                    >
+                      <div
+                        className={`flex h-9 w-9 shrink-0 items-center justify-center rounded-lg ${
+                          loginRole === "STUDENT"
+                            ? "bg-indigo-500/20"
+                            : "bg-white/5"
+                        }`}
+                      >
+                        <Users size={18} />
+                      </div>
+
+                      <div>
+                        <p className="text-sm font-bold">
+                          Student
+                        </p>
+
+                        <p className="mt-0.5 text-[10px] text-gray-600">
+                          Take quizzes
+                        </p>
+                      </div>
+
+                      {loginRole === "STUDENT" && (
+                        <Check
+                          size={16}
+                          className="ml-auto text-indigo-400"
+                        />
+                      )}
+                    </button>
+
+                    {/* Admin */}
+
+                    <button
+                      type="button"
+                      onClick={() =>
+                        setLoginRole("ADMIN")
+                      }
+                      className={`relative flex items-center gap-3 rounded-xl border p-3.5 text-left transition ${
+                        loginRole === "ADMIN"
+                          ? "border-purple-500 bg-purple-500/10 text-purple-300"
+                          : "border-white/10 bg-black/20 text-gray-500 hover:border-white/20"
+                      }`}
+                    >
+                      <div
+                        className={`flex h-9 w-9 shrink-0 items-center justify-center rounded-lg ${
+                          loginRole === "ADMIN"
+                            ? "bg-purple-500/20"
+                            : "bg-white/5"
+                        }`}
+                      >
+                        <ShieldCheck size={18} />
+                      </div>
+
+                      <div>
+                        <p className="text-sm font-bold">
+                          Admin
+                        </p>
+
+                        <p className="mt-0.5 text-[10px] text-gray-600">
+                          Manage platform
+                        </p>
+                      </div>
+
+                      {loginRole === "ADMIN" && (
+                        <Check
+                          size={16}
+                          className="ml-auto text-purple-400"
+                        />
+                      )}
+                    </button>
+                  </div>
+
+                  <p className="mt-2 text-[10px] text-gray-600">
+                    Selected login type:{" "}
+                    <span className="font-bold text-gray-400">
+                      {loginRole === "ADMIN"
+                        ? "Administrator"
+                        : "Student"}
+                    </span>
+                  </p>
+                </div>
+
                 {/* Email */}
 
                 <div>
@@ -387,7 +571,8 @@ const handleSubmit = async (
                       onChange={(e) =>
                         setFormData((prev) => ({
                           ...prev,
-                          password: e.target.value,
+                          password:
+                            e.target.value,
                         }))
                       }
                       className="w-full bg-transparent px-3 py-3.5 text-sm text-white outline-none placeholder:text-gray-700"
@@ -437,11 +622,16 @@ const handleSubmit = async (
                   {loading ? (
                     <>
                       <span className="h-4 w-4 animate-spin rounded-full border-2 border-white/30 border-t-white" />
+
                       Signing in...
                     </>
                   ) : (
                     <>
-                      Login
+                      Login as{" "}
+                      {loginRole === "ADMIN"
+                        ? "Admin"
+                        : "Student"}
+
                       <ArrowRight size={17} />
                     </>
                   )}
@@ -459,14 +649,15 @@ const handleSubmit = async (
                   href="/register"
                   className="mt-2 inline-block text-sm font-bold text-indigo-400 transition hover:text-indigo-300"
                 >
-                  Create a Student Account
+                  Create a New Account
                 </Link>
               </div>
             </div>
 
             <p className="mt-6 text-center text-[11px] text-gray-700">
-              By continuing, you agree to our Terms
-              and Privacy Policy.
+              {loginRole === "ADMIN"
+                ? "Admin access is limited to authorized administrators."
+                : "Students can access quizzes, results, performance and leaderboard."}
             </p>
           </motion.div>
         </section>
@@ -500,4 +691,3 @@ function InfoCard({
     </div>
   );
 }
-
