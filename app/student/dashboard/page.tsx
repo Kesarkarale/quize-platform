@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 import type { ReactNode } from "react";
+
 import ThemeToggle from "@/components/theme-toggle";
 
 import {
@@ -14,10 +15,8 @@ import {
   Home,
   LogOut,
   Menu,
-  Moon,
   Search,
   Settings,
-  Sun,
   Trophy,
   User,
   X,
@@ -183,46 +182,23 @@ const demoAttempts: Attempt[] = [
 export default function StudentDashboard() {
   const router = useRouter();
 
-  const [profile, setProfile] = useState<Profile | null>(null);
-  const [loading, setLoading] = useState(true);
+  const [profile, setProfile] =
+    useState<Profile | null>(null);
 
-  const [darkMode, setDarkMode] = useState(false);
-  const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [loading, setLoading] =
+    useState(true);
 
-  const [search, setSearch] = useState("");
-  const [category, setCategory] = useState("All");
+  const [sidebarOpen, setSidebarOpen] =
+    useState(false);
 
-  const [activeMenu, setActiveMenu] = useState("Dashboard");
+  const [search, setSearch] =
+    useState("");
 
-  /* =======================================================
-     LOAD THEME
-  ======================================================= */
+  const [category, setCategory] =
+    useState("All");
 
-  useEffect(() => {
-    const savedTheme = localStorage.getItem("quiz-theme");
-
-    if (savedTheme === "dark") {
-      setDarkMode(true);
-      document.documentElement.classList.add("dark");
-    } else {
-      setDarkMode(false);
-      document.documentElement.classList.remove("dark");
-    }
-  }, []);
-
-  /* =======================================================
-     APPLY THEME
-  ======================================================= */
-
-  useEffect(() => {
-    if (darkMode) {
-      document.documentElement.classList.add("dark");
-      localStorage.setItem("quiz-theme", "dark");
-    } else {
-      document.documentElement.classList.remove("dark");
-      localStorage.setItem("quiz-theme", "light");
-    }
-  }, [darkMode]);
+  const [activeMenu, setActiveMenu] =
+    useState("Dashboard");
 
   /* =======================================================
      LOAD USER PROFILE
@@ -239,7 +215,10 @@ export default function StudentDashboard() {
         } = await supabase.auth.getUser();
 
         if (authError) {
-          console.error("Auth error:", authError);
+          console.error(
+            "Auth error:",
+            authError
+          );
         }
 
         if (!user) {
@@ -247,31 +226,48 @@ export default function StudentDashboard() {
           return;
         }
 
-        const { data, error } = await supabase
+        const {
+          data,
+          error,
+        } = await supabase
           .from("profiles")
-          .select("id, name, email, role, status")
+          .select(
+            "id, name, email, role, status"
+          )
           .eq("id", user.id)
           .single();
 
         if (error) {
-          console.error("Profile error:", error);
+          console.error(
+            "Profile error:",
+            error
+          );
         }
 
         if (!data) {
-          toast.error("Profile not found.");
+          toast.error(
+            "Profile not found."
+          );
+
           router.replace("/login");
           return;
         }
 
         if (data.role !== "STUDENT") {
-          router.replace("/admin/dashboard");
+          router.replace(
+            "/admin/dashboard"
+          );
+
           return;
         }
 
         if (data.status !== "ACTIVE") {
           await supabase.auth.signOut();
 
-          toast.error("Your account is inactive.");
+          toast.error(
+            "Your account is inactive."
+          );
+
           router.replace("/login");
           return;
         }
@@ -280,10 +276,15 @@ export default function StudentDashboard() {
           setProfile(data);
         }
       } catch (error) {
-        console.error("Dashboard error:", error);
+        console.error(
+          "Dashboard error:",
+          error
+        );
 
         if (mounted) {
-          toast.error("Unable to load dashboard.");
+          toast.error(
+            "Unable to load dashboard."
+          );
         }
 
         router.replace("/login");
@@ -307,21 +308,34 @@ export default function StudentDashboard() {
 
   const handleLogout = async () => {
     try {
-      const { error } = await supabase.auth.signOut();
+      const { error } =
+        await supabase.auth.signOut();
 
       if (error) {
-        console.error("Logout error:", error);
-        toast.error("Unable to logout.");
+        console.error(
+          "Logout error:",
+          error
+        );
+
+        toast.error(
+          "Unable to logout."
+        );
+
         return;
       }
 
-      toast.success("Logged out successfully.");
+      toast.success(
+        "Logged out successfully."
+      );
 
       router.replace("/login");
       router.refresh();
     } catch (error) {
       console.error(error);
-      toast.error("Something went wrong.");
+
+      toast.error(
+        "Something went wrong."
+      );
     }
   };
 
@@ -329,7 +343,10 @@ export default function StudentDashboard() {
      NAVIGATION
   ======================================================= */
 
-  const navigateTo = (menu: string, path: string) => {
+  const navigateTo = (
+    menu: string,
+    path: string
+  ) => {
     setActiveMenu(menu);
     setSidebarOpen(false);
     router.push(path);
@@ -354,16 +371,25 @@ export default function StudentDashboard() {
 
   const filteredQuizzes = useMemo(() => {
     return demoQuizzes.filter((quiz) => {
-      const query = search.toLowerCase().trim();
+      const query =
+        search.toLowerCase().trim();
 
       const matchesSearch =
-        quiz.title.toLowerCase().includes(query) ||
-        quiz.category.toLowerCase().includes(query);
+        quiz.title
+          .toLowerCase()
+          .includes(query) ||
+        quiz.category
+          .toLowerCase()
+          .includes(query);
 
       const matchesCategory =
-        category === "All" || quiz.category === category;
+        category === "All" ||
+        quiz.category === category;
 
-      return matchesSearch && matchesCategory;
+      return (
+        matchesSearch &&
+        matchesCategory
+      );
     });
   }, [search, category]);
 
@@ -374,9 +400,8 @@ export default function StudentDashboard() {
   if (loading) {
     return (
       <div className="flex min-h-screen items-center justify-center bg-gray-50 dark:bg-[#08090b]">
-        
         <div className="text-center">
-          <div className="mx-auto h-10 w-10 animate-spin rounded-full border-4 border-indigo-100 border-t-indigo-600" />
+          <div className="mx-auto h-10 w-10 animate-spin rounded-full border-4 border-indigo-100 border-t-indigo-600 dark:border-indigo-500/20 dark:border-t-indigo-400" />
 
           <p className="mt-4 text-sm font-semibold text-gray-500 dark:text-gray-400">
             Loading dashboard...
@@ -386,7 +411,9 @@ export default function StudentDashboard() {
     );
   }
 
-  const firstName = profile?.name?.split(" ")[0] || "Student";
+  const firstName =
+    profile?.name?.split(" ")[0] ||
+    "Student";
 
   return (
     <div className="min-h-screen bg-gray-50 text-gray-900 transition-colors duration-300 dark:bg-[#08090b] dark:text-white">
@@ -397,7 +424,9 @@ export default function StudentDashboard() {
 
       {sidebarOpen && (
         <div
-          onClick={() => setSidebarOpen(false)}
+          onClick={() =>
+            setSidebarOpen(false)
+          }
           className="fixed inset-0 z-40 bg-black/50 backdrop-blur-sm lg:hidden"
         />
       )}
@@ -423,6 +452,7 @@ export default function StudentDashboard() {
           duration-300
           dark:border-white/10
           dark:bg-[#101114]
+
           ${
             sidebarOpen
               ? "translate-x-0"
@@ -430,24 +460,31 @@ export default function StudentDashboard() {
           }
         `}
       >
+
         {/* LOGO */}
 
         <div className="flex items-center justify-between">
+
           <button
             type="button"
             onClick={() =>
-              navigateTo("Dashboard", "/student/dashboard")
+              navigateTo(
+                "Dashboard",
+                "/student/dashboard"
+              )
             }
-            className="flex items-center gap-3 text-left">
-             
-
+            className="flex items-center gap-3 text-left"
+          >
             <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-gradient-to-br from-indigo-600 to-purple-600 text-white shadow-lg shadow-indigo-500/20">
               <Sparkles size={21} />
             </div>
 
             <div>
               <h1 className="text-lg font-black tracking-tight">
-                Quiz<span className="text-indigo-600">Pro</span>
+                Quiz
+                <span className="text-indigo-600 dark:text-indigo-400">
+                  Pro
+                </span>
               </h1>
 
               <p className="text-[10px] font-medium uppercase tracking-[0.2em] text-gray-400">
@@ -458,7 +495,9 @@ export default function StudentDashboard() {
 
           <button
             type="button"
-            onClick={() => setSidebarOpen(false)}
+            onClick={() =>
+              setSidebarOpen(false)
+            }
             className="rounded-xl p-2 text-gray-500 hover:bg-gray-100 dark:hover:bg-white/10 lg:hidden"
           >
             <X size={20} />
@@ -473,37 +512,64 @@ export default function StudentDashboard() {
           </p>
 
           <nav className="space-y-1">
+
             <SidebarItem
               icon={<Home size={19} />}
               label="Dashboard"
-              active={activeMenu === "Dashboard"}
+              active={
+                activeMenu ===
+                "Dashboard"
+              }
               onClick={() =>
-                navigateTo("Dashboard", "/student/dashboard")
+                navigateTo(
+                  "Dashboard",
+                  "/student/dashboard"
+                )
               }
             />
 
             <SidebarItem
-              icon={<BookOpen size={19} />}
+              icon={
+                <BookOpen size={19} />
+              }
               label="Explore Quizzes"
-              active={activeMenu === "Quizzes"}
+              active={
+                activeMenu === "Quizzes"
+              }
               onClick={() =>
-                navigateTo("Quizzes", "/quiz")
+                navigateTo(
+                  "Quizzes",
+                  "/quiz"
+                )
               }
             />
 
             <SidebarItem
-              icon={<Trophy size={19} />}
+              icon={
+                <Trophy size={19} />
+              }
               label="Leaderboard"
-              active={activeMenu === "Leaderboard"}
+              active={
+                activeMenu ===
+                "Leaderboard"
+              }
               onClick={() =>
-                navigateTo("Leaderboard", "/leaderboard")
+                navigateTo(
+                  "Leaderboard",
+                  "/leaderboard"
+                )
               }
             />
 
             <SidebarItem
-              icon={<BarChart3 size={19} />}
+              icon={
+                <BarChart3 size={19} />
+              }
               label="My Performance"
-              active={activeMenu === "Performance"}
+              active={
+                activeMenu ===
+                "Performance"
+              }
               onClick={() =>
                 navigateTo(
                   "Performance",
@@ -511,6 +577,7 @@ export default function StudentDashboard() {
                 )
               }
             />
+
           </nav>
         </div>
 
@@ -522,10 +589,13 @@ export default function StudentDashboard() {
           </p>
 
           <nav className="space-y-1">
+
             <SidebarItem
               icon={<User size={19} />}
               label="Profile"
-              active={activeMenu === "Profile"}
+              active={
+                activeMenu === "Profile"
+              }
               onClick={() =>
                 navigateTo(
                   "Profile",
@@ -535,9 +605,14 @@ export default function StudentDashboard() {
             />
 
             <SidebarItem
-              icon={<Settings size={19} />}
+              icon={
+                <Settings size={19} />
+              }
               label="Settings"
-              active={activeMenu === "Settings"}
+              active={
+                activeMenu ===
+                "Settings"
+              }
               onClick={() =>
                 navigateTo(
                   "Settings",
@@ -545,14 +620,18 @@ export default function StudentDashboard() {
                 )
               }
             />
+
           </nav>
         </div>
 
         {/* BOTTOM */}
 
         <div className="absolute bottom-5 left-5 right-5">
+
           <div className="mb-4 rounded-2xl border border-indigo-100 bg-indigo-50 p-4 dark:border-indigo-500/20 dark:bg-indigo-500/10">
+
             <div className="flex items-center gap-3">
+
               <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-indigo-600 text-white">
                 <Target size={18} />
               </div>
@@ -566,7 +645,9 @@ export default function StudentDashboard() {
                   Your streak is 7 days
                 </p>
               </div>
+
             </div>
+
           </div>
 
           <button
@@ -577,7 +658,9 @@ export default function StudentDashboard() {
             <LogOut size={19} />
             Logout
           </button>
+
         </div>
+
       </aside>
 
       {/* =====================================================
@@ -589,19 +672,23 @@ export default function StudentDashboard() {
         {/* HEADER */}
 
         <header className="sticky top-0 z-30 border-b border-gray-200/80 bg-white/80 px-4 py-4 backdrop-blur-xl dark:border-white/10 dark:bg-[#08090b]/80 sm:px-6 lg:px-8">
+
           <div className="flex items-center justify-between gap-4">
 
             <div className="flex items-center gap-3">
 
               <button
                 type="button"
-                onClick={() => setSidebarOpen(true)}
+                onClick={() =>
+                  setSidebarOpen(true)
+                }
                 className="rounded-xl border border-gray-200 bg-white p-2.5 dark:border-white/10 dark:bg-white/5 lg:hidden"
               >
                 <Menu size={20} />
               </button>
 
               <div className="hidden sm:block">
+
                 <p className="text-xs font-medium text-gray-400">
                   Student Dashboard
                 </p>
@@ -609,7 +696,9 @@ export default function StudentDashboard() {
                 <h2 className="text-lg font-bold">
                   Overview
                 </h2>
+
               </div>
+
             </div>
 
             <div className="flex items-center gap-3">
@@ -617,6 +706,7 @@ export default function StudentDashboard() {
               {/* SEARCH */}
 
               <div className="hidden w-[250px] items-center gap-2 rounded-xl border border-gray-200 bg-gray-50 px-3 py-2.5 md:flex dark:border-white/10 dark:bg-white/5">
+
                 <Search
                   size={17}
                   className="text-gray-400"
@@ -625,55 +715,49 @@ export default function StudentDashboard() {
                 <input
                   value={search}
                   onChange={(e) =>
-                    setSearch(e.target.value)
+                    setSearch(
+                      e.target.value
+                    )
                   }
                   placeholder="Search quizzes..."
                   className="w-full bg-transparent text-sm outline-none placeholder:text-gray-400"
                 />
+
               </div>
 
-              {/* THEME */}
+              {/* GLOBAL THEME */}
 
-              <button
-                type="button"
-                onClick={() =>
-                  setDarkMode((value) => !value)
-                }
-                className="flex h-10 w-10 items-center justify-center rounded-xl border border-gray-200 bg-white transition hover:scale-105 dark:border-white/10 dark:bg-white/5"
-                aria-label="Toggle theme"
-              >
-                {darkMode ? (
-                  <Sun
-                    size={19}
-                    className="text-yellow-400"
-                  />
-                ) : (
-                  <Moon
-                    size={19}
-                    className="text-gray-600"
-                  />
-                )}
-              </button>
+              <ThemeToggle />
 
               {/* USER */}
 
               <div className="hidden items-center gap-3 sm:flex">
+
                 <div className="text-right">
+
                   <p className="text-sm font-bold">
-                    {profile?.name || "Student"}
+                    {profile?.name ||
+                      "Student"}
                   </p>
 
                   <p className="text-[11px] text-gray-400">
                     Student
                   </p>
+
                 </div>
 
                 <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-br from-indigo-500 to-purple-600 font-bold text-white shadow-lg">
-                  {firstName.charAt(0).toUpperCase()}
+                  {firstName
+                    .charAt(0)
+                    .toUpperCase()}
                 </div>
+
               </div>
+
             </div>
+
           </div>
+
         </header>
 
         {/* ===================================================
@@ -693,44 +777,59 @@ export default function StudentDashboard() {
             <div className="relative z-10 flex flex-col justify-between gap-6 md:flex-row md:items-center">
 
               <div>
+
                 <div className="mb-3 flex items-center gap-2 text-indigo-100">
+
                   <Sparkles size={16} />
 
                   <span className="text-xs font-semibold uppercase tracking-[0.15em]">
                     Keep Growing
                   </span>
+
                 </div>
 
                 <h1 className="text-2xl font-black tracking-tight sm:text-3xl">
-                  Welcome back, {firstName}! 👋
+                  Welcome back,{" "}
+                  {firstName}! 👋
                 </h1>
 
                 <p className="mt-2 max-w-xl text-sm leading-6 text-indigo-100 sm:text-base">
-                  Ready to challenge yourself?
-                  Continue learning and improve
+                  Ready to challenge
+                  yourself? Continue
+                  learning and improve
                   your score today.
                 </p>
 
                 <button
                   type="button"
                   onClick={() =>
-                    navigateTo("Quizzes", "/quiz")
+                    navigateTo(
+                      "Quizzes",
+                      "/quiz"
+                    )
                   }
                   className="mt-6 inline-flex items-center gap-2 rounded-xl bg-white px-5 py-3 text-sm font-bold text-indigo-700 shadow-xl transition hover:-translate-y-0.5 hover:shadow-2xl"
                 >
                   Explore Quizzes
-                  <ChevronRight size={17} />
+                  <ChevronRight
+                    size={17}
+                  />
                 </button>
+
               </div>
 
               <div className="hidden h-32 w-32 items-center justify-center rounded-[28px] bg-white/10 backdrop-blur-md lg:flex">
+
                 <Trophy
                   size={65}
                   strokeWidth={1.5}
                   className="text-yellow-300"
                 />
+
               </div>
+
             </div>
+
           </section>
 
           {/* =================================================
@@ -740,7 +839,11 @@ export default function StudentDashboard() {
           <section className="mt-6 grid grid-cols-2 gap-4 lg:grid-cols-4">
 
             <StatCard
-              icon={<BookOpen size={21} />}
+              icon={
+                <BookOpen
+                  size={21}
+                />
+              }
               title="Quizzes Attempted"
               value="24"
               description="+4 this month"
@@ -748,7 +851,11 @@ export default function StudentDashboard() {
             />
 
             <StatCard
-              icon={<CheckCircle2 size={21} />}
+              icon={
+                <CheckCircle2
+                  size={21}
+                />
+              }
               title="Passed"
               value="18"
               description="75% success rate"
@@ -756,7 +863,9 @@ export default function StudentDashboard() {
             />
 
             <StatCard
-              icon={<Target size={21} />}
+              icon={
+                <Target size={21} />
+              }
               title="Average Score"
               value="82%"
               description="+8% improvement"
@@ -764,7 +873,9 @@ export default function StudentDashboard() {
             />
 
             <StatCard
-              icon={<Trophy size={21} />}
+              icon={
+                <Trophy size={21} />
+              }
               title="Highest Score"
               value="96%"
               description="Personal best"
@@ -786,13 +897,16 @@ export default function StudentDashboard() {
               <div className="flex items-center justify-between">
 
                 <div>
+
                   <h3 className="font-bold">
                     Performance Overview
                   </h3>
 
                   <p className="mt-1 text-xs text-gray-400">
-                    Your score progress over the last 7 days
+                    Your score progress
+                    over the last 7 days
                   </p>
+
                 </div>
 
                 <div className="rounded-xl bg-indigo-50 px-3 py-2 text-xs font-bold text-indigo-600 dark:bg-indigo-500/10 dark:text-indigo-400">
@@ -807,9 +921,15 @@ export default function StudentDashboard() {
                   width="100%"
                   height="100%"
                 >
-                  <AreaChart data={performanceData}>
+
+                  <AreaChart
+                    data={
+                      performanceData
+                    }
+                  >
 
                     <defs>
+
                       <linearGradient
                         id="scoreGradient"
                         x1="0"
@@ -817,6 +937,7 @@ export default function StudentDashboard() {
                         x2="0"
                         y2="1"
                       >
+
                         <stop
                           offset="0%"
                           stopColor="#6366f1"
@@ -828,17 +949,15 @@ export default function StudentDashboard() {
                           stopColor="#6366f1"
                           stopOpacity={0}
                         />
+
                       </linearGradient>
+
                     </defs>
 
                     <CartesianGrid
                       strokeDasharray="3 3"
                       vertical={false}
-                      stroke={
-                        darkMode
-                          ? "#27272a"
-                          : "#e5e7eb"
-                      }
+                      className="stroke-gray-200 dark:stroke-zinc-800"
                     />
 
                     <XAxis
@@ -846,9 +965,7 @@ export default function StudentDashboard() {
                       axisLine={false}
                       tickLine={false}
                       tick={{
-                        fill: darkMode
-                          ? "#9ca3af"
-                          : "#6b7280",
+                        fill: "#9ca3af",
                         fontSize: 11,
                       }}
                     />
@@ -858,25 +975,21 @@ export default function StudentDashboard() {
                       axisLine={false}
                       tickLine={false}
                       tick={{
-                        fill: darkMode
-                          ? "#9ca3af"
-                          : "#6b7280",
+                        fill: "#9ca3af",
                         fontSize: 11,
                       }}
                     />
 
                     <Tooltip
                       contentStyle={{
-                        borderRadius: "12px",
-                        border: darkMode
-                          ? "1px solid #27272a"
-                          : "1px solid #e5e7eb",
-                        background: darkMode
-                          ? "#18181b"
-                          : "#ffffff",
-                        color: darkMode
-                          ? "#ffffff"
-                          : "#111827",
+                        borderRadius:
+                          "12px",
+                        border:
+                          "1px solid #27272a",
+                        background:
+                          "#18181b",
+                        color:
+                          "#ffffff",
                       }}
                     />
 
@@ -889,9 +1002,11 @@ export default function StudentDashboard() {
                     />
 
                   </AreaChart>
+
                 </ResponsiveContainer>
 
               </div>
+
             </div>
 
             {/* PROGRESS */}
@@ -901,6 +1016,7 @@ export default function StudentDashboard() {
               <div className="flex items-center justify-between">
 
                 <div>
+
                   <h3 className="font-bold">
                     Your Progress
                   </h3>
@@ -908,6 +1024,7 @@ export default function StudentDashboard() {
                   <p className="mt-1 text-xs text-gray-400">
                     Overall performance
                   </p>
+
                 </div>
 
                 <Flame
@@ -924,6 +1041,7 @@ export default function StudentDashboard() {
                   <div className="absolute inset-0 rotate-45 rounded-full border-[14px] border-transparent border-r-indigo-600 border-t-indigo-600" />
 
                   <div className="text-center">
+
                     <p className="text-3xl font-black">
                       82%
                     </p>
@@ -931,6 +1049,7 @@ export default function StudentDashboard() {
                     <p className="text-xs text-gray-400">
                       Average
                     </p>
+
                   </div>
 
                 </div>
@@ -943,14 +1062,22 @@ export default function StudentDashboard() {
                   label="Passed"
                   value="18"
                   percent="75%"
-                  icon={<CheckCircle2 size={16} />}
+                  icon={
+                    <CheckCircle2
+                      size={16}
+                    />
+                  }
                 />
 
                 <ProgressRow
                   label="Failed"
                   value="6"
                   percent="25%"
-                  icon={<XCircle size={16} />}
+                  icon={
+                    <XCircle
+                      size={16}
+                    />
+                  }
                 />
 
               </div>
@@ -968,6 +1095,7 @@ export default function StudentDashboard() {
             <div className="mb-4 flex flex-col justify-between gap-3 sm:flex-row sm:items-center">
 
               <div>
+
                 <h3 className="text-lg font-black">
                   Explore Quizzes
                 </h3>
@@ -975,17 +1103,23 @@ export default function StudentDashboard() {
                 <p className="mt-1 text-xs text-gray-400">
                   Find your next challenge
                 </p>
+
               </div>
 
               <button
                 type="button"
                 onClick={() =>
-                  navigateTo("Quizzes", "/quiz")
+                  navigateTo(
+                    "Quizzes",
+                    "/quiz"
+                  )
                 }
                 className="inline-flex items-center gap-1 text-sm font-bold text-indigo-600 dark:text-indigo-400"
               >
                 View all
-                <ChevronRight size={16} />
+                <ChevronRight
+                  size={16}
+                />
               </button>
 
             </div>
@@ -994,20 +1128,26 @@ export default function StudentDashboard() {
 
             <div className="mb-5 flex gap-2 overflow-x-auto pb-1">
 
-              {categories.map((item) => (
-                <button
-                  type="button"
-                  key={item}
-                  onClick={() => setCategory(item)}
-                  className={`whitespace-nowrap rounded-xl px-4 py-2 text-xs font-bold transition ${
-                    category === item
-                      ? "bg-indigo-600 text-white shadow-lg shadow-indigo-500/20"
-                      : "border border-gray-200 bg-white text-gray-500 hover:border-indigo-300 dark:border-white/10 dark:bg-[#101114] dark:text-gray-400"
-                  }`}
-                >
-                  {item}
-                </button>
-              ))}
+              {categories.map(
+                (item) => (
+                  <button
+                    type="button"
+                    key={item}
+                    onClick={() =>
+                      setCategory(
+                        item
+                      )
+                    }
+                    className={`whitespace-nowrap rounded-xl px-4 py-2 text-xs font-bold transition ${
+                      category === item
+                        ? "bg-indigo-600 text-white shadow-lg shadow-indigo-500/20"
+                        : "border border-gray-200 bg-white text-gray-500 hover:border-indigo-300 dark:border-white/10 dark:bg-[#101114] dark:text-gray-400"
+                    }`}
+                  >
+                    {item}
+                  </button>
+                )
+              )}
 
             </div>
 
@@ -1015,16 +1155,19 @@ export default function StudentDashboard() {
 
             <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
 
-              {filteredQuizzes.map((quiz) => (
-                <QuizCard
-                  key={quiz.id}
-                  quiz={quiz}
-                />
-              ))}
+              {filteredQuizzes.map(
+                (quiz) => (
+                  <QuizCard
+                    key={quiz.id}
+                    quiz={quiz}
+                  />
+                )
+              )}
 
             </div>
 
-            {filteredQuizzes.length === 0 && (
+            {filteredQuizzes.length ===
+              0 && (
               <div className="rounded-2xl border border-dashed border-gray-300 py-12 text-center dark:border-white/10">
 
                 <Search
@@ -1037,7 +1180,8 @@ export default function StudentDashboard() {
                 </p>
 
                 <p className="mt-1 text-xs text-gray-400">
-                  Try another search or category.
+                  Try another search
+                  or category.
                 </p>
 
               </div>
@@ -1058,13 +1202,16 @@ export default function StudentDashboard() {
               <div className="flex items-center justify-between">
 
                 <div>
+
                   <h3 className="font-bold">
                     Recent Attempts
                   </h3>
 
                   <p className="mt-1 text-xs text-gray-400">
-                    Your latest quiz activity
+                    Your latest quiz
+                    activity
                   </p>
+
                 </div>
 
                 <button
@@ -1084,63 +1231,84 @@ export default function StudentDashboard() {
 
               <div className="mt-5 space-y-3">
 
-                {demoAttempts.map((attempt) => (
-                  <div
-                    key={attempt.id}
-                    className="flex items-center justify-between gap-3 rounded-2xl border border-gray-100 p-4 transition hover:bg-gray-50 dark:border-white/5 dark:hover:bg-white/[0.03]"
-                  >
+                {demoAttempts.map(
+                  (attempt) => (
+                    <div
+                      key={
+                        attempt.id
+                      }
+                      className="flex items-center justify-between gap-3 rounded-2xl border border-gray-100 p-4 transition hover:bg-gray-50 dark:border-white/5 dark:hover:bg-white/[0.03]"
+                    >
 
-                    <div className="flex min-w-0 items-center gap-3">
+                      <div className="flex min-w-0 items-center gap-3">
 
-                      <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-indigo-50 text-indigo-600 dark:bg-indigo-500/10 dark:text-indigo-400">
-                        <BookOpen size={18} />
+                        <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-indigo-50 text-indigo-600 dark:bg-indigo-500/10 dark:text-indigo-400">
+                          <BookOpen
+                            size={18}
+                          />
+                        </div>
+
+                        <div className="min-w-0">
+
+                          <p className="truncate text-sm font-bold">
+                            {
+                              attempt.quiz
+                            }
+                          </p>
+
+                          <p className="mt-1 text-[11px] text-gray-400">
+                            {
+                              attempt.category
+                            }{" "}
+                            •{" "}
+                            {
+                              attempt.date
+                            }
+                          </p>
+
+                        </div>
+
                       </div>
 
-                      <div className="min-w-0">
+                      <div className="flex items-center gap-3">
 
-                        <p className="truncate text-sm font-bold">
-                          {attempt.quiz}
-                        </p>
+                        <div className="text-right">
 
-                        <p className="mt-1 text-[11px] text-gray-400">
-                          {attempt.category} • {attempt.date}
-                        </p>
+                          <p className="text-sm font-black">
+                            {
+                              attempt.score
+                            }
+                            %
+                          </p>
+
+                          <span
+                            className={`text-[10px] font-bold ${
+                              attempt.status ===
+                              "Passed"
+                                ? "text-emerald-500"
+                                : "text-red-500"
+                            }`}
+                          >
+                            {
+                              attempt.status
+                            }
+                          </span>
+
+                        </div>
+
+                        <ChevronRight
+                          size={17}
+                          className="text-gray-400"
+                        />
 
                       </div>
 
                     </div>
-
-                    <div className="flex items-center gap-3">
-
-                      <div className="text-right">
-
-                        <p className="text-sm font-black">
-                          {attempt.score}%
-                        </p>
-
-                        <span
-                          className={`text-[10px] font-bold ${
-                            attempt.status === "Passed"
-                              ? "text-emerald-500"
-                              : "text-red-500"
-                          }`}
-                        >
-                          {attempt.status}
-                        </span>
-
-                      </div>
-
-                      <ChevronRight
-                        size={17}
-                        className="text-gray-400"
-                      />
-
-                    </div>
-
-                  </div>
-                ))}
+                  )
+                )}
 
               </div>
+
             </div>
 
             {/* LEADERBOARD */}
@@ -1150,13 +1318,16 @@ export default function StudentDashboard() {
               <div className="flex items-center justify-between">
 
                 <div>
+
                   <h3 className="font-bold">
                     Leaderboard
                   </h3>
 
                   <p className="mt-1 text-xs text-gray-400">
-                    Top performers this week
+                    Top performers this
+                    week
                   </p>
+
                 </div>
 
                 <Trophy
@@ -1188,7 +1359,10 @@ export default function StudentDashboard() {
 
                 <LeaderboardRow
                   rank={4}
-                  name={profile?.name || "You"}
+                  name={
+                    profile?.name ||
+                    "You"
+                  }
                   score="82%"
                   current
                 />
@@ -1206,7 +1380,9 @@ export default function StudentDashboard() {
                 className="mt-5 flex w-full items-center justify-center gap-2 rounded-xl bg-gray-50 py-3 text-xs font-bold text-gray-600 transition hover:bg-gray-100 dark:bg-white/5 dark:text-gray-300 dark:hover:bg-white/10"
               >
                 View Full Leaderboard
-                <ChevronRight size={15} />
+                <ChevronRight
+                  size={15}
+                />
               </button>
 
             </div>
@@ -1216,12 +1392,16 @@ export default function StudentDashboard() {
           {/* FOOTER */}
 
           <footer className="mt-10 border-t border-gray-200 pt-6 text-center dark:border-white/10">
+
             <p className="text-xs text-gray-400">
-              © 2026 QuizPro. Learn. Challenge. Achieve.
+              © 2026 QuizPro. Learn.
+              Challenge. Achieve.
             </p>
+
           </footer>
 
         </div>
+
       </main>
     </div>
   );
@@ -1440,6 +1620,7 @@ function QuizCard({
         </Link>
 
       </div>
+
     </div>
   );
 }
@@ -1485,7 +1666,9 @@ function LeaderboardRow({
         </div>
 
         <div className="flex h-8 w-8 items-center justify-center rounded-full bg-gradient-to-br from-indigo-500 to-purple-500 text-xs font-bold text-white">
-          {name.charAt(0).toUpperCase()}
+          {name
+            .charAt(0)
+            .toUpperCase()}
         </div>
 
         <p className="text-xs font-bold">
