@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 import type { ReactNode } from "react";
+import ThemeToggle from "@/components/theme-toggle";
 
 import {
   BarChart3,
@@ -373,6 +374,7 @@ export default function StudentDashboard() {
   if (loading) {
     return (
       <div className="flex min-h-screen items-center justify-center bg-gray-50 dark:bg-[#08090b]">
+        
         <div className="text-center">
           <div className="mx-auto h-10 w-10 animate-spin rounded-full border-4 border-indigo-100 border-t-indigo-600" />
 
@@ -436,8 +438,9 @@ export default function StudentDashboard() {
             onClick={() =>
               navigateTo("Dashboard", "/student/dashboard")
             }
-            className="flex items-center gap-3 text-left"
-          >
+            className="flex items-center gap-3 text-left">
+             <ThemeToggle />
+
             <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-gradient-to-br from-indigo-600 to-purple-600 text-white shadow-lg shadow-indigo-500/20">
               <Sparkles size={21} />
             </div>
