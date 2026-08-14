@@ -15,8 +15,16 @@ import {
   Zap,
   Crown,
   Star,
+  LayoutDashboard,
+  BookOpen,
+  BarChart3,
+  User,
+  LogOut,
+  Menu,
+  X,
+  GraduationCap,
 } from "lucide-react";
-import { motion } from "framer-motion";
+import { motion, AnimatePresence } from "framer-motion";
 
 type Player = {
   rank: number;
@@ -136,6 +144,7 @@ export default function LeaderboardPage() {
   const [period, setPeriod] = useState("This Week");
   const [category, setCategory] = useState("All Categories");
   const [search, setSearch] = useState("");
+  const [sidebarOpen, setSidebarOpen] = useState(false);
 
   /* =========================================
      UPDATE USER SCORE FROM QUIZ RESULT
@@ -221,6 +230,14 @@ export default function LeaderboardPage() {
   const currentUser =
     players.find((player) => player.current) ?? players[3];
 
+  /* =========================================
+     CLOSE MOBILE SIDEBAR
+  ========================================= */
+
+  const closeSidebar = () => {
+    setSidebarOpen(false);
+  };
+
   return (
     <main className="min-h-screen overflow-x-hidden bg-[#050816] text-white">
       {/* =====================================
@@ -236,15 +253,38 @@ export default function LeaderboardPage() {
       </div>
 
       {/* =====================================
-          HEADER
+          MOBILE OVERLAY
       ===================================== */}
 
-      <header className="sticky top-0 z-50 border-b border-white/10 bg-[#050816]/85 backdrop-blur-xl">
-        <div className="mx-auto flex h-20 max-w-7xl items-center justify-between px-5 lg:px-8">
-          {/* LOGO */}
+      <AnimatePresence>
+        {sidebarOpen && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            onClick={closeSidebar}
+            className="fixed inset-0 z-[90] bg-black/70 backdrop-blur-sm lg:hidden"
+          />
+        )}
+      </AnimatePresence>
 
+      {/* =====================================
+          SIDEBAR
+      ===================================== */}
+
+      <aside
+        className={`fixed left-0 top-0 z-[100] flex h-screen w-[270px] flex-col border-r border-white/10 bg-[#080b18] transition-transform duration-300 lg:translate-x-0 ${
+          sidebarOpen
+            ? "translate-x-0"
+            : "-translate-x-full"
+        }`}
+      >
+        {/* SIDEBAR LOGO */}
+
+        <div className="flex h-20 shrink-0 items-center justify-between border-b border-white/10 px-5">
           <Link
             href="/student/dashboard"
+            onClick={closeSidebar}
             className="group flex items-center gap-3"
           >
             <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-gradient-to-br from-indigo-500 to-purple-600 shadow-lg shadow-indigo-600/20 transition group-hover:scale-105">
@@ -259,429 +299,604 @@ export default function LeaderboardPage() {
                 </span>
               </h1>
 
-              <p className="hidden text-[9px] font-medium tracking-[0.2em] text-gray-600 sm:block">
+              <p className="text-[8px] font-medium tracking-[0.2em] text-gray-600">
                 PLAY • LEARN • WIN
               </p>
             </div>
           </Link>
 
-          {/* HEADER RIGHT */}
+          <button
+            type="button"
+            onClick={closeSidebar}
+            className="flex h-9 w-9 items-center justify-center rounded-lg text-gray-500 transition hover:bg-white/5 hover:text-white lg:hidden"
+          >
+            <X size={19} />
+          </button>
+        </div>
 
+        {/* USER */}
+
+        <div className="mx-4 mt-5 rounded-2xl border border-white/10 bg-white/[0.035] p-3">
           <div className="flex items-center gap-3">
-            <Link
-              href="/student/dashboard"
-              className="flex items-center gap-2 rounded-xl border border-white/10 bg-white/[0.04] px-4 py-2.5 text-sm font-semibold text-gray-400 transition hover:border-white/20 hover:bg-white/[0.08] hover:text-white"
-            >
-              <ArrowLeft size={16} />
-
-              <span className="hidden sm:block">
-                Dashboard
-              </span>
-            </Link>
-
-            <div className="flex h-10 w-10 items-center justify-center rounded-full bg-gradient-to-br from-indigo-500 to-purple-600 text-sm font-bold shadow-lg shadow-indigo-600/20">
+            <div className="flex h-10 w-10 items-center justify-center rounded-full bg-gradient-to-br from-indigo-500 to-purple-600 text-xs font-bold">
               K
             </div>
+
+            <div className="min-w-0">
+              <p className="truncate text-sm font-bold">
+                Kesar
+              </p>
+
+              <p className="mt-0.5 text-[10px] text-gray-600">
+                Student Account
+              </p>
+            </div>
+
+            <Star
+              size={15}
+              className="ml-auto text-yellow-400"
+            />
           </div>
         </div>
-      </header>
+
+        {/* NAVIGATION */}
+
+        <div className="mt-7 px-3">
+          <p className="px-3 text-[10px] font-bold uppercase tracking-[0.2em] text-gray-600">
+            Main Menu
+          </p>
+
+          <nav className="mt-3 space-y-1.5">
+            <SidebarItem
+              href="/student/dashboard"
+              icon={LayoutDashboard}
+              label="Dashboard"
+              onClick={closeSidebar}
+            />
+
+            <SidebarItem
+              href="/quiz"
+              icon={BookOpen}
+              label="Explore Quizzes"
+              onClick={closeSidebar}
+            />
+
+            <SidebarItem
+              href="/student/leaderboard"
+              icon={Trophy}
+              label="Leaderboard"
+              active
+              onClick={closeSidebar}
+            />
+
+            <SidebarItem
+              href="/student/results"
+              icon={BarChart3}
+              label="My Results"
+              onClick={closeSidebar}
+            />
+          </nav>
+        </div>
+
+        {/* ACCOUNT */}
+
+        <div className="mt-7 px-3">
+          <p className="px-3 text-[10px] font-bold uppercase tracking-[0.2em] text-gray-600">
+            Account
+          </p>
+
+          <nav className="mt-3 space-y-1.5">
+            <SidebarItem
+              href="/student/profile"
+              icon={User}
+              label="My Profile"
+              onClick={closeSidebar}
+            />
+          </nav>
+        </div>
+
+        {/* BOTTOM */}
+
+        <div className="mt-auto p-4">
+          <div className="mb-4 rounded-2xl border border-indigo-500/10 bg-gradient-to-br from-indigo-500/[0.08] to-purple-500/[0.04] p-4">
+            <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-indigo-500/10 text-indigo-400">
+              <GraduationCap size={18} />
+            </div>
+
+            <p className="mt-3 text-xs font-bold">
+              Keep Learning!
+            </p>
+
+            <p className="mt-1 text-[10px] leading-4 text-gray-600">
+              Complete quizzes and climb higher on the leaderboard.
+            </p>
+          </div>
+
+          <button
+            type="button"
+            onClick={() => {
+              localStorage.removeItem("quizResult");
+              window.location.href = "/login";
+            }}
+            className="flex w-full items-center gap-3 rounded-xl px-3 py-3 text-sm font-semibold text-gray-500 transition hover:bg-red-500/10 hover:text-red-400"
+          >
+            <LogOut size={18} />
+            Logout
+          </button>
+        </div>
+      </aside>
 
       {/* =====================================
-          CONTENT
+          MAIN AREA
       ===================================== */}
 
-      <div className="relative z-10 mx-auto max-w-7xl px-5 py-10 lg:px-8">
+      <div className="relative z-10 lg:pl-[270px]">
         {/* =====================================
-            HERO
+            HEADER
         ===================================== */}
 
-        <motion.section
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.5 }}
-          className="text-center"
-        >
-          <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-2xl border border-yellow-500/20 bg-yellow-500/10 text-yellow-400 shadow-lg shadow-yellow-500/5">
-            <Trophy size={31} />
-          </div>
+        <header className="sticky top-0 z-50 border-b border-white/10 bg-[#050816]/85 backdrop-blur-xl">
+          <div className="mx-auto flex h-20 max-w-7xl items-center justify-between px-5 lg:px-8">
+            {/* MOBILE MENU */}
 
-          <p className="mt-5 text-xs font-bold uppercase tracking-[0.25em] text-indigo-400">
-            Top Performers
-          </p>
+            <button
+              type="button"
+              onClick={() => setSidebarOpen(true)}
+              className="flex h-10 w-10 items-center justify-center rounded-xl border border-white/10 bg-white/[0.04] text-gray-400 transition hover:bg-white/[0.08] hover:text-white lg:hidden"
+            >
+              <Menu size={20} />
+            </button>
 
-          <h1 className="mt-2 text-4xl font-black tracking-tight sm:text-5xl">
-            Leaderboard
-          </h1>
+            {/* DESKTOP TITLE */}
 
-          <p className="mx-auto mt-4 max-w-xl text-sm leading-6 text-gray-500">
-            Compete with other students, earn points,
-            maintain your streak and become the quiz
-            champion.
-          </p>
-        </motion.section>
+            <div className="hidden lg:block">
+              <p className="text-[10px] font-bold uppercase tracking-[0.2em] text-indigo-400">
+                Student Portal
+              </p>
 
-        {/* =====================================
-            PODIUM
-        ===================================== */}
+              <p className="mt-1 text-sm font-semibold text-gray-400">
+                Leaderboard
+              </p>
+            </div>
 
-        <section className="mt-12">
-          <div className="grid items-end gap-5 md:grid-cols-3">
-            <PodiumCard
-              player={topThree[1]}
-              position={2}
-              delay={0.15}
-            />
+            {/* HEADER RIGHT */}
 
-            <PodiumCard
-              player={topThree[0]}
-              position={1}
-              delay={0}
-              first
-            />
+            <div className="ml-auto flex items-center gap-3">
+              <Link
+                href="/student/dashboard"
+                className="flex items-center gap-2 rounded-xl border border-white/10 bg-white/[0.04] px-4 py-2.5 text-sm font-semibold text-gray-400 transition hover:border-white/20 hover:bg-white/[0.08] hover:text-white"
+              >
+                <ArrowLeft size={16} />
 
-            <PodiumCard
-              player={topThree[2]}
-              position={3}
-              delay={0.3}
-            />
-          </div>
-        </section>
+                <span className="hidden sm:block">
+                  Dashboard
+                </span>
+              </Link>
 
-        {/* =====================================
-            USER RANK
-        ===================================== */}
-
-        <motion.section
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.35 }}
-          className="mt-8 overflow-hidden rounded-2xl border border-indigo-500/20 bg-gradient-to-r from-indigo-500/[0.10] to-purple-500/[0.06] p-5 shadow-xl shadow-indigo-950/10"
-        >
-          <div className="flex flex-col gap-5 sm:flex-row sm:items-center sm:justify-between">
-            <div className="flex items-center gap-4">
-              <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-indigo-500/10 text-indigo-400">
-                <Medal size={23} />
+              <div className="flex h-10 w-10 items-center justify-center rounded-full bg-gradient-to-br from-indigo-500 to-purple-600 text-sm font-bold shadow-lg shadow-indigo-600/20">
+                K
               </div>
+            </div>
+          </div>
+        </header>
 
-              <div>
-                <p className="text-[10px] font-bold uppercase tracking-[0.18em] text-indigo-400">
-                  Your Current Rank
-                </p>
+        {/* =====================================
+            CONTENT
+        ===================================== */}
 
-                <div className="mt-1 flex items-center gap-3">
-                  <span className="text-2xl font-black">
-                    #{currentUser.rank}
-                  </span>
+        <div className="mx-auto max-w-7xl px-5 py-10 lg:px-8">
+          {/* =====================================
+              HERO
+          ===================================== */}
 
-                  <span className="text-sm font-semibold text-gray-300">
-                    {currentUser.name}
-                  </span>
+          <motion.section
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.5 }}
+            className="text-center"
+          >
+            <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-2xl border border-yellow-500/20 bg-yellow-500/10 text-yellow-400 shadow-lg shadow-yellow-500/5">
+              <Trophy size={31} />
+            </div>
+
+            <p className="mt-5 text-xs font-bold uppercase tracking-[0.25em] text-indigo-400">
+              Top Performers
+            </p>
+
+            <h1 className="mt-2 text-4xl font-black tracking-tight sm:text-5xl">
+              Leaderboard
+            </h1>
+
+            <p className="mx-auto mt-4 max-w-xl text-sm leading-6 text-gray-500">
+              Compete with other students, earn points,
+              maintain your streak and become the quiz
+              champion.
+            </p>
+          </motion.section>
+
+          {/* =====================================
+              PODIUM
+          ===================================== */}
+
+          <section className="mt-12">
+            <div className="grid items-end gap-5 md:grid-cols-3">
+              <PodiumCard
+                player={topThree[1]}
+                position={2}
+                delay={0.15}
+              />
+
+              <PodiumCard
+                player={topThree[0]}
+                position={1}
+                delay={0}
+                first
+              />
+
+              <PodiumCard
+                player={topThree[2]}
+                position={3}
+                delay={0.3}
+              />
+            </div>
+          </section>
+
+          {/* =====================================
+              USER RANK
+          ===================================== */}
+
+          <motion.section
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.35 }}
+            className="mt-8 overflow-hidden rounded-2xl border border-indigo-500/20 bg-gradient-to-r from-indigo-500/[0.10] to-purple-500/[0.06] p-5 shadow-xl shadow-indigo-950/10"
+          >
+            <div className="flex flex-col gap-5 sm:flex-row sm:items-center sm:justify-between">
+              <div className="flex items-center gap-4">
+                <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-indigo-500/10 text-indigo-400">
+                  <Medal size={23} />
+                </div>
+
+                <div>
+                  <p className="text-[10px] font-bold uppercase tracking-[0.18em] text-indigo-400">
+                    Your Current Rank
+                  </p>
+
+                  <div className="mt-1 flex items-center gap-3">
+                    <span className="text-2xl font-black">
+                      #{currentUser.rank}
+                    </span>
+
+                    <span className="text-sm font-semibold text-gray-300">
+                      {currentUser.name}
+                    </span>
+                  </div>
                 </div>
               </div>
+
+              <div className="grid grid-cols-3 gap-5 sm:flex sm:items-center sm:gap-8">
+                <MiniStat
+                  value={currentUser.points.toLocaleString()}
+                  label="Points"
+                />
+
+                <MiniStat
+                  value={String(currentUser.quizzes)}
+                  label="Quizzes"
+                />
+
+                <MiniStat
+                  value={`${currentUser.score}%`}
+                  label="Avg Score"
+                />
+              </div>
             </div>
+          </motion.section>
 
-            <div className="grid grid-cols-3 gap-5 sm:flex sm:items-center sm:gap-8">
-              <MiniStat
-                value={currentUser.points.toLocaleString()}
-                label="Points"
-              />
+          {/* =====================================
+              FILTERS
+          ===================================== */}
 
-              <MiniStat
-                value={String(currentUser.quizzes)}
-                label="Quizzes"
-              />
-
-              <MiniStat
-                value={`${currentUser.score}%`}
-                label="Avg Score"
-              />
-            </div>
-          </div>
-        </motion.section>
-
-        {/* =====================================
-            FILTERS
-        ===================================== */}
-
-        <section className="mt-10">
-          <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
-            {/* SEARCH */}
-
-            <div className="relative w-full lg:max-w-sm">
-              <Search
-                size={18}
-                className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-600"
-              />
-
-              <input
-                type="text"
-                value={search}
-                onChange={(e) => setSearch(e.target.value)}
-                placeholder="Search player..."
-                className="w-full rounded-xl border border-white/10 bg-white/[0.04] py-3 pl-11 pr-4 text-sm text-white outline-none transition placeholder:text-gray-600 focus:border-indigo-500/60 focus:bg-white/[0.06]"
-              />
-            </div>
-
-            {/* FILTERS */}
-
-            <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
-              <FilterSelect
-                value={period}
-                options={[
-                  "This Week",
-                  "This Month",
-                  "All Time",
-                ]}
-                onChange={setPeriod}
-              />
-
-              <FilterSelect
-                value={category}
-                options={categories}
-                onChange={setCategory}
-              />
-            </div>
-          </div>
-        </section>
-
-        {/* =====================================
-            TABLE
-        ===================================== */}
-
-        <section className="mt-5 overflow-hidden rounded-2xl border border-white/10 bg-white/[0.035] shadow-2xl shadow-black/10">
-          {/* DESKTOP HEADER */}
-
-          <div className="hidden grid-cols-12 gap-4 border-b border-white/10 bg-white/[0.02] px-6 py-4 text-[10px] font-bold uppercase tracking-[0.15em] text-gray-600 md:grid">
-            <div className="col-span-1">Rank</div>
-
-            <div className="col-span-4">Player</div>
-
-            <div className="col-span-2 text-center">
-              Points
-            </div>
-
-            <div className="col-span-2 text-center">
-              Quizzes
-            </div>
-
-            <div className="col-span-2 text-center">
-              Avg. Score
-            </div>
-
-            <div className="col-span-1 text-center">
-              Streak
-            </div>
-          </div>
-
-          {/* ROWS */}
-
-          {filteredPlayers.length === 0 ? (
-            <div className="p-14 text-center">
-              <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-2xl bg-white/[0.04]">
+          <section className="mt-10">
+            <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
+              <div className="relative w-full lg:max-w-sm">
                 <Search
-                  size={28}
-                  className="text-gray-700"
+                  size={18}
+                  className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-600"
+                />
+
+                <input
+                  type="text"
+                  value={search}
+                  onChange={(e) => setSearch(e.target.value)}
+                  placeholder="Search player..."
+                  className="w-full rounded-xl border border-white/10 bg-white/[0.04] py-3 pl-11 pr-4 text-sm text-white outline-none transition placeholder:text-gray-600 focus:border-indigo-500/60 focus:bg-white/[0.06]"
                 />
               </div>
 
-              <p className="mt-4 font-semibold text-gray-400">
-                No player found
-              </p>
+              <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+                <FilterSelect
+                  value={period}
+                  options={[
+                    "This Week",
+                    "This Month",
+                    "All Time",
+                  ]}
+                  onChange={setPeriod}
+                />
 
-              <p className="mt-1 text-sm text-gray-600">
-                Try another name.
-              </p>
+                <FilterSelect
+                  value={category}
+                  options={categories}
+                  onChange={setCategory}
+                />
+              </div>
             </div>
-          ) : (
-            filteredPlayers.map((player, index) => (
-              <motion.div
-                key={player.name}
-                initial={{ opacity: 0, y: 8 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{
-                  delay: index * 0.03,
-                }}
-                className={`border-b border-white/[0.06] p-4 transition last:border-b-0 md:grid md:grid-cols-12 md:items-center md:gap-4 md:px-6 ${
-                  player.current
-                    ? "bg-indigo-500/[0.07]"
-                    : "hover:bg-white/[0.025]"
-                }`}
-              >
-                {/* MOBILE TOP */}
+          </section>
 
-                <div className="flex items-center gap-4 md:contents">
-                  {/* RANK */}
+          {/* =====================================
+              TABLE
+          ===================================== */}
 
-                  <div className="flex w-8 shrink-0 items-center justify-center md:col-span-1 md:w-auto">
-                    {player.rank <= 3 ? (
-                      <RankIcon rank={player.rank} />
-                    ) : (
-                      <span className="text-sm font-bold text-gray-500">
-                        {player.rank}
-                      </span>
-                    )}
-                  </div>
+          <section className="mt-5 overflow-hidden rounded-2xl border border-white/10 bg-white/[0.035] shadow-2xl shadow-black/10">
+            <div className="hidden grid-cols-12 gap-4 border-b border-white/10 bg-white/[0.02] px-6 py-4 text-[10px] font-bold uppercase tracking-[0.15em] text-gray-600 md:grid">
+              <div className="col-span-1">Rank</div>
 
-                  {/* PLAYER */}
+              <div className="col-span-4">Player</div>
 
-                  <div className="flex min-w-0 flex-1 items-center gap-3 md:col-span-4">
-                    <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-gradient-to-br from-indigo-500 to-purple-600 text-xs font-bold shadow-lg shadow-indigo-600/10">
-                      {player.avatar}
-                    </div>
-
-                    <div className="min-w-0">
-                      <p className="truncate text-sm font-bold">
-                        {player.name}
-
-                        {player.current && (
-                          <span className="ml-2 rounded-full bg-indigo-500/10 px-2 py-0.5 text-[9px] font-bold text-indigo-400">
-                            YOU
-                          </span>
-                        )}
-                      </p>
-
-                      <p className="mt-0.5 text-xs text-gray-600 md:hidden">
-                        {player.quizzes} quizzes
-                      </p>
-                    </div>
-                  </div>
-
-                  {/* MOBILE POINTS */}
-
-                  <div className="text-right md:hidden">
-                    <p className="text-sm font-black">
-                      {player.points.toLocaleString()}
-                    </p>
-
-                    <p className="mt-0.5 flex items-center justify-end gap-1 text-[10px] text-gray-600">
-                      <Zap size={10} />
-                      points
-                    </p>
-                  </div>
-                </div>
-
-                {/* DESKTOP POINTS */}
-
-                <div className="hidden text-center text-sm font-bold md:col-span-2 md:block">
-                  {player.points.toLocaleString()}
-                </div>
-
-                {/* DESKTOP QUIZZES */}
-
-                <div className="hidden text-center text-sm text-gray-400 md:col-span-2 md:block">
-                  {player.quizzes}
-                </div>
-
-                {/* DESKTOP SCORE */}
-
-                <div className="hidden text-center md:col-span-2 md:block">
-                  <span
-                    className={`inline-flex rounded-full px-2.5 py-1 text-xs font-bold ${
-                      player.score >= 90
-                        ? "bg-green-500/10 text-green-400"
-                        : player.score >= 75
-                        ? "bg-indigo-500/10 text-indigo-400"
-                        : "bg-yellow-500/10 text-yellow-400"
-                    }`}
-                  >
-                    {player.score}%
-                  </span>
-                </div>
-
-                {/* DESKTOP STREAK */}
-
-                <div className="hidden items-center justify-center gap-1 text-sm text-orange-400 md:col-span-1 md:flex">
-                  <Flame size={15} />
-                  {player.streak}
-                </div>
-
-                {/* MOBILE STATS */}
-
-                <div className="mt-4 grid grid-cols-3 gap-3 border-t border-white/[0.06] pt-4 md:hidden">
-                  <MobileStat
-                    label="Score"
-                    value={`${player.score}%`}
-                  />
-
-                  <MobileStat
-                    label="Quizzes"
-                    value={String(player.quizzes)}
-                  />
-
-                  <MobileStat
-                    label="Streak"
-                    value={`${player.streak} 🔥`}
-                  />
-                </div>
-              </motion.div>
-            ))
-          )}
-        </section>
-
-        {/* =====================================
-            INFO CARDS
-        ===================================== */}
-
-        <section className="mt-8 grid gap-4 sm:grid-cols-3">
-          <InfoCard
-            icon={Trophy}
-            title="Earn Points"
-            description="Get points for every correct answer."
-            iconClass="text-yellow-400"
-            bgClass="bg-yellow-500/10"
-          />
-
-          <InfoCard
-            icon={Flame}
-            title="Build Streaks"
-            description="Play every day to maintain your streak."
-            iconClass="text-orange-400"
-            bgClass="bg-orange-500/10"
-          />
-
-          <InfoCard
-            icon={Award}
-            title="Climb Higher"
-            description="Compete with students and reach #1."
-            iconClass="text-purple-400"
-            bgClass="bg-purple-500/10"
-          />
-        </section>
-
-        {/* =====================================
-            CTA
-        ===================================== */}
-
-        <section className="mt-10 pb-10">
-          <div className="relative overflow-hidden rounded-3xl border border-indigo-500/20 bg-gradient-to-r from-indigo-600/15 to-purple-600/10 p-7 text-center shadow-2xl shadow-indigo-950/10 sm:p-10">
-            <div className="pointer-events-none absolute left-1/2 top-0 h-40 w-80 -translate-x-1/2 rounded-full bg-indigo-500/10 blur-[100px]" />
-
-            <div className="relative">
-              <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-xl bg-indigo-500/10 text-indigo-400">
-                <Zap size={23} />
+              <div className="col-span-2 text-center">
+                Points
               </div>
 
-              <h2 className="mt-5 text-2xl font-black">
-                Ready to climb the leaderboard?
-              </h2>
+              <div className="col-span-2 text-center">
+                Quizzes
+              </div>
 
-              <p className="mx-auto mt-2 max-w-lg text-sm leading-6 text-gray-500">
-                Take another quiz, earn more points and
-                move one step closer to the #1 spot.
-              </p>
+              <div className="col-span-2 text-center">
+                Avg. Score
+              </div>
 
-              <Link
-                href="/quiz"
-                className="mt-6 inline-flex items-center gap-2 rounded-xl bg-gradient-to-r from-indigo-600 to-purple-600 px-6 py-3.5 text-sm font-bold shadow-lg shadow-indigo-600/20 transition hover:-translate-y-0.5 hover:shadow-indigo-600/30"
-              >
-                Start New Quiz
-                <ArrowRight size={17} />
-              </Link>
+              <div className="col-span-1 text-center">
+                Streak
+              </div>
             </div>
-          </div>
-        </section>
+
+            {filteredPlayers.length === 0 ? (
+              <div className="p-14 text-center">
+                <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-2xl bg-white/[0.04]">
+                  <Search
+                    size={28}
+                    className="text-gray-700"
+                  />
+                </div>
+
+                <p className="mt-4 font-semibold text-gray-400">
+                  No player found
+                </p>
+
+                <p className="mt-1 text-sm text-gray-600">
+                  Try another name.
+                </p>
+              </div>
+            ) : (
+              filteredPlayers.map((player, index) => (
+                <motion.div
+                  key={player.name}
+                  initial={{ opacity: 0, y: 8 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{
+                    delay: index * 0.03,
+                  }}
+                  className={`border-b border-white/[0.06] p-4 transition last:border-b-0 md:grid md:grid-cols-12 md:items-center md:gap-4 md:px-6 ${
+                    player.current
+                      ? "bg-indigo-500/[0.07]"
+                      : "hover:bg-white/[0.025]"
+                  }`}
+                >
+                  <div className="flex items-center gap-4 md:contents">
+                    <div className="flex w-8 shrink-0 items-center justify-center md:col-span-1 md:w-auto">
+                      {player.rank <= 3 ? (
+                        <RankIcon rank={player.rank} />
+                      ) : (
+                        <span className="text-sm font-bold text-gray-500">
+                          {player.rank}
+                        </span>
+                      )}
+                    </div>
+
+                    <div className="flex min-w-0 flex-1 items-center gap-3 md:col-span-4">
+                      <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-gradient-to-br from-indigo-500 to-purple-600 text-xs font-bold shadow-lg shadow-indigo-600/10">
+                        {player.avatar}
+                      </div>
+
+                      <div className="min-w-0">
+                        <p className="truncate text-sm font-bold">
+                          {player.name}
+
+                          {player.current && (
+                            <span className="ml-2 rounded-full bg-indigo-500/10 px-2 py-0.5 text-[9px] font-bold text-indigo-400">
+                              YOU
+                            </span>
+                          )}
+                        </p>
+
+                        <p className="mt-0.5 text-xs text-gray-600 md:hidden">
+                          {player.quizzes} quizzes
+                        </p>
+                      </div>
+                    </div>
+
+                    <div className="text-right md:hidden">
+                      <p className="text-sm font-black">
+                        {player.points.toLocaleString()}
+                      </p>
+
+                      <p className="mt-0.5 flex items-center justify-end gap-1 text-[10px] text-gray-600">
+                        <Zap size={10} />
+                        points
+                      </p>
+                    </div>
+                  </div>
+
+                  <div className="hidden text-center text-sm font-bold md:col-span-2 md:block">
+                    {player.points.toLocaleString()}
+                  </div>
+
+                  <div className="hidden text-center text-sm text-gray-400 md:col-span-2 md:block">
+                    {player.quizzes}
+                  </div>
+
+                  <div className="hidden text-center md:col-span-2 md:block">
+                    <span
+                      className={`inline-flex rounded-full px-2.5 py-1 text-xs font-bold ${
+                        player.score >= 90
+                          ? "bg-green-500/10 text-green-400"
+                          : player.score >= 75
+                          ? "bg-indigo-500/10 text-indigo-400"
+                          : "bg-yellow-500/10 text-yellow-400"
+                      }`}
+                    >
+                      {player.score}%
+                    </span>
+                  </div>
+
+                  <div className="hidden items-center justify-center gap-1 text-sm text-orange-400 md:col-span-1 md:flex">
+                    <Flame size={15} />
+                    {player.streak}
+                  </div>
+
+                  <div className="mt-4 grid grid-cols-3 gap-3 border-t border-white/[0.06] pt-4 md:hidden">
+                    <MobileStat
+                      label="Score"
+                      value={`${player.score}%`}
+                    />
+
+                    <MobileStat
+                      label="Quizzes"
+                      value={String(player.quizzes)}
+                    />
+
+                    <MobileStat
+                      label="Streak"
+                      value={`${player.streak} 🔥`}
+                    />
+                  </div>
+                </motion.div>
+              ))
+            )}
+          </section>
+
+          {/* =====================================
+              INFO CARDS
+          ===================================== */}
+
+          <section className="mt-8 grid gap-4 sm:grid-cols-3">
+            <InfoCard
+              icon={Trophy}
+              title="Earn Points"
+              description="Get points for every correct answer."
+              iconClass="text-yellow-400"
+              bgClass="bg-yellow-500/10"
+            />
+
+            <InfoCard
+              icon={Flame}
+              title="Build Streaks"
+              description="Play every day to maintain your streak."
+              iconClass="text-orange-400"
+              bgClass="bg-orange-500/10"
+            />
+
+            <InfoCard
+              icon={Award}
+              title="Climb Higher"
+              description="Compete with students and reach #1."
+              iconClass="text-purple-400"
+              bgClass="bg-purple-500/10"
+            />
+          </section>
+
+          {/* =====================================
+              CTA
+          ===================================== */}
+
+          <section className="mt-10 pb-10">
+            <div className="relative overflow-hidden rounded-3xl border border-indigo-500/20 bg-gradient-to-r from-indigo-600/15 to-purple-600/10 p-7 text-center shadow-2xl shadow-indigo-950/10 sm:p-10">
+              <div className="pointer-events-none absolute left-1/2 top-0 h-40 w-80 -translate-x-1/2 rounded-full bg-indigo-500/10 blur-[100px]" />
+
+              <div className="relative">
+                <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-xl bg-indigo-500/10 text-indigo-400">
+                  <Zap size={23} />
+                </div>
+
+                <h2 className="mt-5 text-2xl font-black">
+                  Ready to climb the leaderboard?
+                </h2>
+
+                <p className="mx-auto mt-2 max-w-lg text-sm leading-6 text-gray-500">
+                  Take another quiz, earn more points and
+                  move one step closer to the #1 spot.
+                </p>
+
+                <Link
+                  href="/quiz"
+                  className="mt-6 inline-flex items-center gap-2 rounded-xl bg-gradient-to-r from-indigo-600 to-purple-600 px-6 py-3.5 text-sm font-bold shadow-lg shadow-indigo-600/20 transition hover:-translate-y-0.5 hover:shadow-indigo-600/30"
+                >
+                  Start New Quiz
+                  <ArrowRight size={17} />
+                </Link>
+              </div>
+            </div>
+          </section>
+        </div>
       </div>
     </main>
+  );
+}
+
+/* =========================================
+   SIDEBAR ITEM
+========================================= */
+
+function SidebarItem({
+  href,
+  icon: Icon,
+  label,
+  active = false,
+  onClick,
+}: {
+  href: string;
+  icon: typeof Brain;
+  label: string;
+  active?: boolean;
+  onClick?: () => void;
+}) {
+  return (
+    <Link
+      href={href}
+      onClick={onClick}
+      className={`group flex items-center gap-3 rounded-xl px-3.5 py-3 text-sm font-semibold transition ${
+        active
+          ? "bg-indigo-500/10 text-indigo-400 shadow-sm"
+          : "text-gray-500 hover:bg-white/[0.04] hover:text-white"
+      }`}
+    >
+      <div
+        className={`flex h-8 w-8 items-center justify-center rounded-lg transition ${
+          active
+            ? "bg-indigo-500/10 text-indigo-400"
+            : "text-gray-600 group-hover:text-gray-300"
+        }`}
+      >
+        <Icon size={17} />
+      </div>
+
+      <span>{label}</span>
+
+      {active && (
+        <span className="ml-auto h-1.5 w-1.5 rounded-full bg-indigo-400" />
+      )}
+    </Link>
   );
 }
 
