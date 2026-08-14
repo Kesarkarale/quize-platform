@@ -1,16 +1,17 @@
+ 
 "use client";
 
-import { Toaster } from "sonner";
+import { ReactNode } from "react";
+import { ThemeProvider } from "@/components/theme-provider";
 
 export default function Providers({
   children,
 }: {
-  children: React.ReactNode;
+  children: ReactNode;
 }) {
   return (
-    <>
+    <ThemeProvider>
       {children}
-      <Toaster richColors position="top-right" />
-    </>
+    </ThemeProvider>
   );
 }
