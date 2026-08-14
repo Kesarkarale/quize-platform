@@ -211,7 +211,7 @@ export default function LoginPage() {
        */
       if (actualRole === "ADMIN") {
         window.location.href =
-          "/admin/dashboard";
+          "/admin";
 
         return;
       }
