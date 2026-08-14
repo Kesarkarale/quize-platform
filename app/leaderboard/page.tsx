@@ -2,6 +2,7 @@
 
 import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
+
 import {
   ArrowLeft,
   ArrowRight,
@@ -14,7 +15,6 @@ import {
   Trophy,
   Zap,
   Crown,
-  Star,
   LayoutDashboard,
   BookOpen,
   BarChart3,
@@ -22,8 +22,11 @@ import {
   LogOut,
   Menu,
   X,
-  GraduationCap,
+  Settings,
+  Target,
+  Sparkles,
 } from "lucide-react";
+
 import { motion, AnimatePresence } from "framer-motion";
 
 type Player = {
@@ -147,6 +150,26 @@ export default function LeaderboardPage() {
   const [sidebarOpen, setSidebarOpen] = useState(false);
 
   /* =========================================
+     NAVIGATION
+  ========================================= */
+
+  const navigateTo = (href: string) => {
+    setSidebarOpen(false);
+    window.location.href = href;
+  };
+
+  /* =========================================
+     LOGOUT
+  ========================================= */
+
+  const handleLogout = () => {
+    localStorage.removeItem("quizResult");
+    localStorage.removeItem("leaderboardResultUpdated");
+
+    navigateTo("/login");
+  };
+
+  /* =========================================
      UPDATE USER SCORE FROM QUIZ RESULT
   ========================================= */
 
@@ -221,7 +244,9 @@ export default function LeaderboardPage() {
 
   const filteredPlayers = useMemo(() => {
     return players.filter((player) =>
-      player.name.toLowerCase().includes(search.toLowerCase())
+      player.name
+        .toLowerCase()
+        .includes(search.toLowerCase())
     );
   }, [players, search]);
 
@@ -231,7 +256,7 @@ export default function LeaderboardPage() {
     players.find((player) => player.current) ?? players[3];
 
   /* =========================================
-     CLOSE MOBILE SIDEBAR
+     CLOSE SIDEBAR
   ========================================= */
 
   const closeSidebar = () => {
@@ -277,18 +302,16 @@ export default function LeaderboardPage() {
           fixed
           left-0
           top-0
-          z-50
+          z-[100]
           h-screen
           w-[270px]
           border-r
-          border-gray-200
-          bg-white
+          border-white/10
+          bg-[#101114]
           px-5
           py-6
           transition-transform
           duration-300
-          dark:border-white/10
-          dark:bg-[#101114]
 
           ${
             sidebarOpen
@@ -297,19 +320,14 @@ export default function LeaderboardPage() {
           }
         `}
       >
-
-        {/* =================================================
-            LOGO
-        ================================================= */}
+        {/* LOGO */}
 
         <div className="flex items-center justify-between">
-
-          <button
-            type="button"
-            onClick={() => navigateTo("/student/dashboard")}
-            className="flex items-center gap-3 text-left"
+          <Link
+            href="/student/dashboard"
+            onClick={closeSidebar}
+            className="flex items-center gap-3"
           >
-
             <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-gradient-to-br from-indigo-600 to-purple-600 text-white shadow-lg shadow-indigo-500/20">
               <Sparkles size={21} />
             </div>
@@ -317,131 +335,106 @@ export default function LeaderboardPage() {
             <div>
               <h1 className="text-lg font-black tracking-tight">
                 Quiz
-                <span className="text-indigo-600 dark:text-indigo-400">
+                <span className="text-indigo-400">
                   Pro
                 </span>
               </h1>
 
-              <p className="text-[10px] font-medium uppercase tracking-[0.2em] text-gray-400">
+              <p className="text-[10px] font-medium uppercase tracking-[0.2em] text-gray-500">
                 Learning Platform
               </p>
             </div>
-
-          </button>
+          </Link>
 
           {/* MOBILE CLOSE */}
 
           <button
             type="button"
-            onClick={() => setSidebarOpen(false)}
-            className="rounded-xl p-2 text-gray-500 transition hover:bg-gray-100 dark:hover:bg-white/10 lg:hidden"
+            onClick={closeSidebar}
+            className="rounded-xl p-2 text-gray-500 transition hover:bg-white/10 hover:text-white lg:hidden"
           >
             <X size={20} />
           </button>
-
         </div>
 
-        {/* =================================================
+        {/* =====================================
             MAIN MENU
-        ================================================= */}
+        ===================================== */}
 
         <div className="mt-10">
-
-          <p className="mb-3 px-3 text-[11px] font-bold uppercase tracking-[0.15em] text-gray-400">
+          <p className="mb-3 px-3 text-[11px] font-bold uppercase tracking-[0.15em] text-gray-500">
             Main Menu
           </p>
 
           <nav className="space-y-1">
-
-            {/* DASHBOARD */}
-
             <SidebarItem
-              icon={<Home size={19} />}
+              href="/student/dashboard"
+              icon={LayoutDashboard}
               label="Dashboard"
-              onClick={() =>
-                navigateTo("/student/dashboard")
-              }
+              onClick={closeSidebar}
             />
 
-            {/* EXPLORE QUIZZES */}
-
             <SidebarItem
-              icon={<BookOpen size={19} />}
+              href="/quiz"
+              icon={BookOpen}
               label="Explore Quizzes"
-              active
-              onClick={() =>
-                navigateTo("/quiz")
-              }
+              onClick={closeSidebar}
             />
 
-            {/* LEADERBOARD */}
+            {/* CURRENT PAGE */}
 
             <SidebarItem
-              icon={<Trophy size={19} />}
+              href="/leaderboard"
+              icon={Trophy}
               label="Leaderboard"
-              onClick={() =>
-                navigateTo("/leaderboard")
-              }
+              active
+              onClick={closeSidebar}
             />
-
-            {/* PERFORMANCE */}
 
             <SidebarItem
-              icon={<BarChart3 size={19} />}
+              href="/student/performance"
+              icon={BarChart3}
               label="My Performance"
-              onClick={() =>
-                navigateTo("/student/performance")
-              }
+              onClick={closeSidebar}
             />
-
           </nav>
-
         </div>
 
-        {/* =================================================
+        {/* =====================================
             ACCOUNT
-        ================================================= */}
+        ===================================== */}
 
         <div className="mt-8">
-
-          <p className="mb-3 px-3 text-[11px] font-bold uppercase tracking-[0.15em] text-gray-400">
+          <p className="mb-3 px-3 text-[11px] font-bold uppercase tracking-[0.15em] text-gray-500">
             Account
           </p>
 
           <nav className="space-y-1">
-
             <SidebarItem
-              icon={<User size={19} />}
+              href="/student/profile"
+              icon={User}
               label="Profile"
-              onClick={() =>
-                navigateTo("/student/profile")
-              }
+              onClick={closeSidebar}
             />
 
             <SidebarItem
-              icon={<Settings size={19} />}
+              href="/student/settings"
+              icon={Settings}
               label="Settings"
-              onClick={() =>
-                navigateTo("/student/settings")
-              }
+              onClick={closeSidebar}
             />
-
           </nav>
-
         </div>
 
-        {/* =================================================
+        {/* =====================================
             BOTTOM
-        ================================================= */}
+        ===================================== */}
 
         <div className="absolute bottom-5 left-5 right-5">
-
           {/* STREAK */}
 
-          <div className="mb-4 rounded-2xl border border-indigo-100 bg-indigo-50 p-4 dark:border-indigo-500/20 dark:bg-indigo-500/10">
-
+          <div className="mb-4 rounded-2xl border border-indigo-500/20 bg-indigo-500/10 p-4">
             <div className="flex items-center gap-3">
-
               <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-indigo-600 text-white">
                 <Target size={18} />
               </div>
@@ -451,13 +444,11 @@ export default function LeaderboardPage() {
                   Keep learning!
                 </p>
 
-                <p className="text-[11px] text-gray-500 dark:text-gray-400">
+                <p className="text-[11px] text-gray-400">
                   Your streak is 7 days
                 </p>
               </div>
-
             </div>
-
           </div>
 
           {/* LOGOUT */}
@@ -465,15 +456,14 @@ export default function LeaderboardPage() {
           <button
             type="button"
             onClick={handleLogout}
-            className="flex w-full items-center gap-3 rounded-xl px-3 py-3 text-sm font-semibold text-red-500 transition hover:bg-red-50 dark:hover:bg-red-500/10"
+            className="flex w-full items-center gap-3 rounded-xl px-3 py-3 text-sm font-semibold text-red-400 transition hover:bg-red-500/10"
           >
             <LogOut size={19} />
             Logout
           </button>
-
         </div>
-
       </aside>
+
       {/* =====================================
           MAIN AREA
       ===================================== */}
@@ -533,9 +523,7 @@ export default function LeaderboardPage() {
         ===================================== */}
 
         <div className="mx-auto max-w-7xl px-5 py-10 lg:px-8">
-          {/* =====================================
-              HERO
-          ===================================== */}
+          {/* HERO */}
 
           <motion.section
             initial={{ opacity: 0, y: 20 }}
@@ -562,9 +550,7 @@ export default function LeaderboardPage() {
             </p>
           </motion.section>
 
-          {/* =====================================
-              PODIUM
-          ===================================== */}
+          {/* PODIUM */}
 
           <section className="mt-12">
             <div className="grid items-end gap-5 md:grid-cols-3">
@@ -589,9 +575,7 @@ export default function LeaderboardPage() {
             </div>
           </section>
 
-          {/* =====================================
-              USER RANK
-          ===================================== */}
+          {/* USER RANK */}
 
           <motion.section
             initial={{ opacity: 0, y: 20 }}
@@ -641,9 +625,7 @@ export default function LeaderboardPage() {
             </div>
           </motion.section>
 
-          {/* =====================================
-              FILTERS
-          ===================================== */}
+          {/* FILTERS */}
 
           <section className="mt-10">
             <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
@@ -682,15 +664,17 @@ export default function LeaderboardPage() {
             </div>
           </section>
 
-          {/* =====================================
-              TABLE
-          ===================================== */}
+          {/* TABLE */}
 
           <section className="mt-5 overflow-hidden rounded-2xl border border-white/10 bg-white/[0.035] shadow-2xl shadow-black/10">
             <div className="hidden grid-cols-12 gap-4 border-b border-white/10 bg-white/[0.02] px-6 py-4 text-[10px] font-bold uppercase tracking-[0.15em] text-gray-600 md:grid">
-              <div className="col-span-1">Rank</div>
+              <div className="col-span-1">
+                Rank
+              </div>
 
-              <div className="col-span-4">Player</div>
+              <div className="col-span-4">
+                Player
+              </div>
 
               <div className="col-span-2 text-center">
                 Points
@@ -742,6 +726,8 @@ export default function LeaderboardPage() {
                   }`}
                 >
                   <div className="flex items-center gap-4 md:contents">
+                    {/* RANK */}
+
                     <div className="flex w-8 shrink-0 items-center justify-center md:col-span-1 md:w-auto">
                       {player.rank <= 3 ? (
                         <RankIcon rank={player.rank} />
@@ -751,6 +737,8 @@ export default function LeaderboardPage() {
                         </span>
                       )}
                     </div>
+
+                    {/* PLAYER */}
 
                     <div className="flex min-w-0 flex-1 items-center gap-3 md:col-span-4">
                       <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-gradient-to-br from-indigo-500 to-purple-600 text-xs font-bold shadow-lg shadow-indigo-600/10">
@@ -774,6 +762,8 @@ export default function LeaderboardPage() {
                       </div>
                     </div>
 
+                    {/* MOBILE POINTS */}
+
                     <div className="text-right md:hidden">
                       <p className="text-sm font-black">
                         {player.points.toLocaleString()}
@@ -786,13 +776,19 @@ export default function LeaderboardPage() {
                     </div>
                   </div>
 
+                  {/* DESKTOP POINTS */}
+
                   <div className="hidden text-center text-sm font-bold md:col-span-2 md:block">
                     {player.points.toLocaleString()}
                   </div>
 
+                  {/* DESKTOP QUIZZES */}
+
                   <div className="hidden text-center text-sm text-gray-400 md:col-span-2 md:block">
                     {player.quizzes}
                   </div>
+
+                  {/* DESKTOP SCORE */}
 
                   <div className="hidden text-center md:col-span-2 md:block">
                     <span
@@ -808,10 +804,14 @@ export default function LeaderboardPage() {
                     </span>
                   </div>
 
+                  {/* DESKTOP STREAK */}
+
                   <div className="hidden items-center justify-center gap-1 text-sm text-orange-400 md:col-span-1 md:flex">
                     <Flame size={15} />
                     {player.streak}
                   </div>
+
+                  {/* MOBILE STATS */}
 
                   <div className="mt-4 grid grid-cols-3 gap-3 border-t border-white/[0.06] pt-4 md:hidden">
                     <MobileStat
@@ -834,9 +834,7 @@ export default function LeaderboardPage() {
             )}
           </section>
 
-          {/* =====================================
-              INFO CARDS
-          ===================================== */}
+          {/* INFO CARDS */}
 
           <section className="mt-8 grid gap-4 sm:grid-cols-3">
             <InfoCard
@@ -864,9 +862,7 @@ export default function LeaderboardPage() {
             />
           </section>
 
-          {/* =====================================
-              CTA
-          ===================================== */}
+          {/* CTA */}
 
           <section className="mt-10 pb-10">
             <div className="relative overflow-hidden rounded-3xl border border-indigo-500/20 bg-gradient-to-r from-indigo-600/15 to-purple-600/10 p-7 text-center shadow-2xl shadow-indigo-950/10 sm:p-10">
@@ -914,7 +910,7 @@ function SidebarItem({
   onClick,
 }: {
   href: string;
-  icon: typeof Brain;
+  icon: React.ElementType;
   label: string;
   active?: boolean;
   onClick?: () => void;
@@ -1039,6 +1035,7 @@ function PodiumCard({
             size={13}
             className="text-orange-400"
           />
+
           {player.streak} day streak
         </div>
       </div>
@@ -1180,7 +1177,7 @@ function InfoCard({
   iconClass,
   bgClass,
 }: {
-  icon: typeof Trophy;
+  icon: React.ElementType;
   title: string;
   description: string;
   iconClass: string;
