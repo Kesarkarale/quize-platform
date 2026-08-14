@@ -320,252 +320,235 @@ export default function LeaderboardPage() {
         )}
       </AnimatePresence>
 
-      {/* =========================================
-          EXACT DASHBOARD SIDEBAR
-      ========================================= */}
+    {/* =========================================================
+    SIDEBAR — SAME AS STUDENT DASHBOARD
+========================================================= */}
 
-      <aside
-        className={`
-          fixed
-          left-0
-          top-0
-          z-50
-          h-screen
-          w-[275px]
-          border-r
-          border-gray-200
-          bg-white
-          px-5
-          py-6
-          transition-transform
-          duration-300
-          dark:border-white/10
-          dark:bg-[#0e1013]
+<aside
+  className={`
+    fixed
+    left-0
+    top-0
+    z-50
+    h-screen
+    w-[275px]
+    border-r
+    border-gray-200
+    bg-white
+    px-5
+    py-6
+    transition-transform
+    duration-300
+    dark:border-white/10
+    dark:bg-[#0e1013]
 
-          ${
-            sidebarOpen
-              ? "translate-x-0"
-              : "-translate-x-full lg:translate-x-0"
-          }
-        `}
-      >
+    ${
+      sidebarOpen
+        ? "translate-x-0"
+        : "-translate-x-full lg:translate-x-0"
+    }
+  `}
+>
+  {/* =================================================
+      LOGO
+  ================================================= */}
 
-        {/* LOGO */}
+  <div className="flex items-center justify-between">
+    <button
+      type="button"
+      onClick={() =>
+        navigateTo("Dashboard", "/student/dashboard")
+      }
+      className="flex items-center gap-3 text-left"
+    >
+      <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-gradient-to-br from-indigo-600 via-indigo-600 to-purple-600 text-white shadow-lg shadow-indigo-500/20">
+        <Sparkles size={21} />
+      </div>
 
-        <div className="flex items-center justify-between">
-          <button
-            type="button"
-            onClick={() =>
-              navigateTo(
-                "Dashboard",
-                "/student/dashboard"
-              )
-            }
-            className="flex items-center gap-3 text-left"
-          >
-            <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-gradient-to-br from-indigo-600 via-indigo-600 to-purple-600 text-white shadow-lg shadow-indigo-500/20">
-              <Sparkles size={21} />
-            </div>
+      <div>
+        <h1 className="text-lg font-black tracking-tight">
+          Quiz
+          <span className="text-indigo-600 dark:text-indigo-400">
+            Pro
+          </span>
+        </h1>
 
-            <div>
-              <h1 className="text-lg font-black tracking-tight">
-                Quiz
-                <span className="text-indigo-600 dark:text-indigo-400">
-                  Pro
-                </span>
-              </h1>
+        <p className="text-[9px] font-bold uppercase tracking-[0.2em] text-gray-400">
+          Learning Platform
+        </p>
+      </div>
+    </button>
 
-              <p className="text-[9px] font-bold uppercase tracking-[0.2em] text-gray-400">
-                Learning Platform
-              </p>
-            </div>
-          </button>
+    {/* MOBILE CLOSE */}
 
-          <button
-            type="button"
-            onClick={() =>
-              setSidebarOpen(false)
-            }
-            className="rounded-xl p-2 text-gray-500 hover:bg-gray-100 dark:hover:bg-white/10 lg:hidden"
-          >
-            <X size={20} />
-          </button>
+    <button
+      type="button"
+      onClick={() => setSidebarOpen(false)}
+      className="rounded-xl p-2 text-gray-500 hover:bg-gray-100 dark:hover:bg-white/10 lg:hidden"
+    >
+      <X size={20} />
+    </button>
+  </div>
+
+  {/* =================================================
+      USER MINI PROFILE
+  ================================================= */}
+
+  <div className="mt-8 rounded-2xl border border-gray-100 bg-gray-50 p-3 dark:border-white/5 dark:bg-white/[0.03]">
+    <div className="flex items-center gap-3">
+      <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-br from-indigo-500 to-purple-600 text-sm font-black text-white">
+        {firstName.charAt(0).toUpperCase()}
+      </div>
+
+      <div className="min-w-0">
+        <p className="truncate text-sm font-bold">
+          {profile?.name || "Student"}
+        </p>
+
+        <p className="truncate text-[10px] text-gray-400">
+          {profile?.email || "student@example.com"}
+        </p>
+      </div>
+    </div>
+  </div>
+
+  {/* =================================================
+      MAIN MENU
+  ================================================= */}
+
+  <div className="mt-8">
+    <p className="mb-3 px-3 text-[10px] font-black uppercase tracking-[0.18em] text-gray-400">
+      Main Menu
+    </p>
+
+    <nav className="space-y-1">
+      <SidebarItem
+        icon={<Home size={19} />}
+        label="Dashboard"
+        active={activeMenu === "Dashboard"}
+        onClick={() =>
+          navigateTo("Dashboard", "/student/dashboard")
+        }
+      />
+
+      <SidebarItem
+        icon={<BookOpen size={19} />}
+        label="Explore Quizzes"
+        active={activeMenu === "Quizzes"}
+        onClick={() =>
+          navigateTo("Quizzes", "/quiz")
+        }
+      />
+
+      <SidebarItem
+        icon={<Trophy size={19} />}
+        label="Leaderboard"
+        active={activeMenu === "Leaderboard"}
+        onClick={() =>
+          navigateTo("Leaderboard", "/leaderboard")
+        }
+      />
+
+      <SidebarItem
+        icon={<BarChart3 size={19} />}
+        label="My Performance"
+        active={activeMenu === "Performance"}
+        onClick={() =>
+          navigateTo(
+            "Performance",
+            "/student/performance"
+          )
+        }
+      />
+
+      <SidebarItem
+        icon={<Activity size={19} />}
+        label="Quiz History"
+        active={activeMenu === "History"}
+        onClick={() =>
+          navigateTo(
+            "History",
+            "/student/history"
+          )
+        }
+      />
+    </nav>
+  </div>
+
+  {/* =================================================
+      ACCOUNT
+  ================================================= */}
+
+  <div className="mt-7">
+    <p className="mb-3 px-3 text-[10px] font-black uppercase tracking-[0.18em] text-gray-400">
+      Account
+    </p>
+
+    <nav className="space-y-1">
+      <SidebarItem
+        icon={<User size={19} />}
+        label="Profile"
+        active={activeMenu === "Profile"}
+        onClick={() =>
+          navigateTo(
+            "Profile",
+            "/student/profile"
+          )
+        }
+      />
+
+      <SidebarItem
+        icon={<Settings size={19} />}
+        label="Settings"
+        active={activeMenu === "Settings"}
+        onClick={() =>
+          navigateTo(
+            "Settings",
+            "/student/settings"
+          )
+        }
+      />
+    </nav>
+  </div>
+
+  {/* =================================================
+      BOTTOM
+  ================================================= */}
+
+  <div className="absolute bottom-5 left-5 right-5">
+
+    {/* STREAK */}
+
+    <div className="mb-4 overflow-hidden rounded-2xl border border-indigo-100 bg-gradient-to-br from-indigo-50 to-purple-50 p-4 dark:border-indigo-500/20 dark:from-indigo-500/10 dark:to-purple-500/10">
+      <div className="flex items-center gap-3">
+        <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-indigo-600 text-white">
+          <Flame size={18} />
         </div>
 
-        {/* USER MINI PROFILE */}
-
-        <div className="mt-8 rounded-2xl border border-gray-100 bg-gray-50 p-3 dark:border-white/5 dark:bg-white/[0.03]">
-          <div className="flex items-center gap-3">
-
-            <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-br from-indigo-500 to-purple-600 text-sm font-black text-white">
-              {firstName
-                .charAt(0)
-                .toUpperCase()}
-            </div>
-
-            <div className="min-w-0">
-              <p className="truncate text-sm font-bold">
-                {profile?.name ||
-                  "Student"}
-              </p>
-
-              <p className="truncate text-[10px] text-gray-400">
-                {profile?.email ||
-                  "student@example.com"}
-              </p>
-            </div>
-
-          </div>
-        </div>
-
-        {/* MAIN MENU */}
-
-        <div className="mt-8">
-          <p className="mb-3 px-3 text-[10px] font-black uppercase tracking-[0.18em] text-gray-400">
-            Main Menu
+        <div>
+          <p className="text-xs font-black">
+            7 day streak 🔥
           </p>
 
-          <nav className="space-y-1">
-
-            <SidebarItem
-              icon={<Home size={19} />}
-              label="Dashboard"
-              active={false}
-              onClick={() =>
-                navigateTo(
-                  "Dashboard",
-                  "/student/dashboard"
-                )
-              }
-            />
-
-            <SidebarItem
-              icon={<BookOpen size={19} />}
-              label="Explore Quizzes"
-              active={false}
-              onClick={() =>
-                navigateTo(
-                  "Quizzes",
-                  "/quiz"
-                )
-              }
-            />
-
-            {/* ACTIVE LEADERBOARD */}
-
-            <SidebarItem
-              icon={<Trophy size={19} />}
-              label="Leaderboard"
-              active={true}
-              onClick={() =>
-                navigateTo(
-                  "Leaderboard",
-                  "/leaderboard"
-                )
-              }
-            />
-
-            <SidebarItem
-              icon={<BarChart3 size={19} />}
-              label="My Performance"
-              active={false}
-              onClick={() =>
-                navigateTo(
-                  "Performance",
-                  "/student/performance"
-                )
-              }
-            />
-
-            <SidebarItem
-              icon={<Activity size={19} />}
-              label="Quiz History"
-              active={false}
-              onClick={() =>
-                navigateTo(
-                  "History",
-                  "/student/history"
-                )
-              }
-            />
-
-          </nav>
-        </div>
-
-        {/* ACCOUNT */}
-
-        <div className="mt-7">
-          <p className="mb-3 px-3 text-[10px] font-black uppercase tracking-[0.18em] text-gray-400">
-            Account
+          <p className="mt-0.5 text-[10px] text-gray-500 dark:text-gray-400">
+            Keep your momentum!
           </p>
-
-          <nav className="space-y-1">
-
-            <SidebarItem
-              icon={<User size={19} />}
-              label="Profile"
-              active={false}
-              onClick={() =>
-                navigateTo(
-                  "Profile",
-                  "/student/profile"
-                )
-              }
-            />
-
-            <SidebarItem
-              icon={<Settings size={19} />}
-              label="Settings"
-              active={false}
-              onClick={() =>
-                navigateTo(
-                  "Settings",
-                  "/student/settings"
-                )
-              }
-            />
-
-          </nav>
         </div>
+      </div>
+    </div>
 
-        {/* BOTTOM */}
+    {/* LOGOUT */}
 
-        <div className="absolute bottom-5 left-5 right-5">
-
-          <div className="mb-4 overflow-hidden rounded-2xl border border-indigo-100 bg-gradient-to-br from-indigo-50 to-purple-50 p-4 dark:border-indigo-500/20 dark:from-indigo-500/10 dark:to-purple-500/10">
-
-            <div className="flex items-center gap-3">
-
-              <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-indigo-600 text-white">
-                <Flame size={18} />
-              </div>
-
-              <div>
-                <p className="text-xs font-black">
-                  7 day streak 🔥
-                </p>
-
-                <p className="mt-0.5 text-[10px] text-gray-500 dark:text-gray-400">
-                  Keep your momentum!
-                </p>
-              </div>
-
-            </div>
-
-          </div>
-
-          <button
-            type="button"
-            onClick={handleLogout}
-            className="flex w-full items-center gap-3 rounded-xl px-3 py-3 text-sm font-semibold text-red-500 transition hover:bg-red-50 dark:hover:bg-red-500/10"
-          >
-            <LogOut size={19} />
-            Logout
-          </button>
-
-        </div>
-
-      </aside>
+    <button
+      type="button"
+      onClick={handleLogout}
+      className="flex w-full items-center gap-3 rounded-xl px-3 py-3 text-sm font-semibold text-red-500 transition hover:bg-red-50 dark:hover:bg-red-500/10"
+    >
+      <LogOut size={19} />
+      Logout
+    </button>
+  </div>
+</aside>
 
       {/* =========================================
           MAIN AREA
