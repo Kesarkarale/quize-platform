@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { useEffect, useMemo, useState } from "react";
+import ThemeToggle from "@/components/theme-toggle";
 import {
   LayoutDashboard,
   Brain,
@@ -460,6 +461,7 @@ export default function AdminPage() {
         </button>
 
         <div className="flex items-center gap-2">
+            <ThemeToggle />
           <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-indigo-600 text-white">
             <Brain size={18} />
           </div>
