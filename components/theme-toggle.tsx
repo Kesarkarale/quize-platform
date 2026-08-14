@@ -1,17 +1,10 @@
 "use client";
 
-import {
-  Moon,
-  Sun,
-} from "lucide-react";
-
+import { Moon, Sun } from "lucide-react";
 import { useTheme } from "@/components/theme-provider";
 
 export default function ThemeToggle() {
-  const {
-    theme,
-    toggleTheme,
-  } = useTheme();
+  const { theme, toggleTheme } = useTheme();
 
   return (
     <button
@@ -19,18 +12,21 @@ export default function ThemeToggle() {
       onClick={toggleTheme}
       aria-label={
         theme === "dark"
-          ? "Switch to light mode"
-          : "Switch to dark mode"
+          ? "Dark theme"
+          : "Light theme"
       }
       title={
         theme === "dark"
-          ? "Switch to Light Mode"
-          : "Switch to Dark Mode"
+          ? "Dark Mode"
+          : "Light Mode"
       }
       className="
         group
-        flex h-10 w-10
-        items-center justify-center
+        flex
+        h-10
+        w-10
+        items-center
+        justify-center
         rounded-xl
         border
         border-gray-200
@@ -43,7 +39,6 @@ export default function ThemeToggle() {
         hover:border-indigo-300
         hover:bg-indigo-50
         hover:text-indigo-600
-
         dark:border-white/10
         dark:bg-white/[0.05]
         dark:text-gray-300
@@ -53,14 +48,14 @@ export default function ThemeToggle() {
       "
     >
       {theme === "dark" ? (
-        <Sun
-          size={18}
-          className="transition-transform group-hover:rotate-45"
-        />
-      ) : (
         <Moon
           size={18}
           className="transition-transform group-hover:-rotate-12"
+        />
+      ) : (
+        <Sun
+          size={18}
+          className="transition-transform group-hover:rotate-45"
         />
       )}
     </button>
