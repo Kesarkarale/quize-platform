@@ -84,7 +84,7 @@ const navItems = [
   },
   {
     title: "Quizzes",
-    href: "/quiz",
+    href: "/admin/quizzes",
     icon: Brain,
   },
   {
