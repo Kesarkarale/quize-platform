@@ -17,6 +17,7 @@ import {
   Search,
   Settings,
   Sparkles,
+  Target,
   Trophy,
   User,
   X,
