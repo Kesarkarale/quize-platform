@@ -23,6 +23,7 @@ type FormData = {
   email: string;
   password: string;
   confirmPassword: string;
+  role: "STUDENT" | "ADMIN";
 };
 
 export default function RegisterPage() {
@@ -41,6 +42,7 @@ export default function RegisterPage() {
     email: "",
     password: "",
     confirmPassword: "",
+    role: "STUDENT",
   });
 
   const passwordChecks = useMemo(() => {
@@ -108,6 +110,11 @@ export default function RegisterPage() {
       return;
     }
 
+    if (!formData.role) {
+      toast.error("Please select an account type.");
+      return;
+    }
+
     try {
       setLoading(true);
 
@@ -122,11 +129,14 @@ export default function RegisterPage() {
             name,
             email,
             password,
+            role: formData.role,
           }),
         }
       );
 
-      const result = await response.json().catch(() => null);
+      const result = await response
+        .json()
+        .catch(() => null);
 
       if (!response.ok) {
         toast.error(
@@ -137,7 +147,7 @@ export default function RegisterPage() {
       }
 
       toast.success(
-        "Account created successfully!"
+        `${formData.role === "ADMIN" ? "Admin" : "Student"} account created successfully!`
       );
 
       router.replace("/login");
@@ -217,10 +227,9 @@ export default function RegisterPage() {
             </h1>
 
             <p className="mt-7 max-w-lg text-base leading-7 text-gray-500">
-              Create your free student account and
-              start taking online assessments,
-              tracking your progress and improving
-              your skills.
+              Create your account and start using
+              QuizMaster to manage online assessments,
+              quizzes and student performance.
             </p>
 
             {/* Benefits */}
@@ -237,8 +246,8 @@ export default function RegisterPage() {
               />
 
               <Benefit
-                title="Compete on leaderboard"
-                description="Challenge yourself and improve your rank."
+                title="Manage assessments"
+                description="Admins can create and manage quizzes and questions."
               />
             </div>
           </div>
@@ -301,8 +310,8 @@ export default function RegisterPage() {
                 </h2>
 
                 <p className="mt-2 text-sm leading-6 text-gray-600">
-                  Join QuizMaster and start your
-                  assessment journey.
+                  Choose your account type and join
+                  QuizMaster.
                 </p>
               </div>
 
@@ -310,6 +319,115 @@ export default function RegisterPage() {
                 onSubmit={handleSubmit}
                 className="mt-7 space-y-4"
               >
+                {/* =====================================
+                    ACCOUNT TYPE
+                ===================================== */}
+
+                <div>
+                  <label className="mb-2 block text-xs font-bold text-gray-400">
+                    Register As
+                  </label>
+
+                  <div className="grid grid-cols-2 gap-3">
+                    {/* Student */}
+
+                    <button
+                      type="button"
+                      onClick={() =>
+                        setFormData((prev) => ({
+                          ...prev,
+                          role: "STUDENT",
+                        }))
+                      }
+                      className={`flex items-center gap-3 rounded-xl border p-3.5 text-left transition ${
+                        formData.role === "STUDENT"
+                          ? "border-indigo-500 bg-indigo-500/10 text-indigo-300"
+                          : "border-white/10 bg-black/20 text-gray-500 hover:border-white/20"
+                      }`}
+                    >
+                      <div
+                        className={`flex h-9 w-9 shrink-0 items-center justify-center rounded-lg ${
+                          formData.role === "STUDENT"
+                            ? "bg-indigo-500/20"
+                            : "bg-white/5"
+                        }`}
+                      >
+                        <Users size={18} />
+                      </div>
+
+                      <div className="min-w-0">
+                        <p className="text-sm font-bold">
+                          Student
+                        </p>
+
+                        <p className="mt-0.5 text-[10px] text-gray-600">
+                          Take quizzes
+                        </p>
+                      </div>
+
+                      {formData.role === "STUDENT" && (
+                        <Check
+                          size={16}
+                          className="ml-auto shrink-0 text-indigo-400"
+                        />
+                      )}
+                    </button>
+
+                    {/* Admin */}
+
+                    <button
+                      type="button"
+                      onClick={() =>
+                        setFormData((prev) => ({
+                          ...prev,
+                          role: "ADMIN",
+                        }))
+                      }
+                      className={`flex items-center gap-3 rounded-xl border p-3.5 text-left transition ${
+                        formData.role === "ADMIN"
+                          ? "border-purple-500 bg-purple-500/10 text-purple-300"
+                          : "border-white/10 bg-black/20 text-gray-500 hover:border-white/20"
+                      }`}
+                    >
+                      <div
+                        className={`flex h-9 w-9 shrink-0 items-center justify-center rounded-lg ${
+                          formData.role === "ADMIN"
+                            ? "bg-purple-500/20"
+                            : "bg-white/5"
+                        }`}
+                      >
+                        <ShieldCheck size={18} />
+                      </div>
+
+                      <div className="min-w-0">
+                        <p className="text-sm font-bold">
+                          Admin
+                        </p>
+
+                        <p className="mt-0.5 text-[10px] text-gray-600">
+                          Manage platform
+                        </p>
+                      </div>
+
+                      {formData.role === "ADMIN" && (
+                        <Check
+                          size={16}
+                          className="ml-auto shrink-0 text-purple-400"
+                        />
+                      )}
+                    </button>
+                  </div>
+
+                  <p className="mt-2 text-[10px] text-gray-600">
+                    Selected account:{" "}
+                    <span className="font-bold text-gray-400">
+                      {formData.role === "ADMIN"
+                        ? "Administrator"
+                        : "Student"}
+                    </span>
+                  </p>
+                </div>
+
                 {/* Name */}
 
                 <div>
@@ -578,7 +696,11 @@ export default function RegisterPage() {
                     </>
                   ) : (
                     <>
-                      Create Account
+                      Create{" "}
+                      {formData.role === "ADMIN"
+                        ? "Admin"
+                        : "Student"}{" "}
+                      Account
                       <ArrowRight size={17} />
                     </>
                   )}
@@ -602,8 +724,9 @@ export default function RegisterPage() {
             </div>
 
             <p className="mt-6 text-center text-[11px] text-gray-700">
-              Student accounts can access quizzes,
-              results, performance and leaderboard.
+              {formData.role === "ADMIN"
+                ? "Admin accounts can manage quizzes, questions, students, results and platform analytics."
+                : "Student accounts can access quizzes, results, performance and leaderboard."}
             </p>
           </motion.div>
         </section>
