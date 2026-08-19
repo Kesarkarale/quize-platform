@@ -12,7 +12,7 @@ The platform provides separate **Student** and **Admin** roles with role-based a
 
 * Student Registration & Login
 * Student Dashboard
-* Browse Available Quizzes
+* Browse Available Quizzes 
 * Search and Filter Quizzes
 * Category-based Quizzes
 * Level-based Quiz System
